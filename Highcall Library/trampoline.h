@@ -1,5 +1,5 @@
 #pragma once
-#include "type.h"
+#include "nttype.h"
 
 BOOL WINAPI HcWindowThreadProcessId(_In_ HWND hWnd, _Out_opt_ LPDWORD lpdwProcessId);
 

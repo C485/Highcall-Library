@@ -1,8 +1,8 @@
-#include "trampoline.h"
+#include "static Trampoline.h"
 #include "hcapi.h"
 #include "global.h"
 
-TrampolineJump tjGetWindowThreadProcessId = HcGetProcedureAddress(USER32, "GetWindowThreadProcessId") + 5;
+static TrampolineJump tjGetWindowThreadProcessId = HcGetProcedureAddress(USER32, "GetWindowThreadProcessId") + 5;
 __declspec(naked) BOOL WINAPI HcWindowThreadProcessId(_In_ HWND hWnd, _Out_opt_ LPDWORD lpdwProcessId)
 {
 	__asm
@@ -14,7 +14,7 @@ __declspec(naked) BOOL WINAPI HcWindowThreadProcessId(_In_ HWND hWnd, _Out_opt_ 
 	}
 }
 
-TrampolineJump tjGetCursorPos = HcGetProcedureAddress(USER32, "GetCursorPos") + 5;
+static TrampolineJump tjGetCursorPos = HcGetProcedureAddress(USER32, "GetCursorPos") + 5;
 __declspec(naked) BOOL WINAPI HcGetCursorPos(
 	_Out_ LPPOINT lpPoint
 ) {
@@ -27,7 +27,7 @@ __declspec(naked) BOOL WINAPI HcGetCursorPos(
 	}
 }
 
-TrampolineJump tjPostMessageA = HcGetProcedureAddress(USER32, "PostMessageA") + 5;
+static TrampolineJump tjPostMessageA = HcGetProcedureAddress(USER32, "PostMessageA") + 5;
 __declspec(naked) BOOL WINAPI HcPostMessageA(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	__asm
@@ -39,7 +39,7 @@ __declspec(naked) BOOL WINAPI HcPostMessageA(HWND hWnd, UINT uMsg, WPARAM wParam
 	}
 }
 
-TrampolineJump tjPostMessageW = HcGetProcedureAddress(USER32, "PostMessageW") + 5;
+static TrampolineJump tjPostMessageW = HcGetProcedureAddress(USER32, "PostMessageW") + 5;
 __declspec(naked) BOOL WINAPI HcPostMessageW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	__asm
@@ -51,7 +51,7 @@ __declspec(naked) BOOL WINAPI HcPostMessageW(HWND hWnd, UINT uMsg, WPARAM wParam
 	}
 }
 
-TrampolineJump tjSendMessageA = HcGetProcedureAddress(USER32, "SendMessageA") + 5;
+static TrampolineJump tjSendMessageA = HcGetProcedureAddress(USER32, "SendMessageA") + 5;
 __declspec(naked) BOOL WINAPI HcSendMessageA(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	__asm
@@ -63,7 +63,7 @@ __declspec(naked) BOOL WINAPI HcSendMessageA(HWND hWnd, UINT uMsg, WPARAM wParam
 	}
 }
 
-TrampolineJump tjSendMessageW = HcGetProcedureAddress(USER32, "SendMessageW") + 5;
+static TrampolineJump tjSendMessageW = HcGetProcedureAddress(USER32, "SendMessageW") + 5;
 __declspec(naked) BOOL WINAPI HcSendMessageW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	__asm
@@ -75,7 +75,7 @@ __declspec(naked) BOOL WINAPI HcSendMessageW(HWND hWnd, UINT uMsg, WPARAM wParam
 	}
 }
 
-TrampolineJump tjCreateRemoteThread = HcGetProcedureAddress(KERNEL32, "CreateRemoteThread") + 5;
+static TrampolineJump tjCreateRemoteThread = HcGetProcedureAddress(KERNEL32, "CreateRemoteThread") + 5;
 __declspec(naked) HANDLE WINAPI HcCreateRemoteThread(
 	_In_  HANDLE                 hProcess,
 	_In_  LPSECURITY_ATTRIBUTES  lpThreadAttributes,

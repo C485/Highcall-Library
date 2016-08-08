@@ -8,8 +8,6 @@ BOOLEAN HcElevated;
 
 typedef BYTE Unused;
 
-/* C++ Dynamic initialization. */
-
 static Unused HcInitializeSecurity(VOID)
 {
 	HANDLE hToken;
@@ -23,7 +21,6 @@ static Unused HcInitializeSecurity(VOID)
 
 	return 1;
 }
-static Unused _sec_unused = HcInitializeSecurity();
 
 static Unused HcInitializeWindowsVersion(VOID)
 {
@@ -68,4 +65,9 @@ static Unused HcInitializeWindowsVersion(VOID)
 	return 1;
 }
 
+/* C++ Dynamic initialization. 
+	Sort of hackish, you just call the function to get it to set some variables.
+	I swear there has to be an easier way of doing this. */
+
 static Unused _ver_unused = HcInitializeWindowsVersion();
+static Unused _sec_unused = HcInitializeSecurity();

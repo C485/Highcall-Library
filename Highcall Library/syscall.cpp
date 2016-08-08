@@ -1,24 +1,7 @@
 #include "syscall.h"
 #include "hcapi.h"
 
-static SyscallIndex sciFlushInstructionCache = HcSyscallIndex("NtFlushInstructionCache");
-static SyscallIndex sciOpenProcess = HcSyscallIndex("NtOpenProcess");
-static SyscallIndex sciProtectVirtualMemory = HcSyscallIndex("NtProtectVirtualMemory");
-static SyscallIndex sciReadVirtualMemory = HcSyscallIndex("NtReadVirtualMemory");
-static SyscallIndex sciWriteVirtualMemory = HcSyscallIndex("NtWriteVirtualMemory");
-static SyscallIndex sciQueryInformationProcess = HcSyscallIndex("NtQueryInformationProcess");
-static SyscallIndex sciQuerySystemInformation = HcSyscallIndex("NtQuerySystemInformation");
-static SyscallIndex sciClose = HcSyscallIndex("NtClose");
-static SyscallIndex sciCreateThread = HcSyscallIndex("NtCreateThread");
-static SyscallIndex sciQueryInformationThread = HcSyscallIndex("NtQueryInformationThread");
-static SyscallIndex sciResumeThread = HcSyscallIndex("NtResumeThread");
-static SyscallIndex sciFreeVirtualMemory = HcSyscallIndex("NtFreeVirtualMemory");
-static SyscallIndex sciAllocateVirtualMemory = HcSyscallIndex("NtAllocateVirtualMemory");
-static SyscallIndex sciSuspendProcess = HcSyscallIndex("NtSuspendProcess");
-static SyscallIndex sciResumeProcess = HcSyscallIndex("NtResumeProcess");
-static SyscallIndex sciOpenProcessToken = HcSyscallIndex("NtOpenProcessToken");
 static SyscallIndex sciQueryInformationToken = HcSyscallIndex("NtQueryInformationToken");
-
 __declspec(naked) NTSTATUS NTAPI HcQueryInformationToken(_In_ HANDLE TokenHandle,
 	_In_ TOKEN_INFORMATION_CLASS TokenInformationClass,
 	_Out_writes_bytes_(TokenInformationLength) PVOID TokenInformation,
@@ -35,6 +18,7 @@ __declspec(naked) NTSTATUS NTAPI HcQueryInformationToken(_In_ HANDLE TokenHandle
 	}
 }
 
+static SyscallIndex sciOpenProcessToken = HcSyscallIndex("NtOpenProcessToken");
 __declspec(naked) NTSTATUS NTAPI HcOpenProcessToken(_In_ HANDLE hProcess,
 	_In_ ACCESS_MASK DesiredAccess,
 	_Out_ PHANDLE TokenHandle)
@@ -49,6 +33,7 @@ __declspec(naked) NTSTATUS NTAPI HcOpenProcessToken(_In_ HANDLE hProcess,
 	}
 }
 
+static SyscallIndex sciResumeProcess = HcSyscallIndex("NtResumeProcess");
 __declspec(naked) NTSTATUS NTAPI HcResumeProcess(IN HANDLE ProcessHandle)
 {
 	__asm
@@ -61,6 +46,7 @@ __declspec(naked) NTSTATUS NTAPI HcResumeProcess(IN HANDLE ProcessHandle)
 	}
 }
 
+static SyscallIndex sciSuspendProcess = HcSyscallIndex("NtSuspendProcess");
 __declspec(naked) NTSTATUS NTAPI HcSuspendProcess(IN HANDLE ProcessHandle)
 {
 	__asm
@@ -73,6 +59,7 @@ __declspec(naked) NTSTATUS NTAPI HcSuspendProcess(IN HANDLE ProcessHandle)
 	}
 }
 
+static SyscallIndex sciAllocateVirtualMemory = HcSyscallIndex("NtAllocateVirtualMemory");
 __declspec(naked) NTSTATUS NTAPI HcAllocateVirtualMemory(IN HANDLE hProcess,
 	IN PVOID* UBaseAddress,
 	IN ULONG_PTR ZeroBits,
@@ -91,6 +78,7 @@ __declspec(naked) NTSTATUS NTAPI HcAllocateVirtualMemory(IN HANDLE hProcess,
 }
 
 
+static SyscallIndex sciFreeVirtualMemory = HcSyscallIndex("NtFreeVirtualMemory");
 __declspec(naked) NTSTATUS NTAPI HcFreeVirtualMemory(IN HANDLE hProcess,
 	IN PVOID* UBaseAddress,
 	IN PSIZE_T URegionSize,
@@ -106,6 +94,7 @@ __declspec(naked) NTSTATUS NTAPI HcFreeVirtualMemory(IN HANDLE hProcess,
 	}
 }
 
+static SyscallIndex sciResumeThread = HcSyscallIndex("NtResumeThread");
 __declspec(naked) NTSTATUS NTAPI HcResumeThread(IN HANDLE ThreadHandle,
 	OUT PULONG              SuspendCount OPTIONAL)
 {
@@ -119,6 +108,7 @@ __declspec(naked) NTSTATUS NTAPI HcResumeThread(IN HANDLE ThreadHandle,
 	}
 }
 
+static SyscallIndex sciQueryInformationThread = HcSyscallIndex("NtQueryInformationThread");
 __declspec(naked) NTSTATUS NTAPI HcQueryInformationThread(IN HANDLE ThreadHandle,
 	IN THREADINFOCLASS		ThreadInformationClass,
 	OUT PVOID               ThreadInformation,
@@ -135,6 +125,7 @@ __declspec(naked) NTSTATUS NTAPI HcQueryInformationThread(IN HANDLE ThreadHandle
 	}
 }
 
+static SyscallIndex sciCreateThread = HcSyscallIndex("NtCreateThread");
 __declspec(naked) NTSTATUS NTAPI HcCreateThread(OUT PHANDLE ThreadHandle,
 	IN ACCESS_MASK          DesiredAccess,
 	IN POBJECT_ATTRIBUTES   ObjectAttributes OPTIONAL,
@@ -154,6 +145,7 @@ __declspec(naked) NTSTATUS NTAPI HcCreateThread(OUT PHANDLE ThreadHandle,
 	}
 }
 
+static SyscallIndex sciFlushInstructionCache = HcSyscallIndex("NtFlushInstructionCache");
 __declspec(naked) NTSTATUS NTAPI HcFlushInstructionCache(IN HANDLE ProcessHandle,
 	IN PVOID BaseAddress,
 	IN ULONG NumberOfBytesToFlush)
@@ -168,6 +160,7 @@ __declspec(naked) NTSTATUS NTAPI HcFlushInstructionCache(IN HANDLE ProcessHandle
 	}
 }
 
+static SyscallIndex sciOpenProcess = HcSyscallIndex("NtOpenProcess");
 __declspec(naked) NTSTATUS NTAPI HcOpenProcess
 (
 	_Out_    PHANDLE            ProcessHandle,
@@ -185,6 +178,7 @@ __declspec(naked) NTSTATUS NTAPI HcOpenProcess
 	}
 }
 
+static SyscallIndex sciProtectVirtualMemory = HcSyscallIndex("NtProtectVirtualMemory");
 __declspec(naked) NTSTATUS NTAPI HcProtectVirtualMemory(IN HANDLE ProcessHandle,
 	IN OUT PVOID *BaseAddress,
 	IN OUT PULONG NumberOfBytesToProtect,
@@ -201,6 +195,7 @@ __declspec(naked) NTSTATUS NTAPI HcProtectVirtualMemory(IN HANDLE ProcessHandle,
 	}
 }
 
+static SyscallIndex sciReadVirtualMemory = HcSyscallIndex("NtReadVirtualMemory");
 __declspec(naked) NTSTATUS NTAPI HcReadVirtualMemory(HANDLE ProcessHandle, PVOID BaseAddress, PVOID Buffer, SIZE_T BufferSize, PSIZE_T NumberOfBytesRead)
 {
 	__asm
@@ -213,6 +208,7 @@ __declspec(naked) NTSTATUS NTAPI HcReadVirtualMemory(HANDLE ProcessHandle, PVOID
 	}
 }
 
+static SyscallIndex sciWriteVirtualMemory = HcSyscallIndex("NtWriteVirtualMemory");
 __declspec(naked) NTSTATUS NTAPI HcWriteVirtualMemory(HANDLE ProcessHandle, PVOID BaseAddress, CONST VOID *Buffer, SIZE_T BufferSize, PSIZE_T NumberOfBytesWritten)
 {
 	__asm
@@ -225,6 +221,7 @@ __declspec(naked) NTSTATUS NTAPI HcWriteVirtualMemory(HANDLE ProcessHandle, PVOI
 	}
 }
 
+static SyscallIndex sciQueryInformationProcess = HcSyscallIndex("NtQueryInformationProcess");
 __declspec(naked) NTSTATUS NTAPI HcQueryInformationProcess(
 	__in HANDLE ProcessHandle, __in PROCESSINFOCLASS ProcessInformationClass,
 	__out_bcount(ProcessInformationLength) PVOID ProcessInformation,
@@ -241,6 +238,7 @@ __declspec(naked) NTSTATUS NTAPI HcQueryInformationProcess(
 	}
 }
 
+static SyscallIndex sciQuerySystemInformation = HcSyscallIndex("NtQuerySystemInformation");
 __declspec(naked) NTSTATUS NTAPI HcQuerySystemInformation(
 	__in SYSTEM_INFORMATION_CLASS SystemInformationClass,
 	__out_bcount_opt(SystemInformationLength) PVOID SystemInformation,
@@ -257,6 +255,7 @@ __declspec(naked) NTSTATUS NTAPI HcQuerySystemInformation(
 	}
 }
 
+static SyscallIndex sciClose = HcSyscallIndex("NtClose");
 __declspec(naked) NTSTATUS NTAPI HcClose(HANDLE hObject)
 {
 	__asm

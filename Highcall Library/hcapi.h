@@ -1,13 +1,15 @@
 #pragma once
 #include <windows.h>
 #include "ntdef.h"
-#include "type.h"
+#include "nttype.h"
+#include "hctype.h"
 
 extern HMODULE NTDLL;
 extern HMODULE USER32;
 extern HMODULE KERNEL32;
 
 NTSTATUS
+HCAPI
 HcGetTokenIsElevated(_In_ HANDLE TokenHandle,
 	_Out_ PBOOLEAN Elevated
 );
@@ -237,33 +239,43 @@ HCAPI
 HcProcessResume(DWORD dwProcessId);
 
 mem_result
+HCAPI
 HcInternalMemoryTest(DWORD dwBaseAddress, DWORD dwBufferLength);
 
 mem_result
+HCAPI
 HcInternalMemoryTest(DWORD dwBaseAddress, DWORD* pdwOffsets, DWORD dwOffsetCount, DWORD dwBufferLength);
 
-const char*
+LPCSTR
+HCAPI
 HcInternalReadString(DWORD memAddress, unsigned int* ptrOffsets, unsigned int offsetCount);
 
-const char*
+LPCSTR
+HCAPI
 HcInternalReadString(DWORD memAddress);
 
 int
+HCAPI
 HcInternalReadInt(DWORD memAddress, unsigned int* ptrOffsets, unsigned int offsetCount);
 
 int
+HCAPI
 HcInternalReadInt(DWORD baseAddress);
 
 DWORD
+HCAPI
 HcInternalLocatePointer(DWORD baseAddress, DWORD* offsets, unsigned int offsetCount);
 
-void
+VOID
+HCAPI
 HcInternalMemoryWrite(PVOID pAddress, DWORD dwLen, BYTE* ptrWrite);
 
-void
+VOID
+HCAPI
 HcInternalMemoryNop(PVOID pAddress, DWORD dwLen);
 
 DWORD
+HCAPI
 HcInternalPatternFind(const char* pattern, const char* mask, HC_MODULE_INFORMATION module);
 
 BOOLEAN

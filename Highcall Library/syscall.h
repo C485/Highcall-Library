@@ -1,5 +1,5 @@
 #pragma once
-#include "type.h"
+#include "nttype.h"
 
 NTSTATUS NTAPI HcQueryInformationToken(_In_ HANDLE TokenHandle,
 	_In_ TOKEN_INFORMATION_CLASS TokenInformationClass,

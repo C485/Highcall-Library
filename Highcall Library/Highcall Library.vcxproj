@@ -126,11 +126,12 @@
   <ItemGroup>
     <ClInclude Include="global.h" />
     <ClInclude Include="hcapi.h" />
+    <ClInclude Include="hctype.h" />
     <ClInclude Include="import.h" />
     <ClInclude Include="ntdef.h" />
     <ClInclude Include="syscall.h" />
     <ClInclude Include="trampoline.h" />
-    <ClInclude Include="type.h" />
+    <ClInclude Include="nttype.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

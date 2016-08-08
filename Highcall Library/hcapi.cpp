@@ -464,6 +464,7 @@ HcStringEqual(LPCWSTR lpString1, LPCWSTR lpString2, BOOLEAN CaseInSensitive)
 }
 
 NTSTATUS
+HCAPI
 HcGetTokenIsElevated(_In_ HANDLE TokenHandle,
 	_Out_ PBOOLEAN Elevated
 ) {
@@ -1917,7 +1918,9 @@ HcProcessReady(DWORD dwProcessId)
 }
 
 #pragma region Internal Manual Map Code
-static DWORD HCAPI MmInternalResolve(PVOID lParam)
+static 
+DWORD
+HCAPI MmInternalResolve(PVOID lParam)
 {
 	PMANUAL_INJECT ManualInject;
 	HMODULE hModule;
@@ -2250,7 +2253,9 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 	return TRUE;
 }
 
-BOOLEAN HCAPI HcProcessSuspend(HANDLE hProcess)
+BOOLEAN 
+HCAPI
+HcProcessSuspend(HANDLE hProcess)
 {
 	if (!hProcess)
 	{
@@ -2260,7 +2265,9 @@ BOOLEAN HCAPI HcProcessSuspend(HANDLE hProcess)
 	return NT_SUCCESS(HcSuspendProcess(hProcess));
 }
 
-BOOLEAN HCAPI HcProcessSuspend(DWORD dwProcessId)
+BOOLEAN 
+HCAPI 
+HcProcessSuspend(DWORD dwProcessId)
 {
 	NTSTATUS Status;
 	HANDLE hProcess;
@@ -2278,7 +2285,9 @@ BOOLEAN HCAPI HcProcessSuspend(DWORD dwProcessId)
 	return NT_SUCCESS(Status);
 }
 
-BOOLEAN HCAPI HcProcessResume(HANDLE hProcess)
+BOOLEAN 
+HCAPI 
+HcProcessResume(HANDLE hProcess)
 {
 	if (!hProcess)
 	{
@@ -2288,7 +2297,9 @@ BOOLEAN HCAPI HcProcessResume(HANDLE hProcess)
 	return NT_SUCCESS(HcResumeProcess(hProcess));
 }
 
-BOOLEAN HCAPI HcProcessResume(DWORD dwProcessId)
+BOOLEAN
+HCAPI 
+HcProcessResume(DWORD dwProcessId)
 {
 	NTSTATUS Status;
 	HANDLE hProcess;
@@ -2306,7 +2317,10 @@ BOOLEAN HCAPI HcProcessResume(DWORD dwProcessId)
 	return NT_SUCCESS(Status);
 }
 
-mem_result HcInternalMemoryTest(DWORD dwBaseAddress, DWORD dwBufferLength)
+mem_result
+HCAPI 
+HcInternalMemoryTest(DWORD dwBaseAddress,
+	DWORD dwBufferLength)
 {
 	mem_result _result = { 0 };
 	_result.address = dwBaseAddress;
@@ -2339,7 +2353,12 @@ mem_result HcInternalMemoryTest(DWORD dwBaseAddress, DWORD dwBufferLength)
 	return _result;
 }
 
-mem_result HcInternalMemoryTest(DWORD dwBaseAddress, DWORD* pdwOffsets, DWORD dwOffsetCount, DWORD dwBufferLength)
+mem_result
+HCAPI
+HcInternalMemoryTest(DWORD dwBaseAddress,
+	DWORD* pdwOffsets,
+	DWORD dwOffsetCount,
+	DWORD dwBufferLength)
 {
 	mem_result _result = { 0 };
 	_result.address = dwBaseAddress;
@@ -2389,7 +2408,9 @@ mem_result HcInternalMemoryTest(DWORD dwBaseAddress, DWORD* pdwOffsets, DWORD dw
 	return _result;
 }
 
-BOOLEAN HCAPI HcInternalMainModule(PHC_MODULE_INFORMATION moduleInfo)
+BOOLEAN 
+HCAPI 
+HcInternalMainModule(PHC_MODULE_INFORMATION moduleInfo)
 {
 	/* Query main module */
 	return HcProcessQueryInformationModule(NtCurrentProcess,
@@ -2397,7 +2418,9 @@ BOOLEAN HCAPI HcInternalMainModule(PHC_MODULE_INFORMATION moduleInfo)
 		moduleInfo);
 }
 
-const char* HcInternalReadString(DWORD memAddress, unsigned int* ptrOffsets, unsigned int offsetCount)
+LPCSTR
+HCAPI
+HcInternalReadString(DWORD memAddress, unsigned int* ptrOffsets, unsigned int offsetCount)
 {
 	if (!memAddress)
 		return 0;
@@ -2419,12 +2442,16 @@ const char* HcInternalReadString(DWORD memAddress, unsigned int* ptrOffsets, uns
 	return (const char*)(address + ptrOffsets[offsetCount - 1]);
 }
 
-const char* HcInternalReadString(DWORD memAddress)
+LPCSTR
+HCAPI
+HcInternalReadString(DWORD memAddress)
 {
 	return (const char*) *(DWORD*)memAddress;
 }
 
-int HcInternalReadInt(DWORD memAddress, unsigned int* ptrOffsets, unsigned int offsetCount)
+int
+HCAPI
+HcInternalReadInt(DWORD memAddress, unsigned int* ptrOffsets, unsigned int offsetCount)
 {
 	if (!memAddress)
 		return 0;
@@ -2443,12 +2470,15 @@ int HcInternalReadInt(DWORD memAddress, unsigned int* ptrOffsets, unsigned int o
 	return (int)address;
 }
 
-int HcInternalReadInt(DWORD baseAddress)
+int
+HCAPI
+HcInternalReadInt(DWORD baseAddress)
 {
 	return (int)*(DWORD*)baseAddress;
 }
 
-DWORD HcInternalLocatePointer(DWORD baseAddress, DWORD* offsets, unsigned int offsetCount)
+DWORD
+HCAPI HcInternalLocatePointer(DWORD baseAddress, DWORD* offsets, unsigned int offsetCount)
 {
 	if (!baseAddress)
 		return baseAddress;
@@ -2470,7 +2500,9 @@ DWORD HcInternalLocatePointer(DWORD baseAddress, DWORD* offsets, unsigned int of
 	return (DWORD)address + offsets[offsetCount - 1];
 }
 
-void HcInternalMemoryWrite(PVOID pAddress, DWORD dwLen, BYTE* ptrWrite)
+VOID
+HCAPI
+HcInternalMemoryWrite(PVOID pAddress, DWORD dwLen, BYTE* ptrWrite)
 {
 	DWORD dwProtection;
 
@@ -2484,7 +2516,9 @@ void HcInternalMemoryWrite(PVOID pAddress, DWORD dwLen, BYTE* ptrWrite)
 	VirtualProtect(pAddress, dwLen, dwProtection, &dwProtection);
 }
 
-void HcInternalMemoryNop(PVOID pAddress, DWORD dwLen)
+VOID
+HCAPI
+HcInternalMemoryNop(PVOID pAddress, DWORD dwLen)
 {
 	DWORD dwProtection;
 
@@ -2498,7 +2532,9 @@ void HcInternalMemoryNop(PVOID pAddress, DWORD dwLen)
 	VirtualProtect(pAddress, dwLen, dwProtection, &dwProtection);
 }
 
-DWORD HcInternalPatternFind(const char* pattern, const char* mask, HC_MODULE_INFORMATION module)
+DWORD
+HCAPI
+HcInternalPatternFind(const char* pattern, const char* mask, HC_MODULE_INFORMATION module)
 {
 	/* specifies where the function will start searching from */
 	DWORD base = module.Base;
@@ -2528,14 +2564,18 @@ DWORD HcInternalPatternFind(const char* pattern, const char* mask, HC_MODULE_INF
 	return 0;
 }
 
-LPSTR HCAPI HcPathMainModule()
+LPSTR 
+HCAPI
+HcPathMainModule()
 {
 	char* buffer = (char*)malloc(MAX_PATH);
 	GetModuleFileNameA(NULL, buffer, MAX_PATH);
 	return buffer;
 }
 
-LPSTR HCAPI HcPathLocalDirectory()
+LPSTR 
+HCAPI
+HcPathLocalDirectory()
 {
 	char* module = HcPathMainModule();
 	int index = HcStringCharIndex(module, '\\');
@@ -2546,7 +2586,9 @@ LPSTR HCAPI HcPathLocalDirectory()
 }
 
 #ifdef PROGRAM_ALIAS
-LPSTR HCAPI HcPathLogFile()
+LPSTR 
+HCAPI 
+HcPathLogFile()
 {
 	char* buffer = (char*)malloc(MAX_PATH);
 	char* path = HcPathLocalDirectory();
@@ -2555,7 +2597,9 @@ LPSTR HCAPI HcPathLogFile()
 	return buffer;
 }
 
-LPSTR HCAPI HcPathConfigFile()
+LPSTR 
+HCAPI 
+HcPathConfigFile()
 {
 	char* buffer = (char*)malloc(MAX_PATH);
 	char* path = HcPathLocalDirectory();
@@ -2565,17 +2609,23 @@ LPSTR HCAPI HcPathConfigFile()
 }
 #endif
 
-BOOLEAN HCAPI HcPathFileExists(LPCSTR name)
+BOOLEAN 
+HCAPI 
+HcPathFileExists(LPCSTR name)
 {
 	return (GetFileAttributesA(name) != 0xFFFFFFFF);
 }
 
-BOOLEAN HCAPI HcPathFileExists(LPCWSTR name)
+BOOLEAN 
+HCAPI 
+HcPathFileExists(LPCWSTR name)
 {
 	return (GetFileAttributesW(name) != 0xFFFFFFFF);
 }
 
-SIZE_T HCAPI HcPathFileSize(LPCSTR lpPath)
+SIZE_T 
+HCAPI 
+HcPathFileSize(LPCSTR lpPath)
 {
 	SIZE_T FileSize;
 	HANDLE hFile;
@@ -2600,7 +2650,9 @@ SIZE_T HCAPI HcPathFileSize(LPCSTR lpPath)
 
 #ifdef PROGRAM_ALIAS
 
-VOID HCAPI HcPathLogNormal(const char* input, ...)
+VOID 
+HCAPI 
+HcPathLogNormal(const char* input, ...)
 {
 	char* path = HcPathLogFile();
 	FILE* iobuf = fopen(path, "ab+");
@@ -2628,7 +2680,9 @@ VOID HCAPI HcPathLogNormal(const char* input, ...)
 	}
 }
 
-VOID HCAPI HcPathLogError(const char* input, ...)
+VOID 
+HCAPI 
+HcPathLogError(const char* input, ...)
 {
 	char* path = HcPathLogFile();
 	FILE* iobuf = fopen(path, "ab+");

@@ -1,6 +1,6 @@
 #pragma once
 #include <windows.h>
-#include "type.h"
+#include "nttype.h"
 
 typedef NTSTATUS(NTAPI *t_RtlGetVersion) (_Out_ PRTL_OSVERSIONINFOW lpInformation);
 extern t_RtlGetVersion RtlGetVersion;
