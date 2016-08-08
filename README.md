@@ -9,15 +9,24 @@ Supported compiler is 32bit, 64bit will come at a later time.
 Features:
 
 Write to process memory
+
 Read process memory
+
 Enumerate process modules
-Manual Map
+
+Manual map dlls
+
 Suspend/Resume Process
+
 Allocate/deallocate process memory
+
 Acquire system function index
+
 Read module from disk
+
 Various string helpers
-Window message sending
+
+Send window messages
 
 Note:
 When compiling, specify 'no optimization' in order to maintain some necessary assembly code otherwise removed.
