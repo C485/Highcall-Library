@@ -1,0 +1,4 @@
+﻿  highcall.cpp
+e:\projects\visual studio\c++\highcall library\highcall library\highcall.cpp(2044): warning C4477: 'printf' : format string '%x' requires an argument of type 'unsigned int', but variadic argument 1 has type 'NTSTATUS (__stdcall *)(HANDLE,PROCESSINFOCLASS,PVOID,ULONG,PULONG)'
+e:\projects\visual studio\c++\highcall library\highcall library\highcall.cpp(2246): warning C4101: 'LocalObjectAttributes': unreferenced local variable
+LINK : fatal error LNK1561: entry point must be defined

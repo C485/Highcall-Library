@@ -1,0 +1,3 @@
+﻿  highcall.cpp
+highcall.cpp(2243): warning C4101: 'LocalObjectAttributes': unreferenced local variable
+  Highcall Library.vcxproj -> E:\Projects\Visual Studio\C++\Highcall Library\Release\highcall.lib
