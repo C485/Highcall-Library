@@ -1,4 +1,4 @@
-#include "static Trampoline.h"
+#include "Trampoline.h"
 #include "hcapi.h"
 #include "global.h"
 

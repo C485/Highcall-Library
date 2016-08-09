@@ -1,5 +1,2 @@
-﻿  global.cpp
-  hcapi.cpp
-hcapi.cpp(1768): warning C4101: 'LocalObjectAttributes': unreferenced local variable
-  syscall.cpp
+﻿  trampoline.cpp
   Highcall Library.vcxproj -> E:\Projects\Visual Studio\C++\Highcall Library\Release\highcall.lib
