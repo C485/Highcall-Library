@@ -4,7 +4,7 @@
 typedef HMODULE(WINAPI *pLoadLibraryA)(LPCSTR);
 typedef FARPROC(WINAPI *pGetProcAddress)(HMODULE, LPCSTR);
 
-typedef BOOL(WINAPI *PDLL_MAIN)(HMODULE, DWORD, PVOID);
+typedef BOOL(WINAPI *PDLL_MAIN)(HMODULE, SIZE_T, PVOID);
 
 typedef struct _MANUAL_INJECT
 {
@@ -16,14 +16,13 @@ typedef struct _MANUAL_INJECT
 	pGetProcAddress fnGetProcAddress;
 }MANUAL_INJECT, *PMANUAL_INJECT;
 
-typedef unsigned int TrampolineJump;
-
-typedef unsigned int SyscallIndex;
+typedef SIZE_T TrampolineJump;
+typedef DWORD SyscallIndex;
 
 typedef struct _HC_MODULE_INFORMATION
 {
-	DWORD		Size;
-	DWORD		Base;
+	SIZE_T		Size;
+	SIZE_T		Base;
 	LPWSTR		Name;
 	LPWSTR		Path;
 
@@ -77,7 +76,7 @@ typedef struct _HC_WINDOW_INFORMATION
 
 typedef struct _HC_PROCESS_INFORMATION
 {
-	DWORD					Id;
+	SIZE_T					Id;
 	LPWSTR					Name;
 	HC_MODULE_INFORMATION	MainModule;
 	HC_WINDOW_INFORMATION	MainWindow;
@@ -106,10 +105,10 @@ typedef BOOL(*HC_MODULE_CALLBACK_EVENT)(HC_MODULE_INFORMATION hcmInformation, LP
 
 typedef struct _mem_result
 {
-	DWORD address;
+	SIZE_T address;
 	BOOL accessible;
 
-	DWORD length;
+	SIZE_T length;
 	unsigned char* buffer;
 
 } mem_result;

@@ -77,7 +77,7 @@ HcStringIsBad(LPCWSTR lpcStr)
 */
 LPSTR*
 HCAPI
-HcStringSplit(LPSTR lpStr, const char cDelimiter, PDWORD pdwCount)
+HcStringSplit(LPSTR lpStr, const char cDelimiter, PSIZE_T pdwCount)
 {
 	LPSTR* plpResult;
 	LPSTR lpCopy;
@@ -158,10 +158,10 @@ HcStringSplit(LPSTR lpStr, const char cDelimiter, PDWORD pdwCount)
 */
 VOID
 HCAPI
-HcStringSplitToIntArray(LPSTR lpStr, const char delim, int* pArray, PDWORD dwCount)
+HcStringSplitToIntArray(LPSTR lpStr, const char delim, int* pArray, PSIZE_T dwCount)
 {
 	LPSTR* plpSplit;
-	DWORD Count;
+	SIZE_T Count;
 	if (HcStringIsBad(lpStr))
 	{
 		return;
@@ -177,7 +177,7 @@ HcStringSplitToIntArray(LPSTR lpStr, const char delim, int* pArray, PDWORD dwCou
 	__try
 	{
 		/* get the length of the array */
-		for (DWORD i = 0; dwCount; i++)
+		for (SIZE_T i = 0; dwCount; i++)
 		{
 			pArray[i] = atoi(plpSplit[i]);
 			*dwCount += 1;
@@ -195,12 +195,12 @@ HcStringSplitToIntArray(LPSTR lpStr, const char delim, int* pArray, PDWORD dwCou
 */
 VOID
 HCAPI
-HcStringIntToStringArray(int pIntArray[], DWORD dwCountToRead, LPSTR* lpOutStringArray)
+HcStringIntToStringArray(int pIntArray[], SIZE_T dwCountToRead, LPSTR* lpOutStringArray)
 {
 	LPSTR lpCurrent;
 
 	/* Loop the count. */
-	for (DWORD i = 0; i < dwCountToRead; i++)
+	for (SIZE_T i = 0; i < dwCountToRead; i++)
 	{
 		/* Allocate next. */
 		lpCurrent = (LPSTR)VirtualAlloc(0,
@@ -236,7 +236,7 @@ HcStringIntToStringArray(int pIntArray[], DWORD dwCountToRead, LPSTR* lpOutStrin
 */
 VOID
 HCAPI
-HcStringSubtract(LPCSTR lpStr, LPSTR lpOutStr, DWORD dwIndex, DWORD dwEndIndex, size_t lpSize)
+HcStringSubtract(LPCSTR lpStr, LPSTR lpOutStr, SIZE_T dwIndex, SIZE_T dwEndIndex, size_t lpSize)
 {
 	if (HcStringIsBad(lpStr))
 	{
@@ -250,7 +250,7 @@ HcStringSubtract(LPCSTR lpStr, LPSTR lpOutStr, DWORD dwIndex, DWORD dwEndIndex, 
 	}
 }
 
-DWORD
+SIZE_T
 HCAPI
 HcStringCharIndex(LPCSTR lpStr, char delim)
 {
@@ -489,7 +489,7 @@ HcGetTokenIsElevated(_In_ HANDLE TokenHandle,
 /*
 @implemented
 */
-DWORD
+SIZE_T
 HCAPI
 HcGetProcedureAddress(HANDLE hModule, LPCSTR lpProcedureName)
 {
@@ -512,7 +512,7 @@ HcGetProcedureAddress(HANDLE hModule, LPCSTR lpProcedureName)
 		return 0;
 	}
 
-	DWORD dwModule = (DWORD)hModule;
+	SIZE_T dwModule = (SIZE_T)hModule;
 
 	pHeaderNT = (PIMAGE_NT_HEADERS)(pHeaderDOS->e_lfanew + dwModule);
 	if (pHeaderNT->Signature != IMAGE_NT_SIGNATURE)
@@ -540,7 +540,7 @@ HcGetProcedureAddress(HANDLE hModule, LPCSTR lpProcedureName)
 		}
 
 		/* Check for a match*/
-		if (!lstrcmpiA(lpCurrentFunction, lpProcedureName))
+		if (HcStringEqual(lpCurrentFunction, lpProcedureName, TRUE))
 		{
 			pExportOrdinals = (PWORD)(pExports->AddressOfNameOrdinals + dwModule);
 			pExportFunctions = (PDWORD)(pExports->AddressOfFunctions + dwModule);
@@ -555,12 +555,12 @@ HcGetProcedureAddress(HANDLE hModule, LPCSTR lpProcedureName)
 /*
 @implemented
 */
-DWORD
+SIZE_T
 HCAPI
 HcGetProcedureAddress(HANDLE hModule, LPCWSTR lpProcedureName)
 {
-	SIZE_T Size;
-	DWORD ReturnValue;
+	DWORD Size;
+	SIZE_T ReturnValue;
 	LPSTR lpConvertedName;
 
 	if (!(Size = WideCharToMultiByte(CP_UTF8, 0, lpProcedureName, -1, NULL, 0, NULL, NULL)))
@@ -633,7 +633,7 @@ HMODULE
 HCAPI
 HcGetModuleHandle(LPCSTR lpModuleName)
 {
-	SIZE_T Size;
+	DWORD Size;
 	HMODULE ReturnValue;
 	LPWSTR lpConvertedName;
 
@@ -670,7 +670,7 @@ HcGetModuleHandle(LPCSTR lpModuleName)
 */
 DWORD
 HCAPI
-HcRVAToFileOffset(PIMAGE_NT_HEADERS pImageHeader, DWORD RVA)
+HcRVAToFileOffset(PIMAGE_NT_HEADERS pImageHeader, SIZE_T RVA)
 {
 	PIMAGE_SECTION_HEADER sectionHeader = IMAGE_FIRST_SECTION(pImageHeader);
 
@@ -698,9 +698,9 @@ HcExportToFileOffset(HMODULE hModule, LPCSTR lpExportName)
 {
 	PIMAGE_DOS_HEADER pHeaderDOS;
 	PIMAGE_NT_HEADERS pHeaderNT;
-	DWORD dwExportRVA;
-	DWORD dwExportVA;
-	DWORD dwModule;
+	SIZE_T szExportRVA;
+	SIZE_T szExportVA;
+	SIZE_T szModule;
 
 	if (!hModule)
 	{
@@ -713,21 +713,21 @@ HcExportToFileOffset(HMODULE hModule, LPCSTR lpExportName)
 		return 0;
 	}
 
-	dwModule = (DWORD)hModule;
+	szModule = (SIZE_T)hModule;
 
-	pHeaderNT = (PIMAGE_NT_HEADERS)(dwModule + pHeaderDOS->e_lfanew);
+	pHeaderNT = (PIMAGE_NT_HEADERS)(szModule + pHeaderDOS->e_lfanew);
 	if (pHeaderNT->Signature != IMAGE_NT_SIGNATURE)
 	{
 		return 0;
 	}
 
-	dwExportVA = (DWORD)HcGetProcedureAddress(hModule, lpExportName);
-	if (dwExportVA)
+	szExportVA = (SIZE_T)HcGetProcedureAddress(hModule, lpExportName);
+	if (szExportVA)
 	{
 		/* Calculate the relative offset */
-		dwExportRVA = dwExportVA - dwModule;
+		szExportRVA = szExportVA - szModule;
 
-		return HcRVAToFileOffset(pHeaderNT, dwExportRVA);
+		return HcRVAToFileOffset(pHeaderNT, szExportRVA);
 	}
 
 	return 0;
@@ -742,9 +742,9 @@ HcExportToFileOffset(HMODULE hModule, LPCWSTR lpExportName)
 {
 	PIMAGE_DOS_HEADER pHeaderDOS;
 	PIMAGE_NT_HEADERS pHeaderNT;
-	DWORD dwExportRVA;
-	DWORD dwExportVA;
-	DWORD dwModule;
+	SIZE_T dwExportRVA;
+	SIZE_T dwExportVA;
+	SIZE_T dwModule;
 
 	if (!hModule)
 	{
@@ -757,7 +757,7 @@ HcExportToFileOffset(HMODULE hModule, LPCWSTR lpExportName)
 		return 0;
 	}
 
-	dwModule = (DWORD)hModule;
+	dwModule = (SIZE_T)hModule;
 
 	pHeaderNT = (PIMAGE_NT_HEADERS)(dwModule + pHeaderDOS->e_lfanew);
 	if (pHeaderNT->Signature != IMAGE_NT_SIGNATURE)
@@ -765,7 +765,7 @@ HcExportToFileOffset(HMODULE hModule, LPCWSTR lpExportName)
 		return 0;
 	}
 
-	dwExportVA = (DWORD)HcGetProcedureAddress(hModule, lpExportName);
+	dwExportVA = (SIZE_T)HcGetProcedureAddress(hModule, lpExportName);
 	if (dwExportVA)
 	{
 		/* Calculate the relative offset */
@@ -781,9 +781,9 @@ HcExportToFileOffset(HMODULE hModule, LPCWSTR lpExportName)
 @implemented
 @problem: can't call the native handle close.
 */
-size_t
+SIZE_T
 HCAPI
-HcReadFileModule(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, size_t t_Count)
+HcReadFileModule(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dwCount)
 {
 	DWORD dwFileOffset;
 	LPSTR lpModulePath;
@@ -830,7 +830,7 @@ HcReadFileModule(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, size_t t_
 		return 0;
 	}
 
-	if (!ReadFile(hFile, lpBuffer, t_Count, &BytesRead, NULL))
+	if (!ReadFile(hFile, lpBuffer, dwCount, &BytesRead, NULL))
 	{
 		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
 		CloseHandle(hFile);
@@ -846,9 +846,9 @@ HcReadFileModule(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, size_t t_
 @implemented
 @problem: can't call the native handle close.
 */
-size_t
+SIZE_T
 HCAPI
-HcReadFileModule(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, size_t t_Count)
+HcReadFileModule(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD dwCount)
 {
 	DWORD dwFileOffset;
 	LPWSTR lpModulePath;
@@ -895,7 +895,7 @@ HcReadFileModule(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, size_t t
 		return 0;
 	}
 
-	if (!ReadFile(hFile, lpBuffer, t_Count, &BytesRead, NULL))
+	if (!ReadFile(hFile, lpBuffer, dwCount, &BytesRead, NULL))
 	{
 		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
 		CloseHandle(hFile);
@@ -912,12 +912,16 @@ SyscallIndex
 HCAPI
 HcSyscallIndex(LPCSTR lpName)
 {
-	BYTE buffer[5];
-	HcReadFileModule(NTDLL, lpName, buffer, 5);
+	BYTE buffer[10];
+	HcReadFileModule(NTDLL, lpName, buffer, 10);
 
+#ifndef _WIN64
 	/* mov eax, syscallindex */
 	/* buffer + 1 is the syscall index, 0xB8 is the mov instruction */
-	return buffer ? *(DWORD*)(buffer + 1) : 0;
+	return buffer ? *(ULONG*)(buffer + 1) : 0;
+#else
+	return buffer ? *(ULONG*)(buffer + 4) : 0;
+#endif
 }
 
 /* Unreliable. */
@@ -925,28 +929,21 @@ SyscallIndex
 HCAPI
 HcSyscallIndex(LPCWSTR lpName)
 {
-	BYTE buffer[5];
-	HcReadFileModule(NTDLL, lpName, buffer, 5);
+	BYTE buffer[10];
+	HcReadFileModule(NTDLL, lpName, buffer, 10);
 
+#ifndef _WIN64
 	/* mov eax, syscallindex */
 	/* buffer + 1 is the syscall index, 0xB8 is the mov instruction */
-	return buffer ? *(DWORD*)(buffer + 1) : 0;
-}
-
-/* Unreliable. */
-DWORD
-HCAPI
-HcSyscallForwardPtr()
-{
-	DWORD dwNtClose = HcGetProcedureAddress(NTDLL, "NtClose");
-	/* mov eax, syscallindex */
-	/* buffer + 6 is the syscall address, 0xBA is the mov instruction */
-	return *(DWORD*)(dwNtClose + 6);
+	return buffer ? *(ULONG*)(buffer + 1) : 0;
+#else
+	return buffer ? *(ULONG*)(buffer + 4) : 0;
+#endif
 }
 
 HANDLE
 HCAPI
-HcProcessOpen(DWORD dwProcessId, ACCESS_MASK DesiredAccess)
+HcProcessOpen(SIZE_T dwProcessId, ACCESS_MASK DesiredAccess)
 {
 	OBJECT_ATTRIBUTES oa;
 	CLIENT_ID cid;
@@ -979,7 +976,7 @@ HCAPI
 HcProcessFree(IN HANDLE hProcess,
 	IN LPVOID lpAddress,
 	IN SIZE_T dwSize,
-	IN DWORD dwFreeType)
+	IN ULONG dwFreeType)
 {
 	NTSTATUS Status;
 
@@ -1010,8 +1007,8 @@ HCAPI
 HcProcessAllocate(IN HANDLE hProcess,
 	IN LPVOID lpAddress,
 	IN SIZE_T dwSize,
-	IN DWORD flAllocationType,
-	IN DWORD flProtect)
+	IN ULONG flAllocationType,
+	IN ULONG flProtect)
 {
 	NTSTATUS Status;
 
@@ -1042,12 +1039,12 @@ HCAPI
 HcProcessWriteMemory(HANDLE hProcess,
 	PVOID lpBaseAddress,
 	CONST VOID* lpBuffer,
-	SIZE_T nSize,
+	ULONG nSize,
 	PSIZE_T lpNumberOfBytesWritten)
 {
 	NTSTATUS Status;
 	ULONG OldValue;
-	SIZE_T RegionSize;
+	ULONG RegionSize;
 	PVOID Base;
 	BOOLEAN UnProtect;
 
@@ -1236,7 +1233,7 @@ HcProcessReadNullifiedString(HANDLE hProcess,
 	LPWSTR lpStringOut,
 	SIZE_T lpSize)
 {
-	DWORD Len;
+	SIZE_T Len;
 
 	/* Get the maximum len we have/can write in given size */
 	Len = usStringIn->Length + sizeof(UNICODE_NULL);
@@ -1305,7 +1302,7 @@ HcProcessLdrModuleToHighCallModule(IN HANDLE hProcess,
 	}
 
 	phcModuleOut->Size = Module->SizeOfImage;
-	phcModuleOut->Base = (DWORD)Module->ModuleBase;
+	phcModuleOut->Base = (SIZE_T)Module->ModuleBase;
 
 	return TRUE;
 }
@@ -1316,13 +1313,13 @@ HcProcessQueryInformationModule(IN HANDLE hProcess,
 	IN HMODULE hModule OPTIONAL,
 	OUT PHC_MODULE_INFORMATION phcModuleOut)
 {
-	DWORD Count;
+	SIZE_T Count;
 	NTSTATUS Status;
 	PPEB_LDR_DATA LoaderData;
 	PLIST_ENTRY ListHead, ListEntry;
 	PROCESS_BASIC_INFORMATION ProcInfo;
 	LDR_DATA_TABLE_ENTRY Module;
-	DWORD Len;
+	ULONG Len;
 
 	/* Query the process information to get its PEB address */
 	Status = HcQueryInformationProcess(hProcess,
@@ -1428,8 +1425,8 @@ HcProcessQueryModules(HANDLE hProcess,
 	PROCESS_BASIC_INFORMATION ProcInfo;
 	LDR_DATA_TABLE_ENTRY ldrModule;
 	PHC_MODULE_INFORMATION Module;
-	DWORD Count;
-	DWORD Len;
+	SIZE_T Count;
+	ULONG Len;
 
 	/* Query the process information to get its PEB address */
 	Status = HcQueryInformationProcess(hProcess,
@@ -1517,10 +1514,10 @@ HcProcessQueryModules(HANDLE hProcess,
 	return FALSE;
 }
 
-static SIZE_T HCAPI HcGetProcessListSize()
+static ULONG HCAPI HcGetProcessListSize()
 {
 	NTSTATUS Status;
-	SIZE_T Size = MAXSHORT;
+	ULONG Size = MAXSHORT;
 	PSYSTEM_PROCESS_INFORMATION ProcInfoArray;
 
 	while (TRUE)
@@ -1565,7 +1562,7 @@ HcQueryProcessesByName(LPCWSTR lpProcessName,
 	PHC_PROCESS_INFORMATION hcpInformation;
 	UNICODE_STRING processName;
 	PVOID Buffer;
-	SIZE_T Length;
+	ULONG Length;
 
 	/* Initialize the unicode string */
 	RtlInitUnicodeString(&processName, lpProcessName);
@@ -1620,7 +1617,7 @@ HcQueryProcessesByName(LPCWSTR lpProcessName,
 				TRUE))
 		{
 
-			hcpInformation->Id = (DWORD)processInfo->UniqueProcessId;
+			hcpInformation->Id = (SIZE_T)processInfo->UniqueProcessId;
 
 			/* Copy the name */
 			wcsncpy(hcpInformation->Name,
@@ -1628,7 +1625,7 @@ HcQueryProcessesByName(LPCWSTR lpProcessName,
 				processInfo->ImageName.Length);
 
 			/* Try opening the process */
-			if ((CurrentHandle = HcProcessOpen((DWORD)processInfo->UniqueProcessId,
+			if ((CurrentHandle = HcProcessOpen((SIZE_T)processInfo->UniqueProcessId,
 				PROCESS_QUERY_INFORMATION | PROCESS_VM_READ)))
 			{
 				hcpInformation->CanAccess = TRUE;
@@ -1662,7 +1659,7 @@ HcQueryProcessesByName(LPCWSTR lpProcessName,
 		}
 
 		/* Calculate the next entry address */
-		processInfo = (PSYSTEM_PROCESS_INFORMATION)((ULONG_PTR)processInfo + processInfo->NextEntryOffset);
+		processInfo = (PSYSTEM_PROCESS_INFORMATION)((SIZE_T)processInfo + processInfo->NextEntryOffset);
 	}
 
 	VirtualFree(Buffer, 0, MEM_RELEASE);
@@ -1748,135 +1745,6 @@ HcLoadLibrary(LPCWSTR lpPath)
 	return (HMODULE)hModule;
 }
 
-/*
-* @unimplemented
-*/
-HANDLE
-HCAPI
-HcProcessCreateThread(IN HANDLE hProcess,
-	IN LPSECURITY_ATTRIBUTES lpThreadAttributes,
-	IN DWORD dwStackSize,
-	IN LPTHREAD_START_ROUTINE lpStartAddress,
-	IN LPVOID lpParameter,
-	IN DWORD dwCreationFlags,
-	OUT LPDWORD lpThreadId)
-{
-	NTSTATUS Status;
-	INITIAL_TEB InitialTeb;
-	CONTEXT Context;
-	CLIENT_ID ClientId;
-	OBJECT_ATTRIBUTES LocalObjectAttributes;
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	HANDLE hThread;
-	ULONG Dummy;
-	PTEB Teb;
-	THREAD_BASIC_INFORMATION ThreadBasicInfo;
-	PACTIVATION_CONTEXT_STACK ActivationContextStack = NULL;
-	ACTIVATION_CONTEXT_BASIC_INFORMATION ActCtxInfo;
-	ULONG_PTR Cookie;
-	ULONG ReturnLength;
-
-	/* Clear the Context */
-	RtlZeroMemory(&Context, sizeof(CONTEXT));
-
-	/* Write PID */
-	ClientId.UniqueProcess = hProcess;
-
-	InitializeObjectAttributes(&ObjectAttributes, NULL, 0, NULL, NULL);
-
-	/* Create the Kernel Thread Object */
-	Status = HcCreateThread(&hThread,
-		THREAD_ALL_ACCESS,
-		&ObjectAttributes,
-		hProcess,
-		&ClientId,
-		&Context,
-		&InitialTeb,
-		TRUE);
-
-	if (!NT_SUCCESS(Status))
-	{
-		SetLastError(Status);
-		return NULL;
-	}
-
-	/* Are we in the same process? */
-	if (hProcess == NtCurrentProcess)
-	{
-		/* Get the TEB */
-		Status = HcQueryInformationThread(hThread,
-			ThreadBasicInformation,
-			&ThreadBasicInfo,
-			sizeof(ThreadBasicInfo),
-			&ReturnLength);
-
-		if (!NT_SUCCESS(Status))
-		{
-			SetLastError(Status);
-			return NULL;
-		}
-
-		/* Allocate the Activation Context Stack */
-		Status = RtlAllocateActivationContextStack(&ActivationContextStack);
-		if (!NT_SUCCESS(Status))
-		{
-			SetLastError(Status);
-			return NULL;
-		}
-
-		/* Save it */
-		Teb = ThreadBasicInfo.TebBaseAddress;
-		Teb->ActivationContextStackPointer = ActivationContextStack;
-
-		/* Query the Context */
-		Status = RtlQueryInformationActivationContext(RTL_QUERY_ACTIVATION_CONTEXT_FLAG_USE_ACTIVE_ACTIVATION_CONTEXT,
-			NULL,
-			0,
-			ActivationContextBasicInformation,
-			&ActCtxInfo,
-			sizeof(ActCtxInfo),
-			&ReturnLength);
-
-		if (!NT_SUCCESS(Status))
-		{
-			/* Free the activation context stack */
-
-			RtlFreeThreadActivationContextStack();
-			RtlFreeActivationContextStack(Teb->ActivationContextStackPointer);
-
-			return NULL;
-		}
-
-		/* Does it need to be activated? */
-		if ((ActCtxInfo.hActCtx) && !(ActCtxInfo.dwFlags & 1))
-		{
-			/* Activate it */
-			Status = RtlActivateActivationContextEx(RTL_ACTIVATE_ACTIVATION_CONTEXT_EX_FLAG_RELEASE_ON_STACK_DEALLOCATION,
-				Teb,
-				ActCtxInfo.hActCtx,
-				&Cookie);
-
-			if (!NT_SUCCESS(Status))
-			{
-				/* Free the activation context stack */
-				// RtlFreeThreadActivationContextStack();
-				RtlFreeActivationContextStack(Teb->ActivationContextStackPointer);
-
-				return NULL;
-			}
-		}
-	}
-
-	/* Success */
-	if (lpThreadId) *lpThreadId = HandleToUlong(ClientId.UniqueThread);
-
-	/* Resume it if asked */
-	if (!(dwCreationFlags & CREATE_SUSPENDED)) HcResumeThread(hThread, &Dummy);
-
-	/* Return handle to thread */
-	return hThread;
-}
-
 static
 BOOL BaseCheck(HC_MODULE_INFORMATION hcmInfo, LPARAM lParam)
 {
@@ -1891,7 +1759,6 @@ HcProcessReady(HANDLE hProcess)
 	HC_MODULE_INFORMATION hcmInfo;
 	if (!HcProcessQueryInformationModule(hProcess, NULL, &hcmInfo))
 	{
-		printf("failed");
 		return FALSE;
 	}
 	return hcmInfo.Base > 0;
@@ -1899,7 +1766,7 @@ HcProcessReady(HANDLE hProcess)
 
 BOOLEAN
 HCAPI
-HcProcessReady(DWORD dwProcessId)
+HcProcessReady(SIZE_T dwProcessId)
 {
 	BOOLEAN Success;
 	HANDLE hProcess;
@@ -1919,16 +1786,16 @@ HcProcessReady(DWORD dwProcessId)
 
 #pragma region Internal Manual Map Code
 static 
-DWORD
+SIZE_T
 HCAPI MmInternalResolve(PVOID lParam)
 {
 	PMANUAL_INJECT ManualInject;
 	HMODULE hModule;
-	DWORD Index;
-	DWORD Function;
-	DWORD Count;
-	DWORD Delta;
-	PDWORD FunctionPointer;
+	SIZE_T Index;
+	SIZE_T Function;
+	SIZE_T Count;
+	SIZE_T Delta;
+	PSIZE_T FunctionPointer;
 	PWORD ImportList;
 
 	PIMAGE_BASE_RELOCATION pIBR;
@@ -1941,7 +1808,7 @@ HCAPI MmInternalResolve(PVOID lParam)
 	ManualInject = (PMANUAL_INJECT)lParam;
 
 	pIBR = ManualInject->BaseRelocation;
-	Delta = (DWORD)((LPBYTE)ManualInject->ImageBase - ManualInject->NtHeaders->OptionalHeader.ImageBase);
+	Delta = (SIZE_T)((LPBYTE)ManualInject->ImageBase - ManualInject->NtHeaders->OptionalHeader.ImageBase);
 
 	while (pIBR->VirtualAddress)
 	{
@@ -1954,7 +1821,7 @@ HCAPI MmInternalResolve(PVOID lParam)
 			{
 				if (ImportList[Index])
 				{
-					FunctionPointer = (PDWORD)((LPBYTE)ManualInject->ImageBase + (pIBR->VirtualAddress + (ImportList[Index] & 0xFFF)));
+					FunctionPointer = (PSIZE_T)((LPBYTE)ManualInject->ImageBase + (pIBR->VirtualAddress + (ImportList[Index] & 0xFFF)));
 					*FunctionPointer += Delta;
 				}
 			}
@@ -1984,7 +1851,7 @@ HCAPI MmInternalResolve(PVOID lParam)
 			if (OrigFirstThunk->u1.Ordinal & IMAGE_ORDINAL_FLAG)
 			{
 				/* By ordinal */
-				Function = (DWORD)ManualInject->fnGetProcAddress(hModule, (LPCSTR)(OrigFirstThunk->u1.Ordinal & 0xFFFF));
+				Function = (SIZE_T)ManualInject->fnGetProcAddress(hModule, (LPCSTR)(OrigFirstThunk->u1.Ordinal & 0xFFFF));
 
 				if (!Function)
 				{
@@ -1998,7 +1865,7 @@ HCAPI MmInternalResolve(PVOID lParam)
 			{
 				/* By name */
 				pIBN = (PIMAGE_IMPORT_BY_NAME)((LPBYTE)ManualInject->ImageBase + OrigFirstThunk->u1.AddressOfData);
-				Function = (DWORD)ManualInject->fnGetProcAddress(hModule, (LPCSTR)pIBN->Name);
+				Function = (SIZE_T)ManualInject->fnGetProcAddress(hModule, (LPCSTR)pIBN->Name);
 
 				if (!Function)
 				{
@@ -2024,7 +1891,7 @@ HCAPI MmInternalResolve(PVOID lParam)
 	return TRUE;
 }
 
-DWORD HCAPI MmInternalResolved()
+SIZE_T HCAPI MmInternalResolved()
 {
 	return 0;
 }
@@ -2045,7 +1912,7 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 
 	HANDLE hThread, hFile;
 	PVOID Buffer, ImageBuffer, LoaderBuffer;
-	DWORD SectionIndex, FileSize, ExitCode, BytesRead;
+	DWORD ExitCode, BytesRead, SectionIndex, FileSize;
 
 	MANUAL_INJECT ManualInject;
 
@@ -2203,7 +2070,7 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 	if (!HcProcessWriteMemory(hProcess,
 		(PVOID)((PMANUAL_INJECT)LoaderBuffer + 1),
 		MmInternalResolve,
-		(DWORD)MmInternalResolved - (DWORD)MmInternalResolve,
+		(ULONG)((SIZE_T)MmInternalResolved - (SIZE_T)MmInternalResolve),
 		NULL))
 	{
 		return FALSE;
@@ -2246,7 +2113,7 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 
 	if (pHeaderNt->OptionalHeader.AddressOfEntryPoint)
 	{
-		//printf("\nDLL entry point: %#x\n", ((DWORD)ImageBuffer + pHeaderNt->OptionalHeader.AddressOfEntryPoint));
+		//printf("\nDLL entry point: %#x\n", ((SIZE_T)ImageBuffer + pHeaderNt->OptionalHeader.AddressOfEntryPoint));
 	}
 
 	VirtualFree(Buffer, 0, MEM_RELEASE);
@@ -2267,7 +2134,7 @@ HcProcessSuspend(HANDLE hProcess)
 
 BOOLEAN 
 HCAPI 
-HcProcessSuspend(DWORD dwProcessId)
+HcProcessSuspend(SIZE_T dwProcessId)
 {
 	NTSTATUS Status;
 	HANDLE hProcess;
@@ -2299,7 +2166,7 @@ HcProcessResume(HANDLE hProcess)
 
 BOOLEAN
 HCAPI 
-HcProcessResume(DWORD dwProcessId)
+HcProcessResume(SIZE_T dwProcessId)
 {
 	NTSTATUS Status;
 	HANDLE hProcess;
@@ -2319,8 +2186,8 @@ HcProcessResume(DWORD dwProcessId)
 
 mem_result
 HCAPI 
-HcInternalMemoryTest(DWORD dwBaseAddress,
-	DWORD dwBufferLength)
+HcInternalMemoryTest(SIZE_T dwBaseAddress,
+	SIZE_T dwBufferLength)
 {
 	mem_result _result = { 0 };
 	_result.address = dwBaseAddress;
@@ -2336,7 +2203,7 @@ HcInternalMemoryTest(DWORD dwBaseAddress,
 	__try
 	{
 		/* try reading each piece of memory specified */
-		for (DWORD i = 0; i < dwBufferLength; i++)
+		for (SIZE_T i = 0; i < dwBufferLength; i++)
 		{
 			_result.buffer[i] = (unsigned char)(dwBaseAddress + i);
 		}
@@ -2355,10 +2222,10 @@ HcInternalMemoryTest(DWORD dwBaseAddress,
 
 mem_result
 HCAPI
-HcInternalMemoryTest(DWORD dwBaseAddress,
-	DWORD* pdwOffsets,
-	DWORD dwOffsetCount,
-	DWORD dwBufferLength)
+HcInternalMemoryTest(SIZE_T dwBaseAddress,
+	SIZE_T* pdwOffsets,
+	SIZE_T dwOffsetCount,
+	SIZE_T dwBufferLength)
 {
 	mem_result _result = { 0 };
 	_result.address = dwBaseAddress;
@@ -2379,7 +2246,7 @@ HcInternalMemoryTest(DWORD dwBaseAddress,
 		}
 
 		/* start reading offsets to find the pointer, alternatively this could be done with mem_get_ptr() */
-		_result.address = *(DWORD*)dwBaseAddress;
+		_result.address = *(SIZE_T*)dwBaseAddress;
 		for (unsigned int i = 0; i < dwOffsetCount - 1; i++)
 		{
 			if (!_result.address)
@@ -2387,12 +2254,12 @@ HcInternalMemoryTest(DWORD dwBaseAddress,
 				return _result;
 			}
 
-			_result.address = *(DWORD*)(_result.address + pdwOffsets[i]);
+			_result.address = *(SIZE_T*)(_result.address + pdwOffsets[i]);
 		}
 
-		_result.address = (DWORD)_result.address + pdwOffsets[dwOffsetCount - 1];
+		_result.address = (SIZE_T)_result.address + pdwOffsets[dwOffsetCount - 1];
 
-		for (DWORD i = 0; i < dwBufferLength; i++)
+		for (SIZE_T i = 0; i < dwBufferLength; i++)
 		{
 			/* read the end pointer with the specified buffer length */
 			_result.buffer[i] = (unsigned char)(_result.address + i);
@@ -2420,20 +2287,20 @@ HcInternalMainModule(PHC_MODULE_INFORMATION moduleInfo)
 
 LPCSTR
 HCAPI
-HcInternalReadString(DWORD memAddress, unsigned int* ptrOffsets, unsigned int offsetCount)
+HcInternalReadString(SIZE_T memAddress, SIZE_T* ptrOffsets, SIZE_T offsetCount)
 {
 	if (!memAddress)
 		return 0;
 
 	/* unsafe, can cause crash */
-	DWORD address = *(DWORD*)memAddress;
+	SIZE_T address = *(SIZE_T*)memAddress;
 	for (UINT i = 0; i < offsetCount - 1; i++)
 	{
 		if (!address)
 			return 0;
 
 		/* unsafe, can cause crash */
-		address = *(DWORD*)(address + ptrOffsets[i]);
+		address = *(SIZE_T*)(address + ptrOffsets[i]);
 	}
 
 	if (!address)
@@ -2444,65 +2311,66 @@ HcInternalReadString(DWORD memAddress, unsigned int* ptrOffsets, unsigned int of
 
 LPCSTR
 HCAPI
-HcInternalReadString(DWORD memAddress)
+HcInternalReadString(SIZE_T memAddress)
 {
-	return (const char*) *(DWORD*)memAddress;
+	return (const char*) *(SIZE_T*)memAddress;
 }
 
-int
+SIZE_T
 HCAPI
-HcInternalReadInt(DWORD memAddress, unsigned int* ptrOffsets, unsigned int offsetCount)
+HcInternalReadInt(SIZE_T memAddress, SIZE_T* ptrOffsets, SIZE_T offsetCount)
 {
 	if (!memAddress)
 		return 0;
 
 	/* unsafe, can cause crash */
-	DWORD address = *(DWORD*)memAddress;
+	SIZE_T address = *(SIZE_T*)memAddress;
 	for (UINT i = 0; i < offsetCount; i++)
 	{
 		if (!address)
 			return 0;
 
 		/* unsafe, can cause crash */
-		address = *(DWORD*)(address + ptrOffsets[i]);
+		address = *(SIZE_T*)(address + ptrOffsets[i]);
 	}
 
-	return (int)address;
+	return address;
 }
 
 int
 HCAPI
-HcInternalReadInt(DWORD baseAddress)
+HcInternalReadInt(SIZE_T baseAddress)
 {
-	return (int)*(DWORD*)baseAddress;
+	return (int)*(SIZE_T*)baseAddress;
 }
 
-DWORD
-HCAPI HcInternalLocatePointer(DWORD baseAddress, DWORD* offsets, unsigned int offsetCount)
+SIZE_T
+HCAPI 
+HcInternalLocatePointer(SIZE_T baseAddress, SIZE_T* offsets, unsigned int offsetCount)
 {
 	if (!baseAddress)
 		return baseAddress;
 
 	/* unsafe, can cause crash */
-	DWORD address = *(DWORD*)baseAddress;
+	SIZE_T address = *(SIZE_T*)baseAddress;
 	for (unsigned int i = 0; i < offsetCount - 1; i++)
 	{
 		if (!address)
 			return 0;
 
 		/* unsafe, can cause crash */
-		address = *(DWORD*)(address + offsets[i]);
+		address = *(SIZE_T*)(address + offsets[i]);
 	}
 
 	if (!address)
 		return 0;
 
-	return (DWORD)address + offsets[offsetCount - 1];
+	return (SIZE_T) address + offsets[offsetCount - 1];
 }
 
 VOID
 HCAPI
-HcInternalMemoryWrite(PVOID pAddress, DWORD dwLen, BYTE* ptrWrite)
+HcInternalMemoryWrite(PVOID pAddress, SIZE_T dwLen, BYTE* ptrWrite)
 {
 	DWORD dwProtection;
 
@@ -2518,7 +2386,7 @@ HcInternalMemoryWrite(PVOID pAddress, DWORD dwLen, BYTE* ptrWrite)
 
 VOID
 HCAPI
-HcInternalMemoryNop(PVOID pAddress, DWORD dwLen)
+HcInternalMemoryNop(PVOID pAddress, SIZE_T dwLen)
 {
 	DWORD dwProtection;
 
@@ -2532,22 +2400,22 @@ HcInternalMemoryNop(PVOID pAddress, DWORD dwLen)
 	VirtualProtect(pAddress, dwLen, dwProtection, &dwProtection);
 }
 
-DWORD
+SIZE_T
 HCAPI
 HcInternalPatternFind(const char* pattern, const char* mask, HC_MODULE_INFORMATION module)
 {
 	/* specifies where the function will start searching from */
-	DWORD base = module.Base;
+	SIZE_T base = module.Base;
 
 	/* specifies where the function will end searching */
-	DWORD size = module.Size;
+	SIZE_T size = module.Size;
 
 	/* loop through the specified module */
-	for (DWORD retAddress = base; retAddress < base + size - strlen(mask); retAddress++)
+	for (SIZE_T retAddress = base; retAddress < base + size - strlen(mask); retAddress++)
 	{
 		if (*(BYTE*)retAddress == (pattern[0] & 0xff) || mask[0] == '?')
 		{
-			DWORD startSearch = retAddress;
+			SIZE_T startSearch = retAddress;
 			for (int i = 0; mask[i] != '\0'; i++, startSearch++)
 			{
 				/* next */
@@ -2578,7 +2446,7 @@ HCAPI
 HcPathLocalDirectory()
 {
 	char* module = HcPathMainModule();
-	int index = HcStringCharIndex(module, '\\');
+	SIZE_T index = HcStringCharIndex(module, '\\');
 	char* retn = (char*)malloc(MAX_PATH);
 	HcStringSubtract(module, retn, 0, index);
 	free(module);

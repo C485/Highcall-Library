@@ -22,11 +22,11 @@ HMODULE
 HCAPI
 HcGetModuleHandle(LPCSTR lpModuleName);
 
-DWORD
+SIZE_T
 HCAPI
 HcGetProcedureAddress(HANDLE hModule, LPCSTR lpProcedureName);
 
-DWORD
+SIZE_T
 HCAPI
 HcGetProcedureAddress(HANDLE hModule, LPCWSTR lpProcedureName);
 
@@ -42,10 +42,6 @@ VOID
 HCAPI
 HcCloseHandle(HANDLE hObject);
 
-DWORD
-HCAPI
-HcSyscallForwardPtr();
-
 BOOL
 HCAPI
 HcStringIsBad(LPCSTR lpcStr);
@@ -56,21 +52,21 @@ HcStringIsBad(LPCWSTR lpcStr);
 
 LPSTR*
 HCAPI
-HcStringSplit(LPSTR lpStr, const char cDelimiter, PDWORD pdwCount);
+HcStringSplit(LPSTR lpStr, const char cDelimiter, PSIZE_T pdwCount);
 
 VOID
 HCAPI
-HcStringSplitToIntArray(LPSTR lpStr, const char delim, int* pArray, PDWORD dwCount);
+HcStringSplitToIntArray(LPSTR lpStr, const char delim, int* pArray, PSIZE_T dwCount);
 
 VOID
 HCAPI
-HcStringIntToStringArray(int pIntArray[], DWORD dwCountToRead, LPSTR* lpOutStringArray);
+HcStringIntToStringArray(int pIntArray[], SIZE_T dwCountToRead, LPSTR* lpOutStringArray);
 
 VOID
 HCAPI
-HcStringSubtract(LPCSTR lpStr, LPSTR lpOutStr, DWORD dwIndex, DWORD dwEndIndex, size_t lpSize = 256);
+HcStringSubtract(LPCSTR lpStr, LPSTR lpOutStr, SIZE_T dwIndex, SIZE_T dwEndIndex, size_t lpSize = 256);
 
-DWORD
+SIZE_T
 HCAPI
 HcStringCharIndex(LPCSTR lpStr, char delim);
 
@@ -104,7 +100,7 @@ HcStringEqual(LPCWSTR lpString1, LPCWSTR lpString2, BOOLEAN CaseInSensitive);
 
 DWORD
 HCAPI
-HcRVAToFileOffset(PIMAGE_NT_HEADERS pImageHeader, DWORD RVA);
+HcRVAToFileOffset(PIMAGE_NT_HEADERS pImageHeader, SIZE_T RVA);
 
 DWORD
 HCAPI
@@ -114,43 +110,39 @@ DWORD
 HCAPI
 HcExportToFileOffset(HMODULE hModule, LPCWSTR lpExportName);
 
-size_t
+SIZE_T
 HCAPI
-HcReadFileModule(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, size_t t_Count);
+HcReadFileModule(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dwCount);
 
-size_t
+SIZE_T
 HCAPI
-HcReadFileModule(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, size_t t_Count);
-
-DWORD
-HCAPI
-HcSyscallForwardPtr();
+HcReadFileModule(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD dwCount);
 
 HANDLE
 HCAPI
-HcProcessOpen(DWORD dwProcessId, ACCESS_MASK DesiredAccess);
+HcProcessOpen(SIZE_T dwProcessId, ACCESS_MASK DesiredAccess);
 
 BOOL
 HCAPI
 HcProcessFree(IN HANDLE hProcess,
 	IN LPVOID lpAddress,
 	IN SIZE_T dwSize,
-	IN DWORD dwFreeType);
+	IN ULONG dwFreeType);
 
 LPVOID
 HCAPI
 HcProcessAllocate(IN HANDLE hProcess,
 	IN LPVOID lpAddress,
 	IN SIZE_T dwSize,
-	IN DWORD flAllocationType,
-	IN DWORD flProtect);
+	IN ULONG flAllocationType,
+	IN ULONG flProtect);
 
 BOOL
 HCAPI
 HcProcessWriteMemory(HANDLE hProcess,
 	PVOID lpBaseAddress,
 	CONST VOID* lpBuffer,
-	SIZE_T nSize,
+	ULONG nSize,
 	PSIZE_T lpNumberOfBytesWritten);
 
 BOOL
@@ -191,10 +183,6 @@ HcProcessQueryModules(HANDLE hProcess,
 	HC_MODULE_CALLBACK_EVENT hcmCallback,
 	LPARAM lParam);
 
-SIZE_T
-HCAPI
-HcGetProcessListSize();
-
 BOOL
 HCAPI
 HcQueryProcessesByName(LPCWSTR lpProcessName,
@@ -215,7 +203,7 @@ HcProcessReady(HANDLE hProcess);
 
 BOOLEAN
 HCAPI
-HcProcessReady(DWORD dwProcessId);
+HcProcessReady(SIZE_T dwProcessId);
 
 BOOLEAN
 HCAPI
@@ -228,7 +216,7 @@ HcProcessSuspend(HANDLE hProcess);
 
 BOOLEAN
 HCAPI
-HcProcessSuspend(DWORD dwProcessId);
+HcProcessSuspend(SIZE_T dwProcessId);
 
 BOOLEAN
 HCAPI
@@ -236,45 +224,45 @@ HcProcessResume(HANDLE hProcess);
 
 BOOLEAN
 HCAPI
-HcProcessResume(DWORD dwProcessId);
+HcProcessResume(SIZE_T dwProcessId);
 
 mem_result
 HCAPI
-HcInternalMemoryTest(DWORD dwBaseAddress, DWORD dwBufferLength);
+HcInternalMemoryTest(SIZE_T dwBaseAddress, SIZE_T dwBufferLength);
 
 mem_result
 HCAPI
-HcInternalMemoryTest(DWORD dwBaseAddress, DWORD* pdwOffsets, DWORD dwOffsetCount, DWORD dwBufferLength);
+HcInternalMemoryTest(SIZE_T dwBaseAddress, SIZE_T* pdwOffsets, SIZE_T dwOffsetCount, SIZE_T dwBufferLength);
 
 LPCSTR
 HCAPI
-HcInternalReadString(DWORD memAddress, unsigned int* ptrOffsets, unsigned int offsetCount);
+HcInternalReadString(SIZE_T memAddress, unsigned int* ptrOffsets, unsigned int offsetCount);
 
 LPCSTR
 HCAPI
-HcInternalReadString(DWORD memAddress);
+HcInternalReadString(SIZE_T memAddress);
+
+SIZE_T
+HCAPI
+HcInternalReadInt(SIZE_T memAddress, SIZE_T* ptrOffsets, SIZE_T offsetCount);
 
 int
 HCAPI
-HcInternalReadInt(DWORD memAddress, unsigned int* ptrOffsets, unsigned int offsetCount);
+HcInternalReadInt(SIZE_T baseAddress);
 
-int
+SIZE_T
 HCAPI
-HcInternalReadInt(DWORD baseAddress);
-
-DWORD
-HCAPI
-HcInternalLocatePointer(DWORD baseAddress, DWORD* offsets, unsigned int offsetCount);
+HcInternalLocatePointer(SIZE_T baseAddress, SIZE_T* offsets, unsigned int offsetCount);
 
 VOID
 HCAPI
-HcInternalMemoryWrite(PVOID pAddress, DWORD dwLen, BYTE* ptrWrite);
+HcInternalMemoryWrite(PVOID pAddress, SIZE_T dwLen, BYTE* ptrWrite);
 
 VOID
 HCAPI
-HcInternalMemoryNop(PVOID pAddress, DWORD dwLen);
+HcInternalMemoryNop(PVOID pAddress, SIZE_T dwLen);
 
-DWORD
+SIZE_T
 HCAPI
 HcInternalPatternFind(const char* pattern, const char* mask, HC_MODULE_INFORMATION module);
 

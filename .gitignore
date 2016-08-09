@@ -1,6 +1,9 @@
-Highcall Library.VC
 Release/*
 Debug/*
 .vs/*
 Highcall Library/Debug
 Highcall Library/Release
+*.db
+Highcall Library.VC.VC.opendb
+x64
+Highcall Library/x64

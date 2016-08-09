@@ -1,15 +1,8 @@
 #pragma once
 #include "ntdef.h"
-#include <windows.h>
-
-typedef LONG NTSTATUS;
-typedef LONG KPRIORITY;
-
-typedef struct _CLIENT_ID
-{
-	HANDLE UniqueProcess;
-	HANDLE UniqueThread;
-} CLIENT_ID, *PCLIENT_ID;
+#include <Windows.h>
+#include "minntdef.h"
+#include "ntpebteb.h"
 
 typedef enum _KTHREAD_STATE
 {
@@ -71,20 +64,6 @@ typedef enum _SECTION_INHERIT {
 	ViewUnmap = 2
 } SECTION_INHERIT;
 
-typedef struct _UNICODE_STRING
-{
-	USHORT Length;
-	USHORT MaximumLength;
-	PWSTR  Buffer;
-} UNICODE_STRING, *PUNICODE_STRING;
-
-typedef struct _STRING
-{
-	USHORT Length;
-	USHORT MaximumLength;
-	PCHAR  Buffer;
-} ANSI_STRING, *PANSI_STRING;
-
 typedef struct _SYSTEM_SESSION_PROCESS_INFORMATION
 {
 	ULONG SessionId;
@@ -105,21 +84,6 @@ typedef struct _LDT_INFORMATION
 	LDT_ENTRY LdtEntries[1];
 } PROCESS_LDT_INFORMATION, *PPROCESS_LDT_INFORMATION;
 
-typedef struct _SYSTEM_THREAD_INFORMATION
-{
-	LARGE_INTEGER KernelTime;
-	LARGE_INTEGER UserTime;
-	LARGE_INTEGER CreateTime;
-	ULONG WaitTime;
-	PVOID StartAddress;
-	CLIENT_ID ClientId;
-	KPRIORITY Priority;
-	LONG BasePriority;
-	ULONG ContextSwitches;
-	ULONG ThreadState;
-	ULONG WaitReason;
-} SYSTEM_THREAD_INFORMATION, *PSYSTEM_THREAD_INFORMATION;
-
 typedef struct _SYSTEM_EXTENDED_THREAD_INFORMATION
 {
 	SYSTEM_THREAD_INFORMATION ThreadInfo;
@@ -131,122 +95,6 @@ typedef struct _SYSTEM_EXTENDED_THREAD_INFORMATION
 	ULONG_PTR Reserved3;
 	ULONG_PTR Reserved4;
 } SYSTEM_EXTENDED_THREAD_INFORMATION, *PSYSTEM_EXTENDED_THREAD_INFORMATION;
-
-typedef struct _SYSTEM_PROCESS_INFORMATION
-{
-	ULONG NextEntryOffset;
-	ULONG NumberOfThreads;
-	LARGE_INTEGER SpareLi1;
-	LARGE_INTEGER SpareLi2;
-	LARGE_INTEGER SpareLi3;
-	LARGE_INTEGER CreateTime;
-	LARGE_INTEGER UserTime;
-	LARGE_INTEGER KernelTime;
-	UNICODE_STRING ImageName;
-	KPRIORITY BasePriority;
-	HANDLE UniqueProcessId;
-	HANDLE InheritedFromUniqueProcessId;
-	ULONG HandleCount;
-	ULONG SessionId;
-	ULONG_PTR PageDirectoryBase;
-	SIZE_T PeakVirtualSize;
-	SIZE_T VirtualSize;
-	ULONG PageFaultCount;
-	SIZE_T PeakWorkingSetSize;
-	SIZE_T WorkingSetSize;
-	SIZE_T QuotaPeakPagedPoolUsage;
-	SIZE_T QuotaPagedPoolUsage;
-	SIZE_T QuotaPeakNonPagedPoolUsage;
-	SIZE_T QuotaNonPagedPoolUsage;
-	SIZE_T PagefileUsage;
-	SIZE_T PeakPagefileUsage;
-	SIZE_T PrivatePageCount;
-	LARGE_INTEGER ReadOperationCount;
-	LARGE_INTEGER WriteOperationCount;
-	LARGE_INTEGER OtherOperationCount;
-	LARGE_INTEGER ReadTransferCount;
-	LARGE_INTEGER WriteTransferCount;
-	LARGE_INTEGER OtherTransferCount;
-	SYSTEM_THREAD_INFORMATION Threads[1];
-} SYSTEM_PROCESS_INFORMATION, *PSYSTEM_PROCESS_INFORMATION;
-
-typedef struct _PEB_LDR_DATA {
-	ULONG Length;
-	BOOLEAN Initialized;
-	PVOID SsHandle;
-	LIST_ENTRY InLoadOrderModuleList;
-	LIST_ENTRY InMemoryOrderModuleList;
-	LIST_ENTRY InInitializationOrderModuleList;
-
-} PEB_LDR_DATA, *PPEB_LDR_DATA;
-
-typedef struct _PEB
-{
-	BOOLEAN InheritedAddressSpace;
-	BOOLEAN ReadImageFileExecOptions;
-	BOOLEAN BeingDebugged;
-	BOOLEAN Spare;
-	HANDLE Mutant;
-	PVOID ImageBaseAddress;
-	PPEB_LDR_DATA LoaderData;
-	DWORD ProcessParameters;
-	PVOID SubSystemData;
-	PVOID ProcessHeap;
-	PVOID FastPebLock;
-	DWORD FastPebLockRoutine;;
-	DWORD FastPebUnlockRoutine;
-	ULONG EnvironmentUpdateCount;
-	PVOID* KernelCallbackTable;
-	PVOID EventLogSection;
-	PVOID EventLog;
-	DWORD FreeList;
-	ULONG TlsExpansionCounter;
-	PVOID TlsBitmap;
-	ULONG TlsBitmapBits[0x2];
-	PVOID ReadOnlySharedMemoryBase;
-	PVOID ReadOnlySharedMemoryHeap;
-	PVOID* ReadOnlyStaticServerData;
-	PVOID AnsiCodePageData;
-	PVOID OemCodePageData;
-	PVOID UnicodeCaseTableData;
-	ULONG NumberOfProcessors;
-	ULONG NtGlobalFlag;
-	BYTE Spare2[0x4];
-	LARGE_INTEGER CriticalSectionTimeout;
-	ULONG HeapSegmentReserve;
-	ULONG HeapSegmentCommit;
-	ULONG HeapDeCommitTotalFreeThreshold;
-	ULONG HeapDeCommitFreeBlockThreshold;
-	ULONG NumberOfHeaps;
-	ULONG MaximumNumberOfHeaps;
-	PVOID* *ProcessHeaps;
-	PVOID GdiSharedHandleTable;
-	PVOID ProcessStarterHelper;
-	PVOID GdiDCAttributeList;
-	PVOID LoaderLock;
-	ULONG OSMajorVersion;
-	ULONG OSMinorVersion;
-	ULONG OSBuildNumber;
-	ULONG OSPlatformId;
-	ULONG ImageSubSystem;
-	ULONG ImageSubSystemMajorVersion;
-	ULONG ImageSubSystemMinorVersion;
-	ULONG GdiHandleBuffer[0x22];
-	ULONG PostProcessInitRoutine;
-	ULONG TlsExpansionBitmap;
-	BYTE TlsExpansionBitmapBits[0x80];
-	ULONG SessionId;
-} PEB, *PPEB;
-
-typedef struct _PROCESS_BASIC_INFORMATION
-{
-	NTSTATUS ExitStatus;
-	PPEB PebBaseAddress;
-	ULONG_PTR AffinityMask;
-	KPRIORITY BasePriority;
-	HANDLE UniqueProcessId;
-	HANDLE InheritedFromUniqueProcessId;
-} PROCESS_BASIC_INFORMATION, *PPROCESS_BASIC_INFORMATION;
 
 typedef struct _PROCESS_EXTENDED_BASIC_INFORMATION
 {
@@ -299,15 +147,6 @@ typedef struct _DBGUI_WAIT_STATE_CHANGE
 	//} StateInfo;
 } DBGUI_WAIT_STATE_CHANGE, *PDBGUI_WAIT_STATE_CHANGE;
 
-
-
-typedef struct _GDI_TEB_BATCH
-{
-	ULONG  Offset;
-	HANDLE HDC;
-	ULONG  Buffer[0x136];
-} GDI_TEB_BATCH;
-
 typedef struct _RTL_ACTIVATION_CONTEXT_STACK_FRAME
 {
 	struct _RTL_ACTIVATION_CONTEXT_STACK_FRAME *Previous;
@@ -322,68 +161,6 @@ typedef struct _ACTIVATION_CONTEXT_STACK
 	RTL_ACTIVATION_CONTEXT_STACK_FRAME *ActiveFrame;
 	LIST_ENTRY                          FrameListCache;
 } ACTIVATION_CONTEXT_STACK, *PACTIVATION_CONTEXT_STACK;
-
-typedef struct _TEB
-{
-	NT_TIB          Tib;                        /* 000 */
-	PVOID           EnvironmentPointer;         /* 01c */
-	CLIENT_ID       ClientId;                   /* 020 */
-	PVOID           ActiveRpcHandle;            /* 028 */
-	PVOID           ThreadLocalStoragePointer;  /* 02c */
-	PVOID           Peb;                        /* 030 */
-	ULONG           LastErrorValue;             /* 034 */
-	ULONG           CountOfOwnedCriticalSections;/* 038 */
-	PVOID           CsrClientThread;            /* 03c */
-	PVOID           Win32ThreadInfo;            /* 040 */
-	ULONG           Win32ClientInfo[31];        /* 044 used for user32 private data in Wine */
-	PVOID           WOW32Reserved;              /* 0c0 */
-	ULONG           CurrentLocale;              /* 0c4 */
-	ULONG           FpSoftwareStatusRegister;   /* 0c8 */
-	PVOID           SystemReserved1[54];        /* 0cc used for kernel32 private data in Wine */
-	PVOID           Spare1;                     /* 1a4 */
-	LONG            ExceptionCode;              /* 1a8 */
-	PACTIVATION_CONTEXT_STACK ActivationContextStackPointer; /* 1a8/02c8 */
-	BYTE            SpareBytes1[36];            /* 1ac */
-	PVOID           SystemReserved2[10];        /* 1d4 used for ntdll private data in Wine */
-	PVOID			GdiTebBatch;                /* 1fc */
-	ULONG           gdiRgn;                     /* 6dc */
-	ULONG           gdiPen;                     /* 6e0 */
-	ULONG           gdiBrush;                   /* 6e4 */
-	CLIENT_ID       RealClientId;               /* 6e8 */
-	HANDLE          GdiCachedProcessHandle;     /* 6f0 */
-	ULONG           GdiClientPID;               /* 6f4 */
-	ULONG           GdiClientTID;               /* 6f8 */
-	PVOID           GdiThreadLocaleInfo;        /* 6fc */
-	PVOID           UserReserved[5];            /* 700 */
-	PVOID           glDispatchTable[280];        /* 714 */
-	ULONG           glReserved1[26];            /* b74 */
-	PVOID           glReserved2;                /* bdc */
-	PVOID           glSectionInfo;              /* be0 */
-	PVOID           glSection;                  /* be4 */
-	PVOID           glTable;                    /* be8 */
-	PVOID           glCurrentRC;                /* bec */
-	PVOID           glContext;                  /* bf0 */
-	ULONG           LastStatusValue;            /* bf4 */
-	UNICODE_STRING  StaticUnicodeString;        /* bf8 used by advapi32 */
-	WCHAR           StaticUnicodeBuffer[261];   /* c00 used by advapi32 */
-	PVOID           DeallocationStack;          /* e0c */
-	PVOID           TlsSlots[64];               /* e10 */
-	LIST_ENTRY      TlsLinks;                   /* f10 */
-	PVOID           Vdm;                        /* f18 */
-	PVOID           ReservedForNtRpc;           /* f1c */
-	PVOID           DbgSsReserved[2];           /* f20 */
-	ULONG           HardErrorDisabled;          /* f28 */
-	PVOID           Instrumentation[16];        /* f2c */
-	PVOID           WinSockData;                /* f6c */
-	ULONG           GdiBatchCount;              /* f70 */
-	ULONG           Spare2;                     /* f74 */
-	ULONG           Spare3;                     /* f78 */
-	ULONG           Spare4;                     /* f7c */
-	PVOID           ReservedForOle;             /* f80 */
-	ULONG           WaitingOnLoaderLock;        /* f84 */
-	PVOID           Reserved5[3];               /* f88 */
-	PVOID          *TlsExpansionSlots;          /* f94 */
-} TEB, *PTEB;
 
 typedef struct _THREAD_BASIC_INFORMATION
 {
@@ -456,35 +233,6 @@ typedef struct _RTL_PROCESS_MODULES
 	ULONG NumberOfModules;
 	RTL_PROCESS_MODULE_INFORMATION Modules[1];
 } RTL_PROCESS_MODULES, *PRTL_PROCESS_MODULES;
-
-typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO
-{
-	USHORT UniqueProcessId;
-	USHORT CreatorBackTraceIndex;
-	UCHAR ObjectTypeIndex;
-	UCHAR HandleAttributes;
-	USHORT HandleValue;
-	PVOID Object;
-	ULONG GrantedAccess;
-} SYSTEM_HANDLE_TABLE_ENTRY_INFO, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO;
-
-typedef struct _SYSTEM_HANDLE_INFORMATION
-{
-	ULONG NumberOfHandles;
-	SYSTEM_HANDLE_TABLE_ENTRY_INFO Handles[1];
-} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;
-
-typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX
-{
-	PVOID Object;
-	ULONG_PTR UniqueProcessId;
-	ULONG_PTR HandleValue;
-	ULONG GrantedAccess;
-	USHORT CreatorBackTraceIndex;
-	USHORT ObjectTypeIndex;
-	ULONG  HandleAttributes;
-	ULONG  Reserved;
-} SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO_EX;
 
 typedef struct _SYSTEM_HANDLE_INFORMATION_EX
 {
@@ -1167,8 +915,3 @@ typedef enum _WINDOWINFOCLASS
 	WindowIsHung = 5 //BOOL
 
 } WINDOWINFOCLASS;
-
-__inline PPEB NTAPI NtCurrentPeb()
-{
-	return (PPEB)__readfsdword(0x30);
-}

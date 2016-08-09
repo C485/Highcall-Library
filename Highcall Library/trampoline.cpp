@@ -1,7 +1,18 @@
 #include "Trampoline.h"
 #include "hcapi.h"
 #include "global.h"
-
+HANDLE WINAPI HcCreateRemoteThread(
+	_In_  HANDLE                 hProcess,
+	_In_  LPSECURITY_ATTRIBUTES  lpThreadAttributes,
+	_In_  SIZE_T                 dwStackSize,
+	_In_  LPTHREAD_START_ROUTINE lpStartAddress,
+	_In_  LPVOID                 lpParameter,
+	_In_  DWORD                  dwCreationFlags,
+	_Out_ LPDWORD                lpThreadId
+) {
+	return (HANDLE)1;
+}
+#ifndef _WIN64
 static TrampolineJump tjGetWindowThreadProcessId = HcGetProcedureAddress(USER32, "GetWindowThreadProcessId") + 5;
 __declspec(naked) BOOL WINAPI HcWindowThreadProcessId(_In_ HWND hWnd, _Out_opt_ LPDWORD lpdwProcessId)
 {
@@ -93,3 +104,4 @@ __declspec(naked) HANDLE WINAPI HcCreateRemoteThread(
 		jmp[tjCreateRemoteThread]
 	}
 }
+#endif

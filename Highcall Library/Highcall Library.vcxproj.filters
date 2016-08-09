@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Assembly Files">
+      <UniqueIdentifier>{f7067562-b48b-409e-9406-868fb6ab2563}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global.cpp">
@@ -56,5 +59,61 @@
     <ClInclude Include="hctype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="minntdef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="QuerySystemInformation.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="OpenProcess.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="OpenProcessToken.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="QueryInformationToken.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="ResumeProcess.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="SuspendProcess.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="AllocateVirtualMemory.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="FreeVirtualMemory.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="Close.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="QueryInformationProcess.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="WriteVirtualMemory.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="ReadVirtualMemory.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="ResumeThread.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="QueryInformationThread.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="CreateThread.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="FlushInstructionCache.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="ProtectVirtualMemory.S">
+      <Filter>Assembly Files</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
