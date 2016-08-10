@@ -52,6 +52,8 @@ static HIGHCALL_STATUS HCAPI HcInitializeImports(VOID)
 	RtlFreeActivationContextStack = (t_RtlFreeActivationContextStack)HcGetProcedureAddress(NTDLL, "RtlFreeActivationContextStack");
 	RtlFreeThreadActivationContextStack = (t_RtlFreeThreadActivationContextStack)HcGetProcedureAddress(NTDLL, "RtlFreeThreadActivationContextStack");
 	RtlActivateActivationContextEx = (t_RtlActivateActivationContextEx)HcGetProcedureAddress(NTDLL, "RtlActivateActivationContextEx");
+
+	return HIGHCALL_SUCCESS;
 }
 
 #pragma endregion

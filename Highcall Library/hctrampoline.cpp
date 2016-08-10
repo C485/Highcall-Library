@@ -135,7 +135,7 @@ PVOID HCAPI HcTrampolineOriginal(PBYTE lpBaseAddress, DWORD dwMinimumSize)
 
 #ifndef _WIN64
 	/* Relative jump back */
-	*(DWORD*)(Jump + SizeOfOpcode) = (DWORD)((SIZE_T)lpBaseAddress - (SIZE_T) Recreated - SizeOfFunction + dwSizeToRestore);
+	*(DWORD*)(Jump + SizeOfOpcode) = (DWORD)((SIZE_T)lpBaseAddress - (SIZE_T) Recreated - SizeOfFunction + dwRequiredSize);
 #else
 	*(SIZE_T*)&Jump[3] = (SIZE_T)lpBaseAddress + dwRequiredSize;
 #endif

@@ -57,7 +57,7 @@ extern "C" NTSTATUS HcOpenProcess(_Out_ PHANDLE ProcessHandle,
 );
 extern "C" NTSTATUS HcProtectVirtualMemory(IN HANDLE ProcessHandle,
 	IN OUT PVOID *BaseAddress,
-	IN OUT PULONG NumberOfBytesToProtect,
+	IN OUT PSIZE_T NumberOfBytesToProtect,
 	IN ULONG NewAccessProtection,
 	OUT PULONG OldAccessProtection);
 

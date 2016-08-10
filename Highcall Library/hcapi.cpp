@@ -682,7 +682,7 @@ HcRVAToFileOffset(PIMAGE_NT_HEADERS pImageHeader, SIZE_T RVA)
 			{
 				RVA -= sectionHeader->VirtualAddress;
 				RVA += sectionHeader->PointerToRawData;
-				return RVA;
+				return (DWORD) RVA;
 			}
 		}
 	}
@@ -1183,7 +1183,7 @@ HcProcessWriteMemory(HANDLE hProcess,
 {
 	NTSTATUS Status;
 	ULONG OldValue;
-	ULONG RegionSize;
+	SIZE_T RegionSize;
 	PVOID Base;
 	BOOLEAN UnProtect;
 
@@ -1198,6 +1198,7 @@ HcProcessWriteMemory(HANDLE hProcess,
 		PAGE_EXECUTE_READWRITE,
 		&OldValue);
 
+	SetLastError(Status);
 	if (NT_SUCCESS(Status))
 	{
 		/* Check if we are unprotecting */
@@ -2179,11 +2180,13 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 		return FALSE;
 	}
 
+	SIZE_T written;
+
 	if (!HcProcessWriteMemory(hProcess,
 		ImageBuffer,
 		Buffer,
 		pHeaderNt->OptionalHeader.SizeOfHeaders,
-		NULL))
+		&written))
 	{
 		HcProcessFree(hProcess, ImageBuffer, 0, MEM_RELEASE);
 		VirtualFree(Buffer, 0, MEM_RELEASE);
@@ -2281,11 +2284,6 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 
 	HcCloseHandle(hThread);
 	HcProcessFree(hProcess, LoaderBuffer, 0, MEM_RELEASE);
-
-	if (pHeaderNt->OptionalHeader.AddressOfEntryPoint)
-	{
-		//printf("\nDLL entry point: %#x\n", ((SIZE_T)ImageBuffer + pHeaderNt->OptionalHeader.AddressOfEntryPoint));
-	}
 
 	VirtualFree(Buffer, 0, MEM_RELEASE);
 	return TRUE;
