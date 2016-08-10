@@ -20,6 +20,7 @@ Supports x86/x64 compilers.
   * Various string helpers
   * Send window messages
   * Pattern searching
+  * Detoured function calling
   
 
 * ###Features (64bit):
@@ -34,4 +35,5 @@ Supports x86/x64 compilers.
   * Read module from disk
   * Various string helpers
   * Pattern searching
+  * Detoured function calling
 
