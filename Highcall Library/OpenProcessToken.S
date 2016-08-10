@@ -1,9 +1,9 @@
 ; OpenProcessTokenToken
 
-EXTERNDEF sciOpenProcessToken:DWORD
-
 IFDEF RAX
 ; 64bit
+
+EXTERNDEF sciOpenProcessToken:DWORD
    
 .DATA
 .CODE
@@ -17,6 +17,8 @@ HcOpenProcessToken ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciOpenProcessToken:DWORD
 
 .586              
 .MODEL FLAT, C   

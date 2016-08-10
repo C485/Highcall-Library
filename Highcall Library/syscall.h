@@ -104,3 +104,11 @@ extern "C" NTSTATUS HcQuerySystemInformation(
 
 extern "C" SyscallIndex sciClose;
 extern "C" NTSTATUS HcClose(HANDLE hObject);
+
+extern "C" SyscallIndex sciQueryVirtualMemory;
+extern "C" NTSTATUS HcQueryVirtualMemory(IN HANDLE ProcessHandle,
+	IN PVOID BaseAddress,
+	IN MEMORY_INFORMATION_CLASS MemoryInformationClass,
+	OUT PVOID MemoryInformation,
+	IN SIZE_T MemoryInformationLength,
+	OUT PSIZE_T ReturnLength);

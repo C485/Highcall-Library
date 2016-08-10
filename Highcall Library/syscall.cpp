@@ -18,3 +18,4 @@ SyscallIndex sciWriteVirtualMemory = HcSyscallIndex("NtWriteVirtualMemory");
 SyscallIndex sciQueryInformationProcess = HcSyscallIndex("NtQueryInformationProcess");
 SyscallIndex sciQuerySystemInformation = HcSyscallIndex("NtQuerySystemInformation");
 SyscallIndex sciClose = HcSyscallIndex("NtClose");
+SyscallIndex sciQueryVirtualMemory = HcSyscallIndex("NtQueryVirtualMemory");

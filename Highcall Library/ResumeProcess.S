@@ -1,10 +1,10 @@
 ; ResumeProcess
 
-EXTERNDEF sciResumeProcess:DWORD
-
 IFDEF RAX
 ; 64bit
    
+EXTERNDEF sciResumeProcess:DWORD
+
 .DATA
 .CODE
  
@@ -17,6 +17,8 @@ HcResumeProcess ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciResumeProcess:DWORD
 
 .586              
 .MODEL FLAT, C   

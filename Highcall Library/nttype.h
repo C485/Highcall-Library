@@ -2,7 +2,6 @@
 #include "ntdef.h"
 #include <Windows.h>
 #include "minntdef.h"
-#include "ntpebteb.h"
 
 typedef enum _KTHREAD_STATE
 {
@@ -171,14 +170,6 @@ typedef struct _THREAD_BASIC_INFORMATION
 	KPRIORITY Priority;
 	LONG BasePriority;
 } THREAD_BASIC_INFORMATION, *PTHREAD_BASIC_INFORMATION;
-
-typedef struct _MEMORY_REGION_INFORMATION
-{
-	PVOID AllocationBase; //Imagebase
-	ULONG AllocationProtect;
-	ULONG RegionType;
-	SIZE_T RegionSize; //Size of image
-} MEMORY_REGION_INFORMATION, *PMEMORY_REGION_INFORMATION;
 
 typedef struct _SECTION_IMAGE_INFORMATION
 {
@@ -703,15 +694,6 @@ typedef enum _FSINFOCLASS
 	FileFsDriverPathInformation, // 9
 	FileFsMaximumInformation
 } FS_INFORMATION_CLASS, *PFS_INFORMATION_CLASS;
-
-typedef enum _MEMORY_INFORMATION_CLASS
-{
-	MemoryBasicInformation,
-	MemoryWorkingSetInformation,
-	MemoryMappedFilenameInformation, //MemorySectionName, UNICODE_STRING, Wrapper: GetMappedFileNameW
-	MemoryRegionInformation, //MemoryBasicVlmInformation, MEMORY_REGION_INFORMATION
-	MemoryWorkingSetExInformation
-} MEMORY_INFORMATION_CLASS;
 
 typedef enum _SECTION_INFORMATION_CLASS
 {

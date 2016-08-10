@@ -1,9 +1,10 @@
 ; QuerySystemInformation
-EXTERNDEF sciQuerySystemInformation:DWORD
 
 IFDEF RAX
 ; 64bit
-   
+
+EXTERNDEF sciQuerySystemInformation:DWORD
+
 .DATA
 .CODE
  
@@ -16,6 +17,8 @@ HcQuerySystemInformation ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciQuerySystemInformation:DWORD
 
 .586              
 .MODEL FLAT, C   

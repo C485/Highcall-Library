@@ -1,10 +1,10 @@
 ; ResumeThread
 
-EXTERNDEF sciResumeThread:DWORD
-
 IFDEF RAX
 ; 64bit
-   
+  
+EXTERNDEF sciResumeThread:DWORD
+ 
 .DATA
 .CODE
  
@@ -17,6 +17,8 @@ HcResumeThread ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciResumeThread:DWORD
 
 .586              
 .MODEL FLAT, C   

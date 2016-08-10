@@ -1,5 +1,5 @@
 #pragma once
-
+#include <windows.h>
 
 typedef HMODULE(WINAPI *pLoadLibraryA)(LPCSTR);
 typedef FARPROC(WINAPI *pGetProcAddress)(HMODULE, LPCSTR);

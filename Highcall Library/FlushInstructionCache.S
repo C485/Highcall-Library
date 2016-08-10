@@ -1,9 +1,9 @@
 ; FlushInstructionCache
 
-EXTERNDEF sciFlushInstructionCache:DWORD
-
 IFDEF RAX
 ; 64bit
+
+EXTERNDEF sciFlushInstructionCache:DWORD
    
 .DATA
 .CODE
@@ -17,6 +17,8 @@ HcFlushInstructionCache ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciFlushInstructionCache:DWORD
 
 .586              
 .MODEL FLAT, C   

@@ -1,10 +1,10 @@
 ; ProtectVirtualMemory
 
-EXTERNDEF sciProtectVirtualMemory:DWORD
-
 IFDEF RAX
 ; 64bit
    
+EXTERNDEF sciProtectVirtualMemory:DWORD
+
 .DATA
 .CODE
  
@@ -17,6 +17,8 @@ HcProtectVirtualMemory ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciProtectVirtualMemory:DWORD
 
 .586              
 .MODEL FLAT, C   

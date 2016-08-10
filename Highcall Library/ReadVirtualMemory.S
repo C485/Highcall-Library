@@ -1,10 +1,10 @@
 ; ReadVirtualMemory
 
-EXTERNDEF sciReadVirtualMemory:DWORD
-
 IFDEF RAX
 ; 64bit
-   
+  
+EXTERNDEF sciReadVirtualMemory:DWORD
+ 
 .DATA
 .CODE
  
@@ -17,6 +17,8 @@ HcReadVirtualMemory ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciReadVirtualMemory:DWORD
 
 .586              
 .MODEL FLAT, C   

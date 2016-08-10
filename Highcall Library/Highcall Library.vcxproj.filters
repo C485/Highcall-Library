@@ -13,8 +13,29 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Assembly Files">
+    <Filter Include="Highcall">
+      <UniqueIdentifier>{a52f2cbd-6011-4529-9da5-7360bf3ae64d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Highcall\Assembly Files">
       <UniqueIdentifier>{f7067562-b48b-409e-9406-868fb6ab2563}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Highcall\Assembly Files\Syscalls">
+      <UniqueIdentifier>{57eee873-6fb5-42d1-ba39-9d41f5c3cadc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Highcall\Define">
+      <UniqueIdentifier>{37f4af91-c150-4896-a202-28c32b5af93e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Highcall\Trampoline">
+      <UniqueIdentifier>{fc46a276-7c3a-41ca-8ab5-5f4418b0bfd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Highcall\Import">
+      <UniqueIdentifier>{4704915b-23bc-4523-b7b1-4f85b43366b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Highcall\Syscall">
+      <UniqueIdentifier>{402cf375-7ea8-42da-a29d-6efad335a469}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Native">
+      <UniqueIdentifier>{0bbbf0ac-5036-4ed2-8f38-e6731a89f10d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -22,98 +43,110 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="hcapi.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="syscall.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Highcall</Filter>
     </ClCompile>
     <ClCompile Include="import.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Highcall\Import</Filter>
+    </ClCompile>
+    <ClCompile Include="syscall.cpp">
+      <Filter>Highcall\Syscall</Filter>
     </ClCompile>
     <ClCompile Include="trampoline.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Highcall\Trampoline</Filter>
+    </ClCompile>
+    <ClCompile Include="HookTrampoline.cpp">
+      <Filter>Highcall\Trampoline</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ntdef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="hcapi.h">
-      <Filter>Header Files</Filter>
+      <Filter>Highcall</Filter>
     </ClInclude>
-    <ClInclude Include="syscall.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="trampoline.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="hcdef.h">
+      <Filter>Highcall\Define</Filter>
     </ClInclude>
     <ClInclude Include="import.h">
-      <Filter>Header Files</Filter>
+      <Filter>Highcall\Import</Filter>
     </ClInclude>
-    <ClInclude Include="nttype.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="syscall.h">
+      <Filter>Highcall\Syscall</Filter>
     </ClInclude>
-    <ClInclude Include="hctype.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="trampoline.h">
+      <Filter>Highcall\Trampoline</Filter>
+    </ClInclude>
+    <ClInclude Include="ntdef.h">
+      <Filter>Native</Filter>
     </ClInclude>
     <ClInclude Include="minntdef.h">
-      <Filter>Header Files</Filter>
+      <Filter>Native</Filter>
+    </ClInclude>
+    <ClInclude Include="nttype.h">
+      <Filter>Native</Filter>
+    </ClInclude>
+    <ClInclude Include="HookTrampoline.h">
+      <Filter>Highcall\Trampoline</Filter>
+    </ClInclude>
+    <ClInclude Include="hctype.h">
+      <Filter>Highcall\Define</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="QuerySystemInformation.S">
-      <Filter>Assembly Files</Filter>
-    </MASM>
-    <MASM Include="OpenProcess.S">
-      <Filter>Assembly Files</Filter>
-    </MASM>
-    <MASM Include="OpenProcessToken.S">
-      <Filter>Assembly Files</Filter>
-    </MASM>
-    <MASM Include="QueryInformationToken.S">
-      <Filter>Assembly Files</Filter>
-    </MASM>
-    <MASM Include="ResumeProcess.S">
-      <Filter>Assembly Files</Filter>
-    </MASM>
-    <MASM Include="SuspendProcess.S">
-      <Filter>Assembly Files</Filter>
-    </MASM>
     <MASM Include="AllocateVirtualMemory.S">
-      <Filter>Assembly Files</Filter>
-    </MASM>
-    <MASM Include="FreeVirtualMemory.S">
-      <Filter>Assembly Files</Filter>
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
     </MASM>
     <MASM Include="Close.S">
-      <Filter>Assembly Files</Filter>
-    </MASM>
-    <MASM Include="QueryInformationProcess.S">
-      <Filter>Assembly Files</Filter>
-    </MASM>
-    <MASM Include="WriteVirtualMemory.S">
-      <Filter>Assembly Files</Filter>
-    </MASM>
-    <MASM Include="ReadVirtualMemory.S">
-      <Filter>Assembly Files</Filter>
-    </MASM>
-    <MASM Include="ResumeThread.S">
-      <Filter>Assembly Files</Filter>
-    </MASM>
-    <MASM Include="QueryInformationThread.S">
-      <Filter>Assembly Files</Filter>
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
     </MASM>
     <MASM Include="CreateThread.S">
-      <Filter>Assembly Files</Filter>
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
     </MASM>
     <MASM Include="FlushInstructionCache.S">
-      <Filter>Assembly Files</Filter>
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
+    </MASM>
+    <MASM Include="FreeVirtualMemory.S">
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
+    </MASM>
+    <MASM Include="OpenProcess.S">
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
+    </MASM>
+    <MASM Include="OpenProcessToken.S">
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
     </MASM>
     <MASM Include="ProtectVirtualMemory.S">
-      <Filter>Assembly Files</Filter>
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
+    </MASM>
+    <MASM Include="QueryInformationProcess.S">
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
+    </MASM>
+    <MASM Include="QueryInformationThread.S">
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
+    </MASM>
+    <MASM Include="QueryInformationToken.S">
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
+    </MASM>
+    <MASM Include="QuerySystemInformation.S">
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
+    </MASM>
+    <MASM Include="ReadVirtualMemory.S">
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
+    </MASM>
+    <MASM Include="ResumeProcess.S">
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
+    </MASM>
+    <MASM Include="ResumeThread.S">
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
+    </MASM>
+    <MASM Include="SuspendProcess.S">
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
+    </MASM>
+    <MASM Include="WriteVirtualMemory.S">
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
+    </MASM>
+    <MASM Include="QueryVirtualMemory.S">
+      <Filter>Highcall\Assembly Files\Syscalls</Filter>
     </MASM>
   </ItemGroup>
 </Project>

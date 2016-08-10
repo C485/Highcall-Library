@@ -1,10 +1,10 @@
 ; SuspendProcess
 
-EXTERNDEF sciSuspendProcess:DWORD
-
 IFDEF RAX
 ; 64bit
    
+EXTERNDEF sciSuspendProcess:DWORD
+
 .DATA
 .CODE
  
@@ -17,6 +17,8 @@ HcSuspendProcess ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciSuspendProcess:DWORD
 
 .586              
 .MODEL FLAT, C   

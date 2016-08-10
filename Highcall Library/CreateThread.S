@@ -1,9 +1,9 @@
 ; CreateThread
 
-EXTERNDEF sciCreateThread:DWORD
-
 IFDEF RAX
 ; 64bit
+
+EXTERNDEF sciCreateThread:DWORD
    
 .DATA
 .CODE
@@ -17,6 +17,8 @@ HcCreateThread ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciCreateThread:DWORD
 
 .586              
 .MODEL FLAT, C   

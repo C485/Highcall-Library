@@ -111,7 +111,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -124,6 +124,7 @@
   <ItemGroup>
     <ClCompile Include="global.cpp" />
     <ClCompile Include="hcapi.cpp" />
+    <ClCompile Include="HookTrampoline.cpp" />
     <ClCompile Include="import.cpp" />
     <ClCompile Include="syscall.cpp" />
     <ClCompile Include="trampoline.cpp" />
@@ -131,7 +132,9 @@
   <ItemGroup>
     <ClInclude Include="global.h" />
     <ClInclude Include="hcapi.h" />
+    <ClInclude Include="hcdef.h" />
     <ClInclude Include="hctype.h" />
+    <ClInclude Include="HookTrampoline.h" />
     <ClInclude Include="import.h" />
     <ClInclude Include="ntdef.h" />
     <ClInclude Include="minntdef.h" />
@@ -217,6 +220,11 @@
   </ItemGroup>
   <ItemGroup>
     <MASM Include="ProtectVirtualMemory.S">
+      <FileType>Document</FileType>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="QueryVirtualMemory.S">
       <FileType>Document</FileType>
     </MASM>
   </ItemGroup>

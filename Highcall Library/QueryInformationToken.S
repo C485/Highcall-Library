@@ -1,10 +1,10 @@
 ; QueryInformationToken
 
-EXTERNDEF sciQueryInformationToken:DWORD
-
 IFDEF RAX
 ; 64bit
    
+EXTERNDEF sciQueryInformationToken:DWORD
+
 .DATA
 .CODE
  
@@ -17,6 +17,8 @@ HcQueryInformationToken ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciQueryInformationToken:DWORD
 
 .586              
 .MODEL FLAT, C   

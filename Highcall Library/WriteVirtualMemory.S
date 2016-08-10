@@ -1,10 +1,10 @@
 ; WriteVirtualMemory
 
-EXTERNDEF sciWriteVirtualMemory:DWORD
-
 IFDEF RAX
 ; 64bit
    
+EXTERNDEF sciWriteVirtualMemory:DWORD
+
 .DATA
 .CODE
  
@@ -17,6 +17,8 @@ HcWriteVirtualMemory ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciWriteVirtualMemory:DWORD
 
 .586              
 .MODEL FLAT, C   

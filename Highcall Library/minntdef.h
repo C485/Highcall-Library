@@ -455,3 +455,12 @@ typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX
 	ULONG  HandleAttributes;
 	ULONG  Reserved;
 } SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO_EX;
+
+typedef enum _MEMORY_INFORMATION_CLASS
+{
+	MemoryBasicInformation,
+	MemoryWorkingSetInformation,
+	MemoryMappedFilenameInformation, //MemorySectionName, UNICODE_STRING, Wrapper: GetMappedFileNameW
+	MemoryRegionInformation, //MemoryBasicVlmInformation, MEMORY_REGION_INFORMATION
+	MemoryWorkingSetExInformation
+} MEMORY_INFORMATION_CLASS;

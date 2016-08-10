@@ -1,5 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
+/* GetModuleFileName should be replaced */
+
 #include "hcapi.h"
 #include <ctime>
 #include <stdio.h>
@@ -907,6 +909,133 @@ HcReadFileModule(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD dw
 	return BytesRead;
 }
 
+DWORD
+HCAPI
+HcVirtualAddressFileOffset(LPBYTE lpBaseAddress, HMODULE hModule)
+{
+	PIMAGE_DOS_HEADER pHeaderDOS;
+	PIMAGE_NT_HEADERS pHeaderNT;
+	SIZE_T dwRVA;
+	SIZE_T dwModule;
+
+	if (!hModule)
+	{
+		hModule = ((HMODULE)NtCurrentPeb()->ImageBaseAddress);
+	}
+
+	if (!lpBaseAddress)
+	{
+		return 0;
+	}
+
+	pHeaderDOS = (PIMAGE_DOS_HEADER)hModule;
+	if (pHeaderDOS->e_magic != IMAGE_DOS_SIGNATURE)
+	{
+		return 0;
+	}
+
+	dwModule = (SIZE_T)hModule;
+
+	pHeaderNT = (PIMAGE_NT_HEADERS)(dwModule + pHeaderDOS->e_lfanew);
+	if (pHeaderNT->Signature != IMAGE_NT_SIGNATURE)
+	{
+		return 0;
+	}
+
+	/* Calculate the relative offset */
+	dwRVA = ((SIZE_T) lpBaseAddress) - dwModule;
+
+	return HcRVAToFileOffset(pHeaderNT, dwRVA);
+}
+
+SIZE_T
+HCAPI
+HcReadModuleAddressDisk(LPBYTE lpBaseAddress, PBYTE lpBufferOut, DWORD dwCountToRead)
+{
+	DWORD dwFileOffset;
+	LPWSTR lpModulePath;
+	HANDLE hFile;
+	DWORD BytesRead;
+	HMODULE hModule;
+	MEMORY_BASIC_INFORMATION memInfo;
+
+	/* Find the module that allocated the address */
+	if (!HcVirtualQuery(NtCurrentProcess,
+		lpBaseAddress,
+		&memInfo,
+		sizeof(memInfo)))
+	{
+		return 0;
+	}
+
+	/* Take the module */
+	hModule = (HMODULE)memInfo.AllocationBase;
+	if (!hModule)
+	{
+		return 0;
+	}
+
+	/* Get the file offset */
+	dwFileOffset = HcVirtualAddressFileOffset(lpBaseAddress, hModule);
+	if (!dwFileOffset)
+	{
+		return 0;
+	}
+
+	/* Allocate for the path of the module */
+	lpModulePath = (LPWSTR)VirtualAlloc(NULL,
+		MAX_PATH,
+		MEM_RESERVE | MEM_COMMIT,
+		PAGE_READWRITE);
+
+	if (!lpModulePath)
+	{
+		SetLastError(STATUS_INSUFFICIENT_RESOURCES);
+		return 0;
+	}
+
+	/* Acquire path of targetted module. */
+	GetModuleFileNameW(hModule, lpModulePath, MAX_PATH);
+	if (!lpModulePath)
+	{
+		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		return 0;
+	}
+
+	/* Open the file */
+	if (!(hFile = CreateFileW(lpModulePath,
+		GENERIC_READ,
+		FILE_SHARE_READ,
+		NULL,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL)))
+	{
+		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		return 0;
+	}
+
+	/* Go to the offset */
+	if (!(SetFilePointer(hFile, dwFileOffset, 0, FILE_BEGIN)))
+	{
+		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		HcCloseHandle(hFile);
+		return 0;
+	}
+
+	/* Read it */
+	if (!ReadFile(hFile, lpBufferOut, dwCountToRead, &BytesRead, NULL))
+	{
+		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		HcCloseHandle(hFile);
+		return 0;
+	}
+
+	VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+	HcCloseHandle(hFile);
+	return BytesRead;
+}
+
 /* Unreliable. */
 SyscallIndex
 HCAPI
@@ -920,6 +1049,8 @@ HcSyscallIndex(LPCSTR lpName)
 	/* buffer + 1 is the syscall index, 0xB8 is the mov instruction */
 	return buffer ? *(ULONG*)(buffer + 1) : 0;
 #else
+	/* mov r10, rcx */
+	/* mov eax, syscall index */
 	return buffer ? *(ULONG*)(buffer + 4) : 0;
 #endif
 }
@@ -937,6 +1068,8 @@ HcSyscallIndex(LPCWSTR lpName)
 	/* buffer + 1 is the syscall index, 0xB8 is the mov instruction */
 	return buffer ? *(ULONG*)(buffer + 1) : 0;
 #else
+	/* mov r10, rcx */
+	/* mov eax, syscall index */
 	return buffer ? *(ULONG*)(buffer + 4) : 0;
 #endif
 }
@@ -945,15 +1078,25 @@ HANDLE
 HCAPI
 HcProcessOpen(SIZE_T dwProcessId, ACCESS_MASK DesiredAccess)
 {
+	NTSTATUS Status;
 	OBJECT_ATTRIBUTES oa;
 	CLIENT_ID cid;
+	HANDLE hProcess;
+
 	cid.UniqueProcess = (HANDLE)dwProcessId;
 	cid.UniqueThread = 0;
+
 	InitializeObjectAttributes(&oa, NULL, 0, NULL, NULL);
 
-	HANDLE hProcess;
-	HcOpenProcess(&hProcess, DesiredAccess, &oa, &cid);
-	return hProcess;
+	Status = HcOpenProcess(&hProcess, DesiredAccess, &oa, &cid);
+
+	SetLastError(Status);
+	if (NT_SUCCESS(Status))
+	{
+		return hProcess;
+	}
+
+	return 0;
 }
 
 VOID
@@ -1002,6 +1145,10 @@ HcProcessFree(IN HANDLE hProcess,
 	return FALSE;
 }
 
+/*
+* @implemented
+* removed SEH block
+*/
 LPVOID
 HCAPI
 HcProcessAllocate(IN HANDLE hProcess,
@@ -1012,18 +1159,12 @@ HcProcessAllocate(IN HANDLE hProcess,
 {
 	NTSTATUS Status;
 
-	__try
-	{
-		Status = HcAllocateVirtualMemory(hProcess,
-			&lpAddress,
-			0,
-			&dwSize,
-			flAllocationType,
-			flProtect);
-	}
-	__except (EXCEPTION_EXECUTE_HANDLER)
-	{
-	}
+	Status = HcAllocateVirtualMemory(hProcess,
+		&lpAddress,
+		0,
+		&dwSize,
+		flAllocationType,
+		flProtect);
 
 	if (!NT_SUCCESS(Status))
 	{
@@ -1170,6 +1311,36 @@ HcProcessReadMemory(IN HANDLE hProcess,
 
 	/* Return success */
 	return TRUE;
+}
+
+
+SIZE_T
+NTAPI
+HcVirtualQuery(IN HANDLE hProcess,
+	IN LPCVOID lpAddress,
+	OUT PMEMORY_BASIC_INFORMATION lpBuffer,
+	IN SIZE_T dwLength)
+{
+	NTSTATUS Status;
+	SIZE_T ResultLength;
+
+	/* Query basic information */
+	Status = HcQueryVirtualMemory(hProcess,
+		(LPVOID)lpAddress,
+		MemoryBasicInformation,
+		lpBuffer,
+		dwLength,
+		&ResultLength);
+
+	if (!NT_SUCCESS(Status))
+	{
+		/* We failed */
+		SetLastError(Status);
+		return 0;
+	}
+
+	/* Return the queried length */
+	return ResultLength;
 }
 
 BOOL
@@ -1330,7 +1501,6 @@ HcProcessQueryInformationModule(IN HANDLE hProcess,
 
 	if (!NT_SUCCESS(Status))
 	{
-		printf("1 %x\n", Status);
 		return FALSE;
 	}
 
@@ -1486,10 +1656,12 @@ HcProcessQueryModules(HANDLE hProcess,
 
 		Module = new HC_MODULE_INFORMATION;
 
+		/* Attempt to convert to a HC module */
 		if (HcProcessLdrModuleToHighCallModule(hProcess,
 			&ldrModule,
 			Module))
 		{
+			/* Give it to the caller */
 			if (hcmCallback(*Module, lParam))
 			{
 				delete Module;
@@ -1520,8 +1692,10 @@ static ULONG HCAPI HcGetProcessListSize()
 	ULONG Size = MAXSHORT;
 	PSYSTEM_PROCESS_INFORMATION ProcInfoArray;
 
+	/* Loop on it */
 	while (TRUE)
 	{
+		/* Allocate for first test */
 		if (!(ProcInfoArray = (PSYSTEM_PROCESS_INFORMATION)
 			VirtualAlloc(NULL,
 				Size,
@@ -1536,7 +1710,10 @@ static ULONG HCAPI HcGetProcessListSize()
 			Size,
 			NULL);
 
+		/* Release, we're only looking for the size. */
 		VirtualFree(ProcInfoArray, 0, MEM_RELEASE);
+
+		/* Not enough, go for it again. */
 		if (Status == STATUS_INFO_LENGTH_MISMATCH)
 		{
 			Size += MAXSHORT;
@@ -1574,10 +1751,6 @@ HcQueryProcessesByName(LPCWSTR lpProcessName,
 	{
 		return FALSE;
 	}
-
-	/* Before we continue, check access rights for protected processes. */
-	//CheckDebugPrivilege();
-	//EnableDebugPrivilege();
 
 	/* Allocate the buffer with specified size. */
 	if (!(Buffer = VirtualAlloc(NULL,

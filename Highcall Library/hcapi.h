@@ -3,6 +3,7 @@
 #include "ntdef.h"
 #include "nttype.h"
 #include "hctype.h"
+#include "hcdef.h"
 
 extern HMODULE NTDLL;
 extern HMODULE USER32;
@@ -110,6 +111,10 @@ DWORD
 HCAPI
 HcExportToFileOffset(HMODULE hModule, LPCWSTR lpExportName);
 
+DWORD
+HCAPI
+HcVirtualAddressFileOffset(LPBYTE lpBaseAddress, HMODULE hModule);
+
 SIZE_T
 HCAPI
 HcReadFileModule(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dwCount);
@@ -117,6 +122,10 @@ HcReadFileModule(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dwC
 SIZE_T
 HCAPI
 HcReadFileModule(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD dwCount);
+
+SIZE_T
+HCAPI
+HcReadModuleAddressDisk(LPBYTE lpBaseAddress, PBYTE lpBufferOut, DWORD dwCountToRead);
 
 HANDLE
 HCAPI
@@ -152,6 +161,13 @@ HcProcessReadMemory(IN HANDLE hProcess,
 	IN LPVOID lpBuffer,
 	IN SIZE_T nSize,
 	OUT SIZE_T* lpNumberOfBytesRead);
+
+SIZE_T
+NTAPI
+HcVirtualQuery(IN HANDLE hProcess,
+	IN LPCVOID lpAddress,
+	OUT PMEMORY_BASIC_INFORMATION lpBuffer,
+	IN SIZE_T dwLength);
 
 BOOL
 HCAPI

@@ -1,9 +1,9 @@
 ; OpenProcess
 
-EXTERNDEF sciOpenProcess:DWORD
-
 IFDEF RAX
 ; 64bit
+
+EXTERNDEF sciOpenProcess:DWORD
    
 .DATA
 .CODE
@@ -17,6 +17,8 @@ HcOpenProcess ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciOpenProcess:DWORD
 
 .586              
 .MODEL FLAT, C   

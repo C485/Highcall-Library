@@ -1,10 +1,10 @@
 ; QueryInformationProcess
 
-EXTERNDEF sciQueryInformationProcess:DWORD
-
 IFDEF RAX
 ; 64bit
-   
+  
+EXTERNDEF sciQueryInformationProcess:DWORD
+ 
 .DATA
 .CODE
  
@@ -17,6 +17,8 @@ HcQueryInformationProcess ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciQueryInformationProcess:DWORD
 
 .586              
 .MODEL FLAT, C   

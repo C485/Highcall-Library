@@ -1,10 +1,10 @@
 ; Close (HANDLE)
 
-EXTERNDEF sciClose:DWORD
-
 IFDEF RAX
 ; 64bit
    
+EXTERNDEF sciClose:DWORD
+
 .DATA
 .CODE
  
@@ -17,6 +17,8 @@ HcClose ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciClose:DWORD
 
 .586              
 .MODEL FLAT, C   

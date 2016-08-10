@@ -1,9 +1,9 @@
 ; FreeVirtualMemory
 
-EXTERNDEF sciFreeVirtualMemory:DWORD
-
 IFDEF RAX
 ; 64bit
+
+EXTERNDEF sciFreeVirtualMemory:DWORD
    
 .DATA
 .CODE
@@ -17,6 +17,8 @@ HcFreeVirtualMemory ENDP
 
 ELSE
 ; 32bit
+
+EXTERNDEF C sciFreeVirtualMemory:DWORD
 
 .586              
 .MODEL FLAT, C   
