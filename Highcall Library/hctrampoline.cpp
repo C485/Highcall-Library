@@ -27,7 +27,6 @@ PVOID HCAPI HcTrampolineOriginal(PBYTE lpBaseAddress, DWORD dwSizeToRestore)
 #else
 	SizeOfOpcode = 1;
 #endif
-
 	opCode = (PBYTE)VirtualAlloc(0,
 		SizeOfOpcode,
 		MEM_COMMIT | MEM_RESERVE,
