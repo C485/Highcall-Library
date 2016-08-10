@@ -74,12 +74,18 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>highcall</TargetName>
+    <LibraryPath>E:\Projects\Visual Studio\C++\Highcall Library\Capstone\msvc\x86\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>highcall</TargetName>
+    <LibraryPath>E:\Projects\Visual Studio\C++\Highcall Library\Capstone\msvc\x86\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>highcall</TargetName>
+    <LibraryPath>E:\Projects\Visual Studio\C++\Highcall Library\Capstone\msvc\x64\Release;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>E:\Projects\Visual Studio\C++\Highcall Library\Capstone\msvc\x64\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -122,25 +128,39 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="global.cpp" />
+    <ClCompile Include="..\distorm\src\decoder.c" />
+    <ClCompile Include="..\distorm\src\distorm.c" />
+    <ClCompile Include="..\distorm\src\instructions.c" />
+    <ClCompile Include="..\distorm\src\insts.c" />
+    <ClCompile Include="..\distorm\src\mnemonics.c" />
+    <ClCompile Include="..\distorm\src\operands.c" />
+    <ClCompile Include="..\distorm\src\prefix.c" />
+    <ClCompile Include="..\distorm\src\textdefs.c" />
+    <ClCompile Include="..\distorm\src\wstring.c" />
     <ClCompile Include="hcapi.cpp" />
-    <ClCompile Include="HookTrampoline.cpp" />
-    <ClCompile Include="import.cpp" />
-    <ClCompile Include="syscall.cpp" />
-    <ClCompile Include="trampoline.cpp" />
+    <ClCompile Include="hctrampoline.cpp" />
+    <ClCompile Include="highcall.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="global.h" />
+    <ClInclude Include="..\distorm\include\distorm.h" />
+    <ClInclude Include="..\distorm\include\mnemonics.h" />
+    <ClInclude Include="..\distorm\src\config.h" />
+    <ClInclude Include="..\distorm\src\decoder.h" />
+    <ClInclude Include="..\distorm\src\instructions.h" />
+    <ClInclude Include="..\distorm\src\insts.h" />
+    <ClInclude Include="..\distorm\src\operands.h" />
+    <ClInclude Include="..\distorm\src\prefix.h" />
+    <ClInclude Include="..\distorm\src\textdefs.h" />
+    <ClInclude Include="..\distorm\src\wstring.h" />
+    <ClInclude Include="..\distorm\src\x86defs.h" />
     <ClInclude Include="hcapi.h" />
     <ClInclude Include="hcdef.h" />
-    <ClInclude Include="hctype.h" />
-    <ClInclude Include="HookTrampoline.h" />
-    <ClInclude Include="import.h" />
-    <ClInclude Include="ntdef.h" />
-    <ClInclude Include="minntdef.h" />
-    <ClInclude Include="syscall.h" />
-    <ClInclude Include="trampoline.h" />
-    <ClInclude Include="nttype.h" />
+    <ClInclude Include="hctrampoline.h" />
+    <ClInclude Include="highcall.h" />
+    <ClInclude Include="hcimport.h" />
+    <ClInclude Include="minnative.h" />
+    <ClInclude Include="hcsyscall.h" />
+    <ClInclude Include="native.h" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="QuerySystemInformation.S">

@@ -1,7 +1,76 @@
 #pragma once
-#include "ntdef.h"
 #include <Windows.h>
-#include "minntdef.h"
+#include "minnative.h"
+
+#define NT_SUCCESS(Status)				((NTSTATUS)(Status) >= 0)
+
+#define STATUS_FAILED					((NTSTATUS)-1L)
+#define STATUS_SUCCESS					((NTSTATUS)0x00000000L)
+#define STATUS_INVALID_INFO_CLASS		((NTSTATUS)0xC0000003L)
+#define STATUS_INFO_LENGTH_MISMATCH		((NTSTATUS)0xC0000004L)
+#define STATUS_ACCESS_DENIED			((NTSTATUS)0xC0000022L)
+#define STATUS_DEBUGGER_INACTIVE		((NTSTATUS)0xC0000354L)
+#define STATUS_NO_YIELD_PERFORMED		((NTSTATUS)0x40000024L)
+#define STATUS_PORT_NOT_SET				((NTSTATUS)0xC0000353L)
+#define STATUS_HANDLE_NOT_CLOSABLE		((NTSTATUS)0xC0000235L)
+#define STATUS_INSUFFICIENT_RESOURCES	((NTSTATUS)0xC000009AL)
+#define STATUS_PARTIAL_COPY				((NTSTATUS)0x8000000DL)
+
+#define THREAD_CREATE_FLAGS_HIDE_FROM_DEBUGGER	0x00000004
+#define THREAD_CREATE_FLAGS_CREATE_SUSPENDED 0x00000001
+#define THREAD_CREATE_FLAGS_SKIP_THREAD_ATTACH 0x00000002
+#define THREAD_CREATE_FLAGS_HIDE_FROM_DEBUGGER 0x00000004
+#define THREAD_CREATE_FLAGS_HAS_SECURITY_DESCRIPTOR 0x00000010
+#define THREAD_CREATE_FLAGS_ACCESS_CHECK_IN_TARGET 0x00000020
+#define THREAD_CREATE_FLAGS_INITIAL_THREAD 0x00000080
+
+#define OBJ_INHERIT             0x00000002L
+#define OBJ_PERMANENT           0x00000010L
+#define OBJ_EXCLUSIVE           0x00000020L
+#define OBJ_CASE_INSENSITIVE    0x00000040L
+#define OBJ_OPENIF              0x00000080L
+#define OBJ_OPENLINK            0x00000100L
+#define OBJ_KERNEL_HANDLE       0x00000200L
+#define OBJ_FORCE_ACCESS_CHECK  0x00000400L
+#define OBJ_VALID_ATTRIBUTES    0x000007F2L
+
+#define DEBUG_READ_EVENT        (0x0001)
+#define DEBUG_PROCESS_ASSIGN    (0x0002)
+#define DEBUG_SET_INFORMATION   (0x0004)
+#define DEBUG_QUERY_INFORMATION (0x0008)
+#define DEBUG_ALL_ACCESS		(STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | DEBUG_READ_EVENT | DEBUG_PROCESS_ASSIGN |\
+								DEBUG_SET_INFORMATION | DEBUG_QUERY_INFORMATION)
+
+#define RTL_ACTIVATE_ACTIVATION_CONTEXT_EX_FLAG_RELEASE_ON_STACK_DEALLOCATION   0x01
+#define RTL_QUERY_ACTIVATION_CONTEXT_FLAG_USE_ACTIVE_ACTIVATION_CONTEXT         0x01
+#define RTL_QUERY_ACTIVATION_CONTEXT_FLAG_IS_HMODULE                            0x02
+#define RTL_QUERY_ACTIVATION_CONTEXT_FLAG_IS_ADDRESS                            0x04
+#define RTL_QUERY_ACTIVATION_CONTEXT_FLAG_NO_ADDREF                             0x80000000
+
+#define DEBUG_KILL_ON_CLOSE  (0x1)
+
+#define NtCurrentProcess ((HANDLE)(LONG_PTR)-1)
+#define NtCurrentThread ((HANDLE)(LONG_PTR)-2)
+
+#define ASSERT(x) ((void)sizeof(x))
+
+#define InitializeObjectAttributes( p, n, a, r, s ) { \
+    (p)->Length = sizeof( OBJECT_ATTRIBUTES );          \
+    (p)->RootDirectory = r;                             \
+    (p)->Attributes = a;                                \
+    (p)->ObjectName = n;                                \
+    (p)->SecurityDescriptor = s;                        \
+    (p)->SecurityQualityOfService = NULL;               \
+    }
+
+#define ALIGN_DOWN(length, type) \
+	((ULONG)(length) & ~(sizeof(type) - 1))
+
+#define ALIGN_UP(length, type) \
+	(ALIGN_DOWN(((ULONG)(length) + sizeof(type) - 1), type))
+
+#define MAX_MODULES   0x2710
+#define NB_HOOKS (WH_MAXHOOK - WH_MINHOOK + 1)
 
 typedef enum _KTHREAD_STATE
 {

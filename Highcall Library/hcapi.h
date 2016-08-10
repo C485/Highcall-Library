@@ -1,13 +1,7 @@
 #pragma once
 #include <windows.h>
-#include "ntdef.h"
-#include "nttype.h"
-#include "hctype.h"
+#include "native.h"
 #include "hcdef.h"
-
-extern HMODULE NTDLL;
-extern HMODULE USER32;
-extern HMODULE KERNEL32;
 
 NTSTATUS
 HCAPI

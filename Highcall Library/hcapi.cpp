@@ -2,17 +2,15 @@
 
 /* GetModuleFileName should be replaced */
 
-#include "hcapi.h"
 #include <ctime>
 #include <stdio.h>
-#include "syscall.h"
-#include "global.h"
-#include "import.h"
-#include "trampoline.h"
 
-HMODULE NTDLL = HcGetModuleHandle("ntdll.dll");
-HMODULE USER32 = HcGetModuleHandle(L"user32.dll");
-HMODULE KERNEL32 = HcGetModuleHandle(L"kernel32.dll");
+
+#include "hcapi.h"
+#include "highcall.h"
+#include "hcsyscall.h"
+#include "hcimport.h"
+#include "hctrampoline.h"
 
 /*
 @implemented
