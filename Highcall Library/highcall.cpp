@@ -1,5 +1,10 @@
 #include "highcall.h"
-#include "hcapi.h"
+#include "hcsyscall.h"
+#include "hcimport.h"
+#include "hctrampoline.h"
+#include "hcmodule.h"
+#include "hcstring.h"
+#include "hcprocess.h"
 
 #pragma region Init Trampoline
 
@@ -13,51 +18,50 @@ tCreateRemoteThread HcCreateRemoteThread;
 
 static VOID HCAPI HcInitializeTrampoline(VOID)
 {
-	HcGetWindowThreadProcessId = (tGetWindowThreadProcessId)HcTrampolineOriginal((PBYTE)HcGetProcedureAddress(USER32, "GetWindowThreadProcessId"));
-	HcGetCursorPos = (tGetCursorPos)HcTrampolineOriginal((PBYTE)HcGetProcedureAddress(USER32, "GetCursorPos"));
-	HcPostMessageA = (tPostMessageA)HcTrampolineOriginal((PBYTE)HcGetProcedureAddress(USER32, "PostMessageA"));
-	HcPostMessageW = (tPostMessageW)HcTrampolineOriginal((PBYTE)HcGetProcedureAddress(USER32, "PostMessageW"));
-	HcSendMessageA = (tSendMessageA)HcTrampolineOriginal((PBYTE)HcGetProcedureAddress(USER32, "SendMessageA"));
-	HcSendMessageW = (tSendMessageW)HcTrampolineOriginal((PBYTE)HcGetProcedureAddress(USER32, "SendMessageW"));
-	HcCreateRemoteThread = (tCreateRemoteThread)HcTrampolineOriginal((PBYTE)HcGetProcedureAddress(KERNEL32, "CreateRemoteThread"));
+	HcGetWindowThreadProcessId = (tGetWindowThreadProcessId)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(USER32, "GetWindowThreadProcessId"));
+	HcGetCursorPos = (tGetCursorPos)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(USER32, "GetCursorPos"));
+	HcPostMessageA = (tPostMessageA)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(USER32, "PostMessageA"));
+	HcPostMessageW = (tPostMessageW)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(USER32, "PostMessageW"));
+	HcSendMessageA = (tSendMessageA)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(USER32, "SendMessageA"));
+	HcSendMessageW = (tSendMessageW)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(USER32, "SendMessageW"));
+	HcCreateRemoteThread = (tCreateRemoteThread)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(KERNEL32, "CreateRemoteThread"));
 }
 
 #pragma endregion
 
 #pragma region Init Import
 
-t_RtlActivateActivationContextEx RtlActivateActivationContextEx;
-t_RtlFreeThreadActivationContextStack RtlFreeThreadActivationContextStack;
-t_RtlFreeActivationContextStack RtlFreeActivationContextStack;
-t_RtlQueryInformationActivationContext RtlQueryInformationActivationContext;
-t_RtlAllocateActivationContextStack RtlAllocateActivationContextStack;
-t_LdrLoadDll LdrLoadDll;
 t_RtlGetVersion RtlGetVersion;
 t_RtlEqualUnicodeString RtlEqualUnicodeString;
 t_RtlInitUnicodeString RtlInitUnicodeString;
+t_LdrLoadDll LdrLoadDll;
+t_RtlAllocateActivationContextStack RtlAllocateActivationContextStack;
+t_RtlQueryInformationActivationContext RtlQueryInformationActivationContext;
+t_RtlFreeActivationContextStack RtlFreeActivationContextStack;
+t_RtlFreeThreadActivationContextStack RtlFreeThreadActivationContextStack;
+t_RtlActivateActivationContextEx RtlActivateActivationContextEx;
 
 static HIGHCALL_STATUS HCAPI HcInitializeImports(VOID)
 {
-	RtlGetVersion = (t_RtlGetVersion)HcGetProcedureAddress(NTDLL, "RtlGetVersion");
+	RtlGetVersion = (t_RtlGetVersion)HcModuleProcedureAddress(NTDLL, "RtlGetVersion");
 	if (!RtlGetVersion)
 	{
 		return HIGHCALL_RTLGETVERSION_UNDEFINED;
 	}
 
-	RtlEqualUnicodeString = (t_RtlEqualUnicodeString)HcGetProcedureAddress(NTDLL, "RtlEqualUnicodeString");
-	RtlInitUnicodeString = (t_RtlInitUnicodeString)HcGetProcedureAddress(NTDLL, "RtlInitUnicodeString");
-	LdrLoadDll = (t_LdrLoadDll)HcGetProcedureAddress(NTDLL, "LdrLoadDll");
-	RtlAllocateActivationContextStack = (t_RtlAllocateActivationContextStack)HcGetProcedureAddress(NTDLL, "RtlAllocateActivationContextStack");
-	RtlQueryInformationActivationContext = (t_RtlQueryInformationActivationContext)HcGetProcedureAddress(NTDLL, "RtlQueryInformationActivationContext");
-	RtlFreeActivationContextStack = (t_RtlFreeActivationContextStack)HcGetProcedureAddress(NTDLL, "RtlFreeActivationContextStack");
-	RtlFreeThreadActivationContextStack = (t_RtlFreeThreadActivationContextStack)HcGetProcedureAddress(NTDLL, "RtlFreeThreadActivationContextStack");
-	RtlActivateActivationContextEx = (t_RtlActivateActivationContextEx)HcGetProcedureAddress(NTDLL, "RtlActivateActivationContextEx");
+	RtlEqualUnicodeString = (t_RtlEqualUnicodeString)HcModuleProcedureAddress(NTDLL, "RtlEqualUnicodeString");
+	RtlInitUnicodeString = (t_RtlInitUnicodeString)HcModuleProcedureAddress(NTDLL, "RtlInitUnicodeString");
+	LdrLoadDll = (t_LdrLoadDll)HcModuleProcedureAddress(NTDLL, "LdrLoadDll");
+	RtlAllocateActivationContextStack = (t_RtlAllocateActivationContextStack)HcModuleProcedureAddress(NTDLL, "RtlAllocateActivationContextStack");
+	RtlQueryInformationActivationContext = (t_RtlQueryInformationActivationContext)HcModuleProcedureAddress(NTDLL, "RtlQueryInformationActivationContext");
+	RtlFreeActivationContextStack = (t_RtlFreeActivationContextStack)HcModuleProcedureAddress(NTDLL, "RtlFreeActivationContextStack");
+	RtlFreeThreadActivationContextStack = (t_RtlFreeThreadActivationContextStack)HcModuleProcedureAddress(NTDLL, "RtlFreeThreadActivationContextStack");
+	RtlActivateActivationContextEx = (t_RtlActivateActivationContextEx)HcModuleProcedureAddress(NTDLL, "RtlActivateActivationContextEx");
 
 	return HIGHCALL_SUCCESS;
 }
 
 #pragma endregion
-
 
 #pragma region Init Syscall
 

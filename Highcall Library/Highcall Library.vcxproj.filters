@@ -64,6 +64,21 @@
     <ClCompile Include="highcall.cpp">
       <Filter>Highcall</Filter>
     </ClCompile>
+    <ClCompile Include="hcstring.cpp">
+      <Filter>Highcall</Filter>
+    </ClCompile>
+    <ClCompile Include="hcprocess.cpp">
+      <Filter>Highcall</Filter>
+    </ClCompile>
+    <ClCompile Include="hcinternal.cpp">
+      <Filter>Highcall</Filter>
+    </ClCompile>
+    <ClCompile Include="hcfile.cpp">
+      <Filter>Highcall</Filter>
+    </ClCompile>
+    <ClCompile Include="hcmodule.cpp">
+      <Filter>Highcall</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="hcapi.h">
@@ -121,6 +136,21 @@
       <Filter>Highcall\Import</Filter>
     </ClInclude>
     <ClInclude Include="hcdef.h">
+      <Filter>Highcall</Filter>
+    </ClInclude>
+    <ClInclude Include="hcstring.h">
+      <Filter>Highcall</Filter>
+    </ClInclude>
+    <ClInclude Include="hcprocess.h">
+      <Filter>Highcall</Filter>
+    </ClInclude>
+    <ClInclude Include="hcinternal.h">
+      <Filter>Highcall</Filter>
+    </ClInclude>
+    <ClInclude Include="hcfile.h">
+      <Filter>Highcall</Filter>
+    </ClInclude>
+    <ClInclude Include="hcmodule.h">
       <Filter>Highcall</Filter>
     </ClInclude>
   </ItemGroup>

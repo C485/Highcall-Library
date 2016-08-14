@@ -104,7 +104,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -138,6 +138,11 @@
     <ClCompile Include="..\distorm\src\textdefs.c" />
     <ClCompile Include="..\distorm\src\wstring.c" />
     <ClCompile Include="hcapi.cpp" />
+    <ClCompile Include="hcfile.cpp" />
+    <ClCompile Include="hcinternal.cpp" />
+    <ClCompile Include="hcmodule.cpp" />
+    <ClCompile Include="hcprocess.cpp" />
+    <ClCompile Include="hcstring.cpp" />
     <ClCompile Include="hctrampoline.cpp" />
     <ClCompile Include="highcall.cpp" />
   </ItemGroup>
@@ -155,6 +160,11 @@
     <ClInclude Include="..\distorm\src\x86defs.h" />
     <ClInclude Include="hcapi.h" />
     <ClInclude Include="hcdef.h" />
+    <ClInclude Include="hcinternal.h" />
+    <ClInclude Include="hcfile.h" />
+    <ClInclude Include="hcmodule.h" />
+    <ClInclude Include="hcprocess.h" />
+    <ClInclude Include="hcstring.h" />
     <ClInclude Include="hctrampoline.h" />
     <ClInclude Include="highcall.h" />
     <ClInclude Include="hcimport.h" />

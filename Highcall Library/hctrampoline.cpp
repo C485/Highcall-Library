@@ -1,5 +1,6 @@
 #include "hctrampoline.h"
 #include "hcapi.h"
+#include "hcfile.h"
 #include "../distorm/include/distorm.h"
 
 DWORD HCAPI HcTrampolineCalculateLength(BYTE* Src, DWORD NeededLength)
@@ -72,7 +73,7 @@ PVOID HCAPI HcTrampolineOriginal(PBYTE lpBaseAddress, DWORD dwMinimumSize)
 		MEM_COMMIT | MEM_RESERVE,
 		PAGE_READWRITE);
 
-	if (!HcReadModuleAddressDisk(lpBaseAddress, Original, dwRequiredSize))
+	if (!HcFileReadAddress(lpBaseAddress, Original, dwRequiredSize))
 	{
 		VirtualFree(Original, 0, MEM_RELEASE);
 		return 0;

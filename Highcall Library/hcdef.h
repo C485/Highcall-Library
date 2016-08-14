@@ -123,3 +123,10 @@ typedef struct _mem_result
 	unsigned char* buffer;
 
 } mem_result;
+
+typedef struct _HC_FILE_INFORMATION
+{
+	DWORD Size;
+	PBYTE Data;
+
+} HC_FILE_INFORMATION, *PHC_FILE_INFORMATION;
