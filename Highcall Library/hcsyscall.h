@@ -2,11 +2,10 @@
 #include "native.h"
 #include "hcapi.h"
 
-
 extern "C" SyscallIndex sciQueryInformationToken;
 extern "C" NTSTATUS HcQueryInformationToken(_In_ HANDLE TokenHandle,
 	_In_ TOKEN_INFORMATION_CLASS TokenInformationClass,
-	_Out_writes_bytes_(TokenInformationLength) PVOID TokenInformation,
+	_Out_writes_bytes_(TokenInformationLength) LPVOID TokenInformation,
 	_In_ ULONG TokenInformationLength,
 	_Out_ PULONG ReturnLength);
 
@@ -23,7 +22,7 @@ extern "C" NTSTATUS HcSuspendProcess(IN HANDLE ProcessHandle);
 
 extern "C" SyscallIndex sciAllocateVirtualMemory;
 extern "C" NTSTATUS HcAllocateVirtualMemory(IN HANDLE hProcess,
-	IN PVOID* UBaseAddress,
+	IN LPVOID* UBaseAddress,
 	IN ULONG_PTR ZeroBits,
 	IN OUT PSIZE_T URegionSize,
 	IN ULONG AllocationType,
@@ -31,7 +30,7 @@ extern "C" NTSTATUS HcAllocateVirtualMemory(IN HANDLE hProcess,
 
 extern "C" SyscallIndex sciFreeVirtualMemory;
 extern "C" NTSTATUS HcFreeVirtualMemory(IN HANDLE hProcess,
-	IN PVOID* UBaseAddress,
+	IN LPVOID* UBaseAddress,
 	IN PSIZE_T URegionSize,
 	IN ULONG FreeType);
 
@@ -42,7 +41,7 @@ extern "C" NTSTATUS HcResumeThread(IN HANDLE ThreadHandle,
 extern "C" SyscallIndex sciQueryInformationThread;
 extern "C" NTSTATUS HcQueryInformationThread(IN HANDLE ThreadHandle,
 	IN THREADINFOCLASS ThreadInformationClass,
-	OUT PVOID ThreadInformation,
+	OUT LPVOID ThreadInformation,
 	IN ULONG ThreadInformationLength,
 	OUT PULONG ReturnLength OPTIONAL);
 
@@ -58,8 +57,8 @@ extern "C" NTSTATUS HcCreateThread(OUT PHANDLE ThreadHandle,
 
 extern "C" SyscallIndex sciFlushInstructionCache;
 extern "C" NTSTATUS HcFlushInstructionCache(IN HANDLE ProcessHandle,
-	IN PVOID BaseAddress,
-	IN ULONG NumberOfBytesToFlush);
+	IN LPVOID BaseAddress,
+	IN SIZE_T NumberOfBytesToFlush);
 
 extern "C" SyscallIndex sciOpenProcess;
 extern "C" NTSTATUS HcOpenProcess(_Out_ PHANDLE ProcessHandle,
@@ -70,36 +69,36 @@ extern "C" NTSTATUS HcOpenProcess(_Out_ PHANDLE ProcessHandle,
 
 extern "C" SyscallIndex sciProtectVirtualMemory;
 extern "C" NTSTATUS HcProtectVirtualMemory(IN HANDLE ProcessHandle,
-	IN OUT PVOID *BaseAddress,
+	IN OUT LPVOID *BaseAddress,
 	IN OUT PSIZE_T NumberOfBytesToProtect,
 	IN ULONG NewAccessProtection,
 	OUT PULONG OldAccessProtection);
 
 extern "C" SyscallIndex sciReadVirtualMemory;
 extern "C" NTSTATUS HcReadVirtualMemory(HANDLE ProcessHandle,
-	PVOID BaseAddress,
-	PVOID Buffer,
+	LPVOID BaseAddress,
+	LPVOID Buffer,
 	SIZE_T BufferSize,
 	PSIZE_T NumberOfBytesRead);
 
 extern "C" SyscallIndex sciWriteVirtualMemory;
 extern "C" NTSTATUS HcWriteVirtualMemory(HANDLE ProcessHandle,
-	PVOID BaseAddress, 
+	LPVOID BaseAddress, 
 	CONST VOID *Buffer,
 	SIZE_T BufferSize, 
-	PULONG NumberOfBytesWritten);
+	PSIZE_T NumberOfBytesWritten);
 
 extern "C" SyscallIndex sciQueryInformationProcess;
 extern "C" NTSTATUS HcQueryInformationProcess(
 	__in HANDLE ProcessHandle, __in PROCESSINFOCLASS ProcessInformationClass,
-	__out_bcount(ProcessInformationLength) PVOID ProcessInformation,
+	__out_bcount(ProcessInformationLength) LPVOID ProcessInformation,
 	__in ULONG ProcessInformationLength,
 	__out_opt PULONG ReturnLength);
 
 extern "C" SyscallIndex sciQuerySystemInformation;
 extern "C" NTSTATUS HcQuerySystemInformation(
 	__in SYSTEM_INFORMATION_CLASS SystemInformationClass,
-	__out_bcount_opt(SystemInformationLength) PVOID SystemInformation,
+	__out_bcount_opt(SystemInformationLength) LPVOID SystemInformation,
 	__in ULONG SystemInformationLength,
 	__out_opt PULONG ReturnLength);
 
@@ -108,8 +107,8 @@ extern "C" NTSTATUS HcClose(HANDLE hObject);
 
 extern "C" SyscallIndex sciQueryVirtualMemory;
 extern "C" NTSTATUS HcQueryVirtualMemory(IN HANDLE ProcessHandle,
-	IN PVOID BaseAddress,
+	IN LPVOID BaseAddress,
 	IN MEMORY_INFORMATION_CLASS MemoryInformationClass,
-	OUT PVOID MemoryInformation,
+	OUT LPVOID MemoryInformation,
 	IN SIZE_T MemoryInformationLength,
 	OUT PSIZE_T ReturnLength);

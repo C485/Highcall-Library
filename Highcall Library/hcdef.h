@@ -12,14 +12,16 @@
 #define HCAPI __stdcall
 #define MAX_INT_STRING (sizeof(char) * 9) + UNICODE_NULL
 
+#define PTR_ADD_OFFSET(Pointer, Offset) ((PVOID)((ULONG_PTR)(Pointer) + (ULONG_PTR)(Offset)))
+
 typedef HMODULE(WINAPI *pLoadLibraryA)(LPCSTR);
 typedef FARPROC(WINAPI *pGetProcAddress)(HMODULE, LPCSTR);
 
-typedef BOOL(WINAPI *PDLL_MAIN)(HMODULE, SIZE_T, PVOID);
+typedef BOOL(WINAPI *PDLL_MAIN)(HMODULE, SIZE_T, LPVOID);
 
 typedef struct _MANUAL_INJECT
 {
-	PVOID ImageBase;
+	LPVOID ImageBase;
 	PIMAGE_NT_HEADERS NtHeaders;
 	PIMAGE_BASE_RELOCATION BaseRelocation;
 	PIMAGE_IMPORT_DESCRIPTOR ImportDirectory;

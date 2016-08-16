@@ -1,6 +1,21 @@
 #pragma once
 #include <windows.h>
 
+#define NT_SUCCESS(Status)				((NTSTATUS)(Status) >= 0)
+
+#define STATUS_BUFFER_OVERFLOW			((NTSTATUS)0x80000005L)
+#define STATUS_FAILED					((NTSTATUS)-1L)
+#define STATUS_SUCCESS					((NTSTATUS)0x00000000L)
+#define STATUS_INVALID_INFO_CLASS		((NTSTATUS)0xC0000003L)
+#define STATUS_INFO_LENGTH_MISMATCH		((NTSTATUS)0xC0000004L)
+#define STATUS_ACCESS_DENIED			((NTSTATUS)0xC0000022L)
+#define STATUS_DEBUGGER_INACTIVE		((NTSTATUS)0xC0000354L)
+#define STATUS_NO_YIELD_PERFORMED		((NTSTATUS)0x40000024L)
+#define STATUS_PORT_NOT_SET				((NTSTATUS)0xC0000353L)
+#define STATUS_HANDLE_NOT_CLOSABLE		((NTSTATUS)0xC0000235L)
+#define STATUS_INSUFFICIENT_RESOURCES	((NTSTATUS)0xC000009AL)
+#define STATUS_PARTIAL_COPY				((NTSTATUS)0x8000000DL)
+
 typedef struct _RTL_USER_PROCESS_PARAMETERS *PRTL_USER_PROCESS_PARAMETERS;
 typedef struct _RTL_CRITICAL_SECTION *PRTL_CRITICAL_SECTION;
 
@@ -49,7 +64,7 @@ typedef struct _SYSTEM_THREAD_INFORMATION
 	LARGE_INTEGER UserTime;
 	LARGE_INTEGER CreateTime;
 	ULONG WaitTime;
-	PVOID StartAddress;
+	PBYTE StartAddress;
 	CLIENT_ID ClientId;
 	KPRIORITY Priority;
 	LONG BasePriority;
@@ -101,7 +116,7 @@ typedef struct _SYSTEM_PROCESS_INFORMATION
 typedef struct _PEB_LDR_DATA {
 	ULONG Length;
 	BOOLEAN Initialized;
-	PVOID SsHandle;
+	PBYTE SsHandle;
 	LIST_ENTRY InLoadOrderModuleList;
 	LIST_ENTRY InMemoryOrderModuleList;
 	LIST_ENTRY InInitializationOrderModuleList;
@@ -129,14 +144,14 @@ typedef struct _PEB
 	};
 	HANDLE Mutant;
 
-	PVOID ImageBaseAddress;
+	PBYTE ImageBaseAddress;
 	PPEB_LDR_DATA LoaderData;
 	PRTL_USER_PROCESS_PARAMETERS ProcessParameters;
-	PVOID SubSystemData;
-	PVOID ProcessHeap;
+	PBYTE SubSystemData;
+	PBYTE ProcessHeap;
 	PRTL_CRITICAL_SECTION FastPebLock;
-	PVOID AtlThunkSListPtr;
-	PVOID IFEOKey;
+	PBYTE AtlThunkSListPtr;
+	PBYTE IFEOKey;
 	union
 	{
 		ULONG CrossProcessFlags;
@@ -152,21 +167,21 @@ typedef struct _PEB
 	};
 	union
 	{
-		PVOID KernelCallbackTable;
-		PVOID UserSharedInfoPtr;
+		PBYTE KernelCallbackTable;
+		PBYTE UserSharedInfoPtr;
 	};
 	ULONG SystemReserved[1];
 	ULONG AtlThunkSListPtr32;
-	PVOID ApiSetMap;
+	PBYTE ApiSetMap;
 	ULONG TlsExpansionCounter;
-	PVOID TlsBitmap;
+	PBYTE TlsBitmap;
 	ULONG TlsBitmapBits[2];
-	PVOID ReadOnlySharedMemoryBase;
-	PVOID HotpatchInformation;
-	PVOID *ReadOnlyStaticServerData;
-	PVOID AnsiCodePageData;
-	PVOID OemCodePageData;
-	PVOID UnicodeCaseTableData;
+	PBYTE ReadOnlySharedMemoryBase;
+	PBYTE HotpatchInformation;
+	PBYTE *ReadOnlyStaticServerData;
+	PBYTE AnsiCodePageData;
+	PBYTE OemCodePageData;
+	PBYTE UnicodeCaseTableData;
 
 	ULONG NumberOfProcessors;
 	ULONG NtGlobalFlag;
@@ -179,10 +194,10 @@ typedef struct _PEB
 
 	ULONG NumberOfHeaps;
 	ULONG MaximumNumberOfHeaps;
-	PVOID *ProcessHeaps;
+	PBYTE *ProcessHeaps;
 
-	PVOID GdiSharedHandleTable;
-	PVOID ProcessStarterHelper;
+	PBYTE GdiSharedHandleTable;
+	PBYTE ProcessStarterHelper;
 	ULONG GdiDCAttributeList;
 
 	PRTL_CRITICAL_SECTION LoaderLock;
@@ -197,37 +212,37 @@ typedef struct _PEB
 	ULONG ImageSubsystemMinorVersion;
 	ULONG_PTR ImageProcessAffinityMask;
 	GDI_HANDLE_BUFFER GdiHandleBuffer;
-	PVOID PostProcessInitRoutine;
+	PBYTE PostProcessInitRoutine;
 
-	PVOID TlsExpansionBitmap;
+	PBYTE TlsExpansionBitmap;
 	ULONG TlsExpansionBitmapBits[32];
 
 	ULONG SessionId;
 
 	ULARGE_INTEGER AppCompatFlags;
 	ULARGE_INTEGER AppCompatFlagsUser;
-	PVOID pShimData;
-	PVOID AppCompatInfo;
+	PBYTE pShimData;
+	PBYTE AppCompatInfo;
 
 	UNICODE_STRING CSDVersion;
 
-	PVOID ActivationContextData;
-	PVOID ProcessAssemblyStorageMap;
-	PVOID SystemDefaultActivationContextData;
-	PVOID SystemAssemblyStorageMap;
+	PBYTE ActivationContextData;
+	PBYTE ProcessAssemblyStorageMap;
+	PBYTE SystemDefaultActivationContextData;
+	PBYTE SystemAssemblyStorageMap;
 
 	SIZE_T MinimumStackCommit;
 
-	PVOID *FlsCallback;
+	PBYTE *FlsCallback;
 	LIST_ENTRY FlsListHead;
-	PVOID FlsBitmap;
+	PBYTE FlsBitmap;
 	ULONG FlsBitmapBits[FLS_MAXIMUM_AVAILABLE / (sizeof(ULONG) * 8)];
 	ULONG FlsHighIndex;
 
-	PVOID WerRegistrationData;
-	PVOID WerShipAssertPtr;
-	PVOID pContextData;
-	PVOID pImageHeaderHash;
+	PBYTE WerRegistrationData;
+	PBYTE WerShipAssertPtr;
+	PBYTE pContextData;
+	PBYTE pImageHeaderHash;
 	union
 	{
 		ULONG TracingFlags;
@@ -266,24 +281,24 @@ typedef struct _TEB
 {
 	NT_TIB NtTib;
 
-	PVOID EnvironmentPointer;
+	PBYTE EnvironmentPointer;
 	CLIENT_ID ClientId;
-	PVOID ActiveRpcHandle;
-	PVOID ThreadLocalStoragePointer;
+	PBYTE ActiveRpcHandle;
+	PBYTE ThreadLocalStoragePointer;
 	PPEB ProcessEnvironmentBlock;
 
 	ULONG LastErrorValue;
 	ULONG CountOfOwnedCriticalSections;
-	PVOID CsrClientThread;
-	PVOID Win32ThreadInfo;
+	PBYTE CsrClientThread;
+	PBYTE Win32ThreadInfo;
 	ULONG User32Reserved[26];
 	ULONG UserReserved[5];
-	PVOID WOW32Reserved;
+	PBYTE WOW32Reserved;
 	LCID CurrentLocale;
 	ULONG FpSoftwareStatusRegister;
-	PVOID SystemReserved1[54];
+	PBYTE SystemReserved1[54];
 	NTSTATUS ExceptionCode;
-	PVOID ActivationContextStackPointer;
+	PBYTE ActivationContextStackPointer;
 #ifdef _WIN64
 	UCHAR SpareBytes[24];
 #else
@@ -296,41 +311,41 @@ typedef struct _TEB
 	HANDLE GdiCachedProcessHandle;
 	ULONG GdiClientPID;
 	ULONG GdiClientTID;
-	PVOID GdiThreadLocalInfo;
+	PBYTE GdiThreadLocalInfo;
 	ULONG_PTR Win32ClientInfo[62];
-	PVOID glDispatchTable[233];
+	PBYTE glDispatchTable[233];
 	ULONG_PTR glReserved1[29];
-	PVOID glReserved2;
-	PVOID glSectionInfo;
-	PVOID glSection;
-	PVOID glTable;
-	PVOID glCurrentRC;
-	PVOID glContext;
+	PBYTE glReserved2;
+	PBYTE glSectionInfo;
+	PBYTE glSection;
+	PBYTE glTable;
+	PBYTE glCurrentRC;
+	PBYTE glContext;
 
 	NTSTATUS LastStatusValue;
 	UNICODE_STRING StaticUnicodeString;
 	WCHAR StaticUnicodeBuffer[261];
 
-	PVOID DeallocationStack;
-	PVOID TlsSlots[64];
+	PBYTE DeallocationStack;
+	PBYTE TlsSlots[64];
 	LIST_ENTRY TlsLinks;
 
-	PVOID Vdm;
-	PVOID ReservedForNtRpc;
-	PVOID DbgSsReserved[2];
+	PBYTE Vdm;
+	PBYTE ReservedForNtRpc;
+	PBYTE DbgSsReserved[2];
 
 	ULONG HardErrorMode;
 #ifdef _WIN64
-	PVOID Instrumentation[11];
+	PBYTE Instrumentation[11];
 #else
 	PVOID Instrumentation[9];
 #endif
 	GUID ActivityId;
 
-	PVOID SubProcessTag;
-	PVOID EtwLocalData;
-	PVOID EtwTraceData;
-	PVOID WinSockData;
+	PBYTE SubProcessTag;
+	PBYTE EtwLocalData;
+	PBYTE EtwTraceData;
+	PBYTE WinSockData;
 	ULONG GdiBatchCount;
 
 	union
@@ -347,29 +362,29 @@ typedef struct _TEB
 	};
 
 	ULONG GuaranteedStackBytes;
-	PVOID ReservedForPerf;
-	PVOID ReservedForOle;
+	PBYTE ReservedForPerf;
+	PBYTE ReservedForOle;
 	ULONG WaitingOnLoaderLock;
-	PVOID SavedPriorityState;
+	PBYTE SavedPriorityState;
 	ULONG_PTR SoftPatchPtr1;
-	PVOID ThreadPoolData;
-	PVOID *TlsExpansionSlots;
+	PBYTE ThreadPoolData;
+	PBYTE *TlsExpansionSlots;
 #ifdef _WIN64
-	PVOID DeallocationBStore;
-	PVOID BStoreLimit;
+	PBYTE DeallocationBStore;
+	PBYTE BStoreLimit;
 #endif
 	ULONG MuiGeneration;
 	ULONG IsImpersonating;
-	PVOID NlsCache;
-	PVOID pShimData;
+	PBYTE NlsCache;
+	PBYTE pShimData;
 	ULONG HeapVirtualAffinity;
 	HANDLE CurrentTransactionHandle;
 	PTEB_ACTIVE_FRAME ActiveFrame;
-	PVOID FlsData;
+	PBYTE FlsData;
 
-	PVOID PreferredLanguages;
-	PVOID UserPrefLanguages;
-	PVOID MergedPrefLanguages;
+	PBYTE PreferredLanguages;
+	PBYTE UserPrefLanguages;
+	PBYTE MergedPrefLanguages;
 	ULONG MuiImpersonation;
 
 	union
@@ -398,13 +413,13 @@ typedef struct _TEB
 		};
 	};
 
-	PVOID TxnScopeEnterCallback;
-	PVOID TxnScopeExitCallback;
-	PVOID TxnScopeContext;
+	PBYTE TxnScopeEnterCallback;
+	PBYTE TxnScopeExitCallback;
+	PBYTE TxnScopeContext;
 	ULONG LockCount;
 	ULONG SpareUlong0;
-	PVOID ResourceRetValue;
-	PVOID ReservedForWdf;
+	PBYTE ResourceRetValue;
+	PBYTE ReservedForWdf;
 } TEB, *PTEB;
 
 __inline PPEB NTAPI NtCurrentPeb()
@@ -434,7 +449,7 @@ typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO
 	UCHAR ObjectTypeIndex;
 	UCHAR HandleAttributes;
 	USHORT HandleValue;
-	PVOID Object;
+	PBYTE Object;
 	ULONG GrantedAccess;
 } SYSTEM_HANDLE_TABLE_ENTRY_INFO, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO;
 
@@ -446,7 +461,7 @@ typedef struct _SYSTEM_HANDLE_INFORMATION
 
 typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX
 {
-	PVOID Object;
+	PBYTE Object;
 	ULONG_PTR UniqueProcessId;
 	ULONG_PTR HandleValue;
 	ULONG GrantedAccess;

@@ -34,7 +34,7 @@ HcProcessAllocate(IN HANDLE hProcess,
 BOOL
 HCAPI
 HcProcessWriteMemory(HANDLE hProcess,
-	PVOID lpBaseAddress,
+	LPVOID lpBaseAddress,
 	CONST VOID* lpBuffer,
 	SIZE_T nSize,
 	PSIZE_T lpNumberOfBytesWritten);
@@ -80,7 +80,14 @@ HcProcessQueryInformationModule(IN HANDLE hProcess,
 
 BOOL
 HCAPI
-HcProcessQueryModules(HANDLE hProcess,
+HcProcessEnumModules(HANDLE hProcess,
+	HC_MODULE_CALLBACK_EVENT hcmCallback,
+	LPARAM lParam);
+
+VOID
+HCAPI
+HcProcessStealthEnumModules(
+	_In_ HANDLE ProcessHandle,
 	HC_MODULE_CALLBACK_EVENT hcmCallback,
 	LPARAM lParam);
 
@@ -112,6 +119,13 @@ HcProcessResume(HANDLE hProcess);
 BOOLEAN
 HCAPI
 HcProcessResume(SIZE_T dwProcessId);
+
+SIZE_T
+WINAPI
+HcProcessModuleFileName(HANDLE hProcess,
+	LPVOID lpv,
+	LPWSTR lpFilename,
+	DWORD nSize);
 
 BOOL
 HCAPI

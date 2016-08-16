@@ -7,4 +7,4 @@ Highcall Library/Release
 Highcall Library.VC.VC.opendb
 x64
 Highcall Library/x64
-.vs
+*.suo

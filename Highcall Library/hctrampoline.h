@@ -3,7 +3,7 @@
 
 DWORD HCAPI HcTrampolineCalculateLength(BYTE* Src, DWORD NeededLength);
 
-PVOID HCAPI HcTrampolineOriginal(PBYTE lpBaseAddress, DWORD dwMinimumSize = 5);
+PBYTE HCAPI HcTrampolineOriginal(PBYTE lpBaseAddress, DWORD dwMinimumSize = 5);
 
 typedef BOOL(WINAPI* tGetWindowThreadProcessId) (_In_ HWND hWnd, _Out_opt_ LPDWORD lpdwProcessId);
 extern tGetWindowThreadProcessId HcGetWindowThreadProcessId;

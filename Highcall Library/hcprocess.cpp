@@ -7,6 +7,7 @@
 #include "hctrampoline.h"
 #include "hcimport.h"
 #include "hcfile.h"
+#include <psapi.h>
 
 BOOLEAN
 HCAPI
@@ -317,6 +318,7 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 	if (!HcParameterVerifyInjectModuleManual(fileInformation.Data))
 	{
 		VirtualFree(fileInformation.Data, 0, MEM_RELEASE);
+		SetLastError(STATUS_INVALID_PARAMETER);
 		return FALSE;
 	}
 
@@ -446,11 +448,6 @@ BOOLEAN
 HCAPI
 HcProcessSuspend(HANDLE hProcess)
 {
-	if (!hProcess)
-	{
-		return FALSE;
-	}
-
 	return NT_SUCCESS(HcSuspendProcess(hProcess));
 }
 
@@ -463,11 +460,6 @@ HcProcessSuspend(SIZE_T dwProcessId)
 
 	hProcess = HcProcessOpen(dwProcessId, PROCESS_ALL_ACCESS);
 
-	if (!hProcess)
-	{
-		return FALSE;
-	}
-
 	Status = HcSuspendProcess(hProcess);
 
 	HcClose(hProcess);
@@ -478,11 +470,6 @@ BOOLEAN
 HCAPI
 HcProcessResume(HANDLE hProcess)
 {
-	if (!hProcess)
-	{
-		return FALSE;
-	}
-
 	return NT_SUCCESS(HcResumeProcess(hProcess));
 }
 
@@ -494,11 +481,6 @@ HcProcessResume(SIZE_T dwProcessId)
 	HANDLE hProcess;
 
 	hProcess = HcProcessOpen(dwProcessId, PROCESS_ALL_ACCESS);
-
-	if (!hProcess)
-	{
-		return FALSE;
-	}
 
 	Status = HcResumeProcess(hProcess);
 
@@ -540,7 +522,6 @@ HcProcessFree(IN HANDLE hProcess,
 
 /*
 * @implemented
-* removed SEH block
 */
 LPVOID
 HCAPI
@@ -918,7 +899,7 @@ HcProcessQueryInformationModule(IN HANDLE hProcess,
 		sizeof(LoaderData),
 		NULL))
 	{
-		return FALSE;
+	return FALSE;
 	}
 
 	if (LoaderData == NULL)
@@ -979,7 +960,7 @@ HcProcessQueryInformationModule(IN HANDLE hProcess,
 
 BOOL
 HCAPI
-HcProcessQueryModules(HANDLE hProcess,
+HcProcessEnumModules(HANDLE hProcess,
 	HC_MODULE_CALLBACK_EVENT hcmCallback,
 	LPARAM lParam)
 {
@@ -1080,7 +1061,108 @@ HcProcessQueryModules(HANDLE hProcess,
 	return FALSE;
 }
 
-static ULONG HCAPI HcGetProcessListSize()
+VOID 
+HCAPI 
+HcProcessEnumModulesEx(
+	_In_ HANDLE ProcessHandle,
+	HC_MODULE_CALLBACK_EVENT hcmCallback,
+	LPARAM lParam)
+{
+	BOOLEAN querySucceeded;
+	PVOID baseAddress;
+	MEMORY_BASIC_INFORMATION basicInfo;
+	HC_MODULE_INFORMATION hcmInformation;
+	SIZE_T allocationSize;
+
+	baseAddress = (PVOID)0;
+
+	if (!NT_SUCCESS(HcQueryVirtualMemory(
+		ProcessHandle,
+		baseAddress,
+		MemoryBasicInformation,
+		&basicInfo,
+		sizeof(MEMORY_BASIC_INFORMATION),
+		NULL
+	)))
+	{
+		return;
+	}
+
+	querySucceeded = TRUE;
+
+	while (querySucceeded)
+	{
+		if (basicInfo.Type == MEM_MAPPED || basicInfo.Type == MEM_IMAGE)
+		{
+			hcmInformation.Base = (SIZE_T) basicInfo.AllocationBase;
+			allocationSize = 0;
+
+			/* Find next module */
+			do
+			{
+				baseAddress = (PVOID)((ULONG_PTR)baseAddress + basicInfo.RegionSize);
+				allocationSize += basicInfo.RegionSize;
+
+				if (!NT_SUCCESS(HcQueryVirtualMemory(
+					ProcessHandle,
+					baseAddress,
+					MemoryBasicInformation,
+					&basicInfo,
+					sizeof(MEMORY_BASIC_INFORMATION),
+					NULL
+				)))
+				{
+					querySucceeded = FALSE;
+					break;
+				}
+
+			} while (basicInfo.AllocationBase == (PVOID) hcmInformation.Base);
+
+			hcmInformation.Size = allocationSize;
+
+			hcmInformation.Name = (LPWSTR)VirtualAlloc(NULL,
+				MAX_PATH,
+				MEM_COMMIT | MEM_RESERVE,
+				PAGE_READWRITE);
+
+			if (HcProcessModuleFileName(ProcessHandle,
+				(PVOID)hcmInformation.Base,
+				hcmInformation.Name,
+				MAX_PATH
+			))
+			{
+				if (hcmCallback(hcmInformation, lParam))
+				{
+					VirtualFree(hcmInformation.Name, 0, MEM_RELEASE);
+					return;
+				}
+			}
+
+			VirtualFree(hcmInformation.Name, 0, MEM_RELEASE);
+		}
+		else
+		{
+			baseAddress = (PVOID)((ULONG_PTR)baseAddress + basicInfo.RegionSize);
+
+			if (!NT_SUCCESS(HcQueryVirtualMemory(
+				ProcessHandle,
+				baseAddress,
+				MemoryBasicInformation,
+				&basicInfo,
+				sizeof(MEMORY_BASIC_INFORMATION),
+				NULL
+			)))
+			{
+				querySucceeded = FALSE;
+			}
+		}
+	}
+}
+
+static 
+ULONG 
+HCAPI 
+HcGetProcessListSize()
 {
 	NTSTATUS Status;
 	ULONG Size = MAXSHORT;
@@ -1230,4 +1312,58 @@ HcProcessQueryByName(LPCWSTR lpProcessName,
 
 	VirtualFree(Buffer, 0, MEM_RELEASE);
 	return FALSE;
+}
+
+SIZE_T
+WINAPI
+HcProcessModuleFileName(HANDLE hProcess,
+	LPVOID lpv,
+	LPWSTR lpFilename,
+	DWORD nSize)
+{
+	SIZE_T Len;
+	SIZE_T OutSize;
+	NTSTATUS Status;
+
+	struct
+	{
+		MEMORY_SECTION_NAME memSection;
+		WCHAR CharBuffer[MAX_PATH];
+	} SectionName;
+
+	/* If no buffer, no need to keep going on */
+	if (nSize == 0)
+	{
+		SetLastError(ERROR_INSUFFICIENT_BUFFER);
+		return 0;
+	}
+
+	/* Query section name */
+	Status = HcQueryVirtualMemory(hProcess, lpv, MemoryMappedFilenameInformation,
+		&SectionName, sizeof(SectionName), &OutSize);
+
+	if (!NT_SUCCESS(Status))
+	{
+		SetLastError(Status);
+		return 0;
+	}
+
+	/* Prepare to copy file name */
+	Len = OutSize = SectionName.memSection.SectionFileName.Length / sizeof(WCHAR);
+	if (OutSize + 1 > nSize)
+	{
+		Len = nSize - 1;
+		OutSize = nSize;
+		SetLastError(ERROR_INSUFFICIENT_BUFFER);
+	}
+	else
+	{
+		SetLastError(ERROR_SUCCESS);
+	}
+
+	/* Copy, zero and return */
+	memcpy(lpFilename, SectionName.memSection.SectionFileName.Buffer, Len * sizeof(WCHAR));
+	lpFilename[Len] = 0;
+
+	return OutSize;
 }

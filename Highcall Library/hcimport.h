@@ -27,8 +27,8 @@ extern t_LdrLoadDll LdrLoadDll;
 typedef NTSTATUS(NTAPI *t_RtlAllocateActivationContextStack) (IN PACTIVATION_CONTEXT_STACK *Stack);
 extern t_RtlAllocateActivationContextStack RtlAllocateActivationContextStack;
 
-typedef NTSTATUS(NTAPI *t_RtlQueryInformationActivationContext) (ULONG flags, HANDLE handle, PVOID subinst,
-	ULONG Class, PVOID buffer,
+typedef NTSTATUS(NTAPI *t_RtlQueryInformationActivationContext) (ULONG flags, HANDLE handle, PBYTE subinst,
+	ULONG Class, PBYTE buffer,
 	SIZE_T bufsize, SIZE_T *retlen);
 extern t_RtlQueryInformationActivationContext RtlQueryInformationActivationContext;
 

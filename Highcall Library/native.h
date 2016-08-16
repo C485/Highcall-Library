@@ -2,20 +2,6 @@
 #include <Windows.h>
 #include "minnative.h"
 
-#define NT_SUCCESS(Status)				((NTSTATUS)(Status) >= 0)
-
-#define STATUS_FAILED					((NTSTATUS)-1L)
-#define STATUS_SUCCESS					((NTSTATUS)0x00000000L)
-#define STATUS_INVALID_INFO_CLASS		((NTSTATUS)0xC0000003L)
-#define STATUS_INFO_LENGTH_MISMATCH		((NTSTATUS)0xC0000004L)
-#define STATUS_ACCESS_DENIED			((NTSTATUS)0xC0000022L)
-#define STATUS_DEBUGGER_INACTIVE		((NTSTATUS)0xC0000354L)
-#define STATUS_NO_YIELD_PERFORMED		((NTSTATUS)0x40000024L)
-#define STATUS_PORT_NOT_SET				((NTSTATUS)0xC0000353L)
-#define STATUS_HANDLE_NOT_CLOSABLE		((NTSTATUS)0xC0000235L)
-#define STATUS_INSUFFICIENT_RESOURCES	((NTSTATUS)0xC000009AL)
-#define STATUS_PARTIAL_COPY				((NTSTATUS)0x8000000DL)
-
 #define THREAD_CREATE_FLAGS_HIDE_FROM_DEBUGGER	0x00000004
 #define THREAD_CREATE_FLAGS_CREATE_SUSPENDED 0x00000001
 #define THREAD_CREATE_FLAGS_SKIP_THREAD_ATTACH 0x00000002
@@ -136,7 +122,7 @@ typedef struct _SYSTEM_SESSION_PROCESS_INFORMATION
 {
 	ULONG SessionId;
 	ULONG SizeOfBuf;
-	PVOID Buffer;
+	PBYTE Buffer;
 } SYSTEM_SESSION_PROCESS_INFORMATION, *PSYSTEM_SESSION_PROCESS_INFORMATION;
 
 typedef struct _SYSTEM_KERNEL_DEBUGGER_INFORMATION
@@ -155,10 +141,10 @@ typedef struct _LDT_INFORMATION
 typedef struct _SYSTEM_EXTENDED_THREAD_INFORMATION
 {
 	SYSTEM_THREAD_INFORMATION ThreadInfo;
-	PVOID StackBase;
-	PVOID StackLimit;
-	PVOID Win32StartAddress;
-	PVOID TebAddress; /* This is only filled in on Vista and above */
+	PBYTE StackBase;
+	PBYTE StackLimit;
+	PBYTE Win32StartAddress;
+	PBYTE TebAddress; /* This is only filled in on Vista and above */
 	ULONG_PTR Reserved2;
 	ULONG_PTR Reserved3;
 	ULONG_PTR Reserved4;
@@ -242,7 +228,7 @@ typedef struct _THREAD_BASIC_INFORMATION
 
 typedef struct _SECTION_IMAGE_INFORMATION
 {
-	PVOID TransferAddress; //Entrypoint
+	PBYTE TransferAddress; //Entrypoint
 	ULONG ZeroBits;
 	SIZE_T MaximumStackSize;
 	SIZE_T CommittedStackSize;
@@ -270,15 +256,15 @@ typedef struct _OBJECT_ATTRIBUTES {
 	HANDLE RootDirectory;
 	PUNICODE_STRING ObjectName;
 	ULONG Attributes;
-	PVOID SecurityDescriptor;
-	PVOID SecurityQualityOfService;
+	PBYTE SecurityDescriptor;
+	PBYTE SecurityQualityOfService;
 } OBJECT_ATTRIBUTES, *POBJECT_ATTRIBUTES;
 
 typedef struct _RTL_PROCESS_MODULE_INFORMATION
 {
 	HANDLE Section;
-	PVOID MappedBase;
-	PVOID ImageBase;
+	PBYTE MappedBase;
+	PBYTE ImageBase;
 	ULONG ImageSize;
 	ULONG Flags;
 	USHORT LoadOrderIndex;
@@ -361,8 +347,8 @@ typedef struct _OBJECT_HANDLE_FLAG_INFORMATION
 typedef struct _RTL_DEBUG_INFORMATION
 {
 	HANDLE SectionHandleClient;
-	PVOID ViewBaseClient;
-	PVOID ViewBaseTarget;
+	PBYTE ViewBaseClient;
+	PBYTE ViewBaseTarget;
 	ULONG_PTR ViewBaseDelta;
 	HANDLE EventPairClient;
 	HANDLE EventPairTarget;
@@ -372,21 +358,21 @@ typedef struct _RTL_DEBUG_INFORMATION
 	SIZE_T OffsetFree;
 	SIZE_T CommitSize;
 	SIZE_T ViewSize;
-	PVOID Modules; //PRTL_PROCESS_MODULES
-	PVOID BackTraces; //PRTL_PROCESS_BACKTRACES
-	PVOID Heaps; //PRTL_PROCESS_HEAPS
-	PVOID Locks; //PRTL_PROCESS_LOCKS
-	PVOID SpecificHeap;
+	PBYTE Modules; //PRTL_PROCESS_MODULES
+	PBYTE BackTraces; //PRTL_PROCESS_BACKTRACES
+	PBYTE Heaps; //PRTL_PROCESS_HEAPS
+	PBYTE Locks; //PRTL_PROCESS_LOCKS
+	PBYTE SpecificHeap;
 	HANDLE TargetProcessHandle;
-	PVOID Reserved[6];
+	PBYTE Reserved[6];
 } RTL_DEBUG_INFORMATION, *PRTL_DEBUG_INFORMATION;
 
 typedef
 VOID
 (*PPS_APC_ROUTINE) (
-	__in_opt PVOID ApcArgument1,
-	__in_opt PVOID ApcArgument2,
-	__in_opt PVOID ApcArgument3
+	__in_opt PBYTE ApcArgument1,
+	__in_opt PBYTE ApcArgument2,
+	__in_opt PBYTE ApcArgument3
 	);
 
 typedef struct _RTLP_CURDIR_REF *PRTLP_CURDIR_REF;
@@ -401,36 +387,36 @@ typedef struct _RTL_RELATIVE_NAME_U
 typedef struct _INITIAL_TEB
 {
 	struct {
-		PVOID OldStackBase;
-		PVOID OldStackLimit;
+		PBYTE OldStackBase;
+		PBYTE OldStackLimit;
 	} OldInitialTeb;
-	PVOID StackBase;
-	PVOID StackLimit;
-	PVOID StackAllocationBase;
+	PBYTE StackBase;
+	PBYTE StackLimit;
+	PBYTE StackAllocationBase;
 } INITIAL_TEB, *PINITIAL_TEB;
 
 
 //0x22C FlsHighIndex, x64 0x0350
 typedef struct _RTL_UNKNOWN_FLS_DATA {
-	PVOID unk2;
-	PVOID address;
-	PVOID unk3;
-	PVOID unk4;
+	PBYTE unk2;
+	PBYTE address;
+	PBYTE unk3;
+	PBYTE unk4;
 } RTL_UNKNOWN_FLS_DATA, *PRTL_UNKNOWN_FLS_DATA;
 
 typedef struct _FLS_CALLBACK_INFO //0x20C PEB FlsCallback, x64 0x320
 {
-	PVOID unk1;
-	PVOID unk2;
-	PVOID address;
-	PVOID unk3;
-	PVOID unk4;
+	PBYTE unk1;
+	PBYTE unk2;
+	PBYTE address;
+	PBYTE unk3;
+	PBYTE unk4;
 } FLS_CALLBACK_INFO, *PFLS_CALLBACK_INFO;
 
 typedef struct _IO_STATUS_BLOCK {
 	union {
 		NTSTATUS Status;
-		PVOID Pointer;
+		PBYTE Pointer;
 	};
 
 	ULONG_PTR Information;
@@ -439,7 +425,7 @@ typedef struct _IO_STATUS_BLOCK {
 typedef
 VOID
 (NTAPI *PIO_APC_ROUTINE) (
-	IN PVOID ApcContext,
+	IN PBYTE ApcContext,
 	IN PIO_STATUS_BLOCK IoStatusBlock,
 	IN ULONG Reserved
 	);
@@ -451,7 +437,7 @@ typedef struct _PS_ATTRIBUTE
 	union
 	{
 		ULONG Value;
-		PVOID ValuePtr;
+		PBYTE ValuePtr;
 	};
 	PSIZE_T ReturnLength;
 } PS_ATTRIBUTE, *PPS_ATTRIBUTE;
@@ -913,7 +899,7 @@ typedef struct _RTL_BUFFER {
 	SIZE_T    Size;
 	SIZE_T    StaticSize;
 	SIZE_T    ReservedForAllocatedSize; // for future doubling
-	PVOID     ReservedForIMalloc; // for future pluggable growth
+	PBYTE     ReservedForIMalloc; // for future pluggable growth
 } RTL_BUFFER, *PRTL_BUFFER;
 
 typedef struct _LDR_DATA_TABLE_ENTRY
@@ -934,17 +920,17 @@ typedef struct _LDR_DATA_TABLE_ENTRY
 		LIST_ENTRY HashLinks;
 		struct
 		{
-			PVOID SectionPointer;
+			PBYTE SectionPointer;
 			ULONG CheckSum;
 		};
 	};
 	union
 	{
 		ULONG TimeDateStamp;
-		PVOID LoadedImports;
+		PBYTE LoadedImports;
 	};
 	DWORD EntryPointActivationContext; //_ACTIVATION_CONTEXT * EntryPointActivationContext; 
-	PVOID PatchInformation;
+	PBYTE PatchInformation;
 	LIST_ENTRY ForwarderLinks;
 	LIST_ENTRY ServiceTagLinks;
 	LIST_ENTRY StaticLinks;
@@ -966,3 +952,9 @@ typedef enum _WINDOWINFOCLASS
 	WindowIsHung = 5 //BOOL
 
 } WINDOWINFOCLASS;
+
+typedef struct
+{
+	UNICODE_STRING SectionFileName;
+	WCHAR NameBuffer[ANYSIZE_ARRAY];
+} MEMORY_SECTION_NAME, *PMEMORY_SECTION_NAME;
