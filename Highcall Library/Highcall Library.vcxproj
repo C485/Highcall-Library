@@ -137,14 +137,14 @@
     <ClCompile Include="..\distorm\src\prefix.c" />
     <ClCompile Include="..\distorm\src\textdefs.c" />
     <ClCompile Include="..\distorm\src\wstring.c" />
-    <ClCompile Include="hcapi.cpp" />
-    <ClCompile Include="hcfile.cpp" />
-    <ClCompile Include="hcinternal.cpp" />
-    <ClCompile Include="hcmodule.cpp" />
-    <ClCompile Include="hcprocess.cpp" />
-    <ClCompile Include="hcstring.cpp" />
-    <ClCompile Include="hctrampoline.cpp" />
-    <ClCompile Include="highcall.cpp" />
+    <ClCompile Include="hcapi.c" />
+    <ClCompile Include="hcfile.c" />
+    <ClCompile Include="hcinternal.c" />
+    <ClCompile Include="hcmodule.c" />
+    <ClCompile Include="hcprocess.c" />
+    <ClCompile Include="hcstring.c" />
+    <ClCompile Include="hctrampoline.c" />
+    <ClCompile Include="highcall.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\distorm\include\distorm.h" />

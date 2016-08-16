@@ -8,7 +8,7 @@
 */
 SIZE_T
 HCAPI
-HcModuleProcedureAddress(HANDLE hModule, LPCSTR lpProcedureName)
+HcModuleProcedureAddressA(HANDLE hModule, LPCSTR lpProcedureName)
 {
 	IMAGE_NT_HEADERS* pHeaderNT;
 	IMAGE_DOS_HEADER* pHeaderDOS;
@@ -57,7 +57,7 @@ HcModuleProcedureAddress(HANDLE hModule, LPCSTR lpProcedureName)
 		}
 
 		/* Check for a match*/
-		if (HcStringEqual(lpCurrentFunction, lpProcedureName, TRUE))
+		if (HcStringEqualA(lpCurrentFunction, lpProcedureName, TRUE))
 		{
 			pExportOrdinals = (PWORD)(pExports->AddressOfNameOrdinals + dwModule);
 			pExportFunctions = (PDWORD)(pExports->AddressOfFunctions + dwModule);
@@ -74,7 +74,7 @@ HcModuleProcedureAddress(HANDLE hModule, LPCSTR lpProcedureName)
 */
 SIZE_T
 HCAPI
-HcModuleProcedureAddress(HANDLE hModule, LPCWSTR lpProcedureName)
+HcModuleProcedureAddressW(HANDLE hModule, LPCWSTR lpProcedureName)
 {
 	DWORD Size;
 	SIZE_T ReturnValue;
@@ -102,7 +102,7 @@ HcModuleProcedureAddress(HANDLE hModule, LPCWSTR lpProcedureName)
 		return 0;
 	}
 
-	ReturnValue = HcModuleProcedureAddress(hModule, lpConvertedName);
+	ReturnValue = HcModuleProcedureAddressA(hModule, lpConvertedName);
 
 	VirtualFree(lpConvertedName, 0, MEM_RELEASE);
 	return ReturnValue;
@@ -113,7 +113,7 @@ HcModuleProcedureAddress(HANDLE hModule, LPCWSTR lpProcedureName)
 */
 HMODULE
 HCAPI
-HcModuleHandle(LPCWSTR lpModuleName)
+HcModuleHandleW(LPCWSTR lpModuleName)
 {
 	PPEB pPeb = NtCurrentPeb();
 	PLDR_DATA_TABLE_ENTRY pLdrDataTableEntry;
@@ -134,7 +134,7 @@ HcModuleHandle(LPCWSTR lpModuleName)
 		pLdrDataTableEntry = (PLDR_DATA_TABLE_ENTRY)pListEntry;
 
 		/* Important note is that this is strict to the entire name */
-		if (HcStringEqual(lpModuleName, pLdrDataTableEntry->FullModuleName.Buffer, TRUE))
+		if (HcStringEqualW(lpModuleName, pLdrDataTableEntry->FullModuleName.Buffer, TRUE))
 		{
 			return (HMODULE)pLdrDataTableEntry->InInitializationOrderLinks.Flink;
 		}
@@ -148,7 +148,7 @@ HcModuleHandle(LPCWSTR lpModuleName)
 */
 HMODULE
 HCAPI
-HcModuleHandle(LPCSTR lpModuleName)
+HcModuleHandleA(LPCSTR lpModuleName)
 {
 	DWORD Size;
 	HMODULE ReturnValue;
@@ -176,7 +176,7 @@ HcModuleHandle(LPCSTR lpModuleName)
 		return 0;
 	}
 
-	ReturnValue = HcModuleHandle(lpConvertedName);
+	ReturnValue = HcModuleHandleW(lpConvertedName);
 
 	VirtualFree(lpConvertedName, 0, MEM_RELEASE);
 	return ReturnValue;
@@ -185,7 +185,7 @@ HcModuleHandle(LPCSTR lpModuleName)
 
 HMODULE
 HCAPI
-HcModuleLoad(LPCSTR lpPath)
+HcModuleLoadA(LPCSTR lpPath)
 {
 	NTSTATUS Status;
 	UNICODE_STRING Path;
@@ -193,7 +193,7 @@ HcModuleLoad(LPCSTR lpPath)
 	LPWSTR lpConverted;
 	HANDLE hModule;
 
-	if (HcStringIsBad(lpPath))
+	if (HcStringIsBadA(lpPath))
 	{
 		return 0;
 	}
@@ -238,13 +238,13 @@ HcModuleLoad(LPCSTR lpPath)
 
 HMODULE
 HCAPI
-HcModuleLoad(LPCWSTR lpPath)
+HcModuleLoadW(LPCWSTR lpPath)
 {
 	NTSTATUS Status;
 	UNICODE_STRING Path;
 	HANDLE hModule;
 
-	if (HcStringIsBad(lpPath))
+	if (HcStringIsBadW(lpPath))
 	{
 		return 0;
 	}

@@ -1,31 +1,43 @@
-#pragma once
+#ifndef HC_MODULE_H
+#define HC_MODULE_H
+
 #include "hcdef.h"
 #include "native.h"
 
-extern HMODULE NTDLL;
-extern HMODULE USER32;
-extern HMODULE KERNEL32;
+HC_GLOBAL HMODULE NTDLL;
+HC_GLOBAL HMODULE USER32;
+HC_GLOBAL HMODULE KERNEL32;
 
-HMODULE
-HCAPI
-HcModuleHandle(LPCWSTR lpModuleName);
+#if defined (__cplusplus)
+extern "C" {
+#endif
 
-HMODULE
-HCAPI
-HcModuleHandle(LPCSTR lpModuleName);
+	HMODULE
+		HCAPI
+		HcModuleHandleW(LPCWSTR lpModuleName);
 
-SIZE_T
-HCAPI
-HcModuleProcedureAddress(HANDLE hModule, LPCSTR lpProcedureName);
+	HMODULE
+		HCAPI
+		HcModuleHandleA(LPCSTR lpModuleName);
 
-SIZE_T
-HCAPI
-HcModuleProcedureAddress(HANDLE hModule, LPCWSTR lpProcedureName);
+	SIZE_T
+		HCAPI
+		HcModuleProcedureAddressA(HANDLE hModule, LPCSTR lpProcedureName);
 
-HMODULE
-HCAPI
-HcModuleLoad(LPCSTR lpPath);
+	SIZE_T
+		HCAPI
+		HcModuleProcedureAddressW(HANDLE hModule, LPCWSTR lpProcedureName);
 
-HMODULE
-HCAPI
-HcModuleLoad(LPCWSTR lpPath);
+	HMODULE
+		HCAPI
+		HcModuleLoadA(LPCSTR lpPath);
+
+	HMODULE
+		HCAPI
+		HcModuleLoadW(LPCWSTR lpPath);
+
+#endif
+
+#if defined (__cplusplus)
+}
+#endif

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef HIGHCALL_H
+#define HIGHCALL_H
+
 #include "native.h"
 #include "hcdef.h"
 
@@ -10,7 +12,17 @@ typedef ULONG HIGHCALL_STATUS;
 #define HIGHCALL_OPENPROCESSTOKEN_UNDEFINED		((HIGHCALL_STATUS)0xC0000002L)
 #define HIGHCALL_RTLGETVERSION_UNDEFINED		((HIGHCALL_STATUS)0xC0000003L)
 
-extern BOOLEAN HcGlobalElevated;
-extern ULONG HcGlobalWindowsVersion;
+HC_GLOBAL BOOLEAN HcGlobalElevated;
+HC_GLOBAL ULONG HcGlobalWindowsVersion;
 
-HIGHCALL_STATUS HCAPI HcInitialize();
+#if defined (__cplusplus)
+extern "C" {
+#endif
+
+	HIGHCALL_STATUS HCAPI HcInitialize();
+
+#if defined (__cplusplus)
+}
+#endif
+
+#endif

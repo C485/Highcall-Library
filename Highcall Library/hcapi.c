@@ -1,7 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 /* GetModuleFileName should be replaced */
 
-#include <ctime>
 #include <stdio.h>
 
 #include "hcapi.h"
@@ -34,10 +33,10 @@ HcGetTokenIsElevated(_In_ HANDLE TokenHandle,
 /* Unreliable. */
 SyscallIndex
 HCAPI
-HcSyscallIndex(LPCSTR lpName)
+HcSyscallIndexA(LPCSTR lpName)
 {
 	BYTE buffer[10];
-	HcFileReadModule(NTDLL, lpName, buffer, 10);
+	HcFileReadModuleA(NTDLL, lpName, buffer, 10);
 
 #ifndef _WIN64
 	/* mov eax, syscallindex */
@@ -53,10 +52,10 @@ HcSyscallIndex(LPCSTR lpName)
 /* Unreliable. */
 SyscallIndex
 HCAPI
-HcSyscallIndex(LPCWSTR lpName)
+HcSyscallIndexW(LPCWSTR lpName)
 {
 	BYTE buffer[10];
-	HcFileReadModule(NTDLL, lpName, buffer, 10);
+	HcFileReadModuleW(NTDLL, lpName, buffer, 10);
 
 #ifndef _WIN64
 	/* mov eax, syscallindex */

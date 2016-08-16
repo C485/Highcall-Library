@@ -1,4 +1,6 @@
-#pragma once
+#ifndef HC_NATIVE_H
+#define HC_NATIVE_H
+
 #include <Windows.h>
 #include "minnative.h"
 
@@ -34,20 +36,6 @@
 #define RTL_QUERY_ACTIVATION_CONTEXT_FLAG_NO_ADDREF                             0x80000000
 
 #define DEBUG_KILL_ON_CLOSE  (0x1)
-
-#define NtCurrentProcess ((HANDLE)(LONG_PTR)-1)
-#define NtCurrentThread ((HANDLE)(LONG_PTR)-2)
-
-#define ASSERT(x) ((void)sizeof(x))
-
-#define InitializeObjectAttributes( p, n, a, r, s ) { \
-    (p)->Length = sizeof( OBJECT_ATTRIBUTES );          \
-    (p)->RootDirectory = r;                             \
-    (p)->Attributes = a;                                \
-    (p)->ObjectName = n;                                \
-    (p)->SecurityDescriptor = s;                        \
-    (p)->SecurityQualityOfService = NULL;               \
-    }
 
 #define ALIGN_DOWN(length, type) \
 	((ULONG)(length) & ~(sizeof(type) - 1))
@@ -958,3 +946,5 @@ typedef struct
 	UNICODE_STRING SectionFileName;
 	WCHAR NameBuffer[ANYSIZE_ARRAY];
 } MEMORY_SECTION_NAME, *PMEMORY_SECTION_NAME;
+
+#endif

@@ -10,11 +10,11 @@ HcInternalMemoryTest(SIZE_T dwBaseAddress,
 	_result.address = dwBaseAddress;
 	_result.length = dwBufferLength;
 	_result.buffer = (unsigned char*)malloc(dwBufferLength);
-	_result.accessible = true;
+	_result.accessible = TRUE;
 
 	if (!dwBaseAddress)
 	{
-		_result.accessible = false;
+		_result.accessible = FALSE;
 	}
 
 	__try
@@ -28,7 +28,7 @@ HcInternalMemoryTest(SIZE_T dwBaseAddress,
 	__except (EXCEPTION_EXECUTE_HANDLER)
 	{
 		/* we hit an inaccessible memory region */
-		_result.accessible = false;
+		_result.accessible = FALSE;
 
 		/* return immedietly */
 		return _result;
@@ -39,7 +39,7 @@ HcInternalMemoryTest(SIZE_T dwBaseAddress,
 
 mem_result
 HCAPI
-HcInternalMemoryTest(SIZE_T dwBaseAddress,
+HcInternalMemoryTestEx(SIZE_T dwBaseAddress,
 	SIZE_T* pdwOffsets,
 	SIZE_T dwOffsetCount,
 	SIZE_T dwBufferLength)
@@ -48,11 +48,11 @@ HcInternalMemoryTest(SIZE_T dwBaseAddress,
 	_result.address = dwBaseAddress;
 	_result.length = dwBufferLength;
 	_result.buffer = (unsigned char*)malloc(dwBufferLength);
-	_result.accessible = true;
+	_result.accessible = TRUE;
 
 	if (!dwBaseAddress)
 	{
-		_result.accessible = false;
+		_result.accessible = FALSE;
 	}
 
 	__try
@@ -85,7 +85,7 @@ HcInternalMemoryTest(SIZE_T dwBaseAddress,
 	__except (EXCEPTION_EXECUTE_HANDLER)
 	{
 		/* we hit inacessible memory */
-		_result.accessible = false;
+		_result.accessible = FALSE;
 		return _result;
 	}
 
@@ -104,7 +104,7 @@ HcInternalMainModule(PHC_MODULE_INFORMATION moduleInfo)
 
 LPCSTR
 HCAPI
-HcInternalReadString(SIZE_T memAddress, SIZE_T* ptrOffsets, SIZE_T offsetCount)
+HcInternalReadStringEx(SIZE_T memAddress, SIZE_T* ptrOffsets, SIZE_T offsetCount)
 {
 	if (!memAddress)
 		return 0;
@@ -135,7 +135,7 @@ HcInternalReadString(SIZE_T memAddress)
 
 SIZE_T
 HCAPI
-HcInternalReadInt(SIZE_T memAddress, SIZE_T* ptrOffsets, SIZE_T offsetCount)
+HcInternalReadIntEx(SIZE_T memAddress, SIZE_T* ptrOffsets, SIZE_T offsetCount)
 {
 	if (!memAddress)
 		return 0;
@@ -154,11 +154,11 @@ HcInternalReadInt(SIZE_T memAddress, SIZE_T* ptrOffsets, SIZE_T offsetCount)
 	return address;
 }
 
-int
+SIZE_T
 HCAPI
 HcInternalReadInt(SIZE_T baseAddress)
 {
-	return (int)*(SIZE_T*)baseAddress;
+	return (SIZE_T)*(SIZE_T*)baseAddress;
 }
 
 SIZE_T

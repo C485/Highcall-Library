@@ -20,7 +20,7 @@ HcFileLocalDirectory()
 	char* module = HcFileMainModule();
 	SIZE_T index = HcStringCharIndex(module, '\\');
 	char* retn = (char*)malloc(MAX_PATH);
-	HcStringSubtract(module, retn, 0, index);
+	HcStringSubtract(module, retn, 0, index, MAX_PATH);
 	free(module);
 	return index != -1 ? retn : (char*)0;
 }
@@ -51,14 +51,14 @@ HcFileConfigFile()
 
 BOOLEAN
 HCAPI
-HcFileExists(LPCSTR name)
+HcFileExistsA(LPCSTR name)
 {
 	return (GetFileAttributesA(name) != 0xFFFFFFFF);
 }
 
 BOOLEAN
 HCAPI
-HcFileExists(LPCWSTR name)
+HcFileExistsW(LPCWSTR name)
 {
 	return (GetFileAttributesW(name) != 0xFFFFFFFF);
 }
@@ -90,7 +90,7 @@ HcFileSize(LPCSTR lpPath)
 
 BOOLEAN
 HCAPI
-HcFileQueryInformation(LPCWSTR lpPath, PHC_FILE_INFORMATION fileInformation)
+HcFileQueryInformationW(LPCWSTR lpPath, PHC_FILE_INFORMATION fileInformation)
 {
 	HANDLE hFile;
 	DWORD BytesRead;
@@ -135,7 +135,7 @@ HcFileQueryInformation(LPCWSTR lpPath, PHC_FILE_INFORMATION fileInformation)
 
 BOOLEAN
 HCAPI
-HcFileQueryInformation(LPCSTR lpPath, PHC_FILE_INFORMATION fileInformation)
+HcFileQueryInformationA(LPCSTR lpPath, PHC_FILE_INFORMATION fileInformation)
 {
 	HANDLE hFile;
 	DWORD BytesRead;
@@ -272,7 +272,7 @@ HcFileRvaOffset(PIMAGE_NT_HEADERS pImageHeader, SIZE_T RVA)
 */
 DWORD
 HCAPI
-HcFileOffsetByExportName(HMODULE hModule, LPCSTR lpExportName)
+HcFileOffsetByExportNameA(HMODULE hModule, LPCSTR lpExportName)
 {
 	PIMAGE_DOS_HEADER pHeaderDOS;
 	PIMAGE_NT_HEADERS pHeaderNT;
@@ -299,7 +299,7 @@ HcFileOffsetByExportName(HMODULE hModule, LPCSTR lpExportName)
 		return 0;
 	}
 
-	szExportVA = (SIZE_T)HcModuleProcedureAddress(hModule, lpExportName);
+	szExportVA = (SIZE_T)HcModuleProcedureAddressA(hModule, lpExportName);
 	if (szExportVA)
 	{
 		/* Calculate the relative offset */
@@ -316,7 +316,7 @@ HcFileOffsetByExportName(HMODULE hModule, LPCSTR lpExportName)
 */
 DWORD
 HCAPI
-HcFileOffsetByExportName(HMODULE hModule, LPCWSTR lpExportName)
+HcFileOffsetByExportNameW(HMODULE hModule, LPCWSTR lpExportName)
 {
 	PIMAGE_DOS_HEADER pHeaderDOS;
 	PIMAGE_NT_HEADERS pHeaderNT;
@@ -343,7 +343,7 @@ HcFileOffsetByExportName(HMODULE hModule, LPCWSTR lpExportName)
 		return 0;
 	}
 
-	dwExportVA = (SIZE_T)HcModuleProcedureAddress(hModule, lpExportName);
+	dwExportVA = (SIZE_T)HcModuleProcedureAddressW(hModule, lpExportName);
 	if (dwExportVA)
 	{
 		/* Calculate the relative offset */
@@ -361,14 +361,14 @@ HcFileOffsetByExportName(HMODULE hModule, LPCWSTR lpExportName)
 */
 SIZE_T
 HCAPI
-HcFileReadModule(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dwCount)
+HcFileReadModuleA(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dwCount)
 {
 	DWORD dwFileOffset;
 	LPSTR lpModulePath;
 	HANDLE hFile;
 	DWORD BytesRead;
 
-	if (!(dwFileOffset = HcFileOffsetByExportName(hModule, lpExportName)))
+	if (!(dwFileOffset = HcFileOffsetByExportNameA(hModule, lpExportName)))
 	{
 		return 0;
 	}
@@ -385,7 +385,7 @@ HcFileReadModule(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dwC
 	GetModuleFileNameA(hModule, lpModulePath, MAX_PATH);
 	if (!lpModulePath)
 	{
-		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		VirtualFree(lpModulePath, 0, MEM_RELEASE);
 		return 0;
 	}
 
@@ -397,25 +397,25 @@ HcFileReadModule(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dwC
 		FILE_ATTRIBUTE_NORMAL,
 		NULL)))
 	{
-		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		VirtualFree(lpModulePath, 0, MEM_RELEASE);
 		return 0;
 	}
 
 	if (!(SetFilePointer(hFile, dwFileOffset, 0, FILE_BEGIN)))
 	{
-		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		VirtualFree(lpModulePath, 0, MEM_RELEASE);
 		CloseHandle(hFile);
 		return 0;
 	}
 
 	if (!ReadFile(hFile, lpBuffer, dwCount, &BytesRead, NULL))
 	{
-		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		VirtualFree(lpModulePath, 0, MEM_RELEASE);
 		CloseHandle(hFile);
 		return 0;
 	}
 
-	VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+	VirtualFree(lpModulePath, 0, MEM_RELEASE);
 	CloseHandle(hFile);
 	return BytesRead;
 }
@@ -426,14 +426,14 @@ HcFileReadModule(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dwC
 */
 SIZE_T
 HCAPI
-HcFileReadModule(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD dwCount)
+HcFileReadModuleW(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD dwCount)
 {
 	DWORD dwFileOffset;
 	LPWSTR lpModulePath;
 	HANDLE hFile;
 	DWORD BytesRead;
 
-	if (!(dwFileOffset = HcFileOffsetByExportName(hModule, lpExportName)))
+	if (!(dwFileOffset = HcFileOffsetByExportNameW(hModule, lpExportName)))
 	{
 		return 0;
 	}
@@ -450,7 +450,7 @@ HcFileReadModule(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD dw
 	GetModuleFileNameW(hModule, lpModulePath, MAX_PATH);
 	if (!lpModulePath)
 	{
-		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		VirtualFree(lpModulePath, 0, MEM_RELEASE);
 		return 0;
 	}
 
@@ -462,25 +462,25 @@ HcFileReadModule(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD dw
 		FILE_ATTRIBUTE_NORMAL,
 		NULL)))
 	{
-		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		VirtualFree(lpModulePath, 0, MEM_RELEASE);
 		return 0;
 	}
 
 	if (!(SetFilePointer(hFile, dwFileOffset, 0, FILE_BEGIN)))
 	{
-		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		VirtualFree(lpModulePath, 0, MEM_RELEASE);
 		CloseHandle(hFile);
 		return 0;
 	}
 
 	if (!ReadFile(hFile, lpBuffer, dwCount, &BytesRead, NULL))
 	{
-		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		VirtualFree(lpModulePath, 0, MEM_RELEASE);
 		CloseHandle(hFile);
 		return 0;
 	}
 
-	VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+	VirtualFree(lpModulePath, 0, MEM_RELEASE);
 	CloseHandle(hFile);
 	return BytesRead;
 }
@@ -587,7 +587,7 @@ HcFileReadAddress(LPBYTE lpBaseAddress, PBYTE lpBufferOut, DWORD dwCountToRead)
 	GetModuleFileNameW(hModule, lpModulePath, MAX_PATH);
 	if (!lpModulePath)
 	{
-		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		VirtualFree(lpModulePath, 0, MEM_RELEASE);
 		return 0;
 	}
 
@@ -600,14 +600,14 @@ HcFileReadAddress(LPBYTE lpBaseAddress, PBYTE lpBufferOut, DWORD dwCountToRead)
 		FILE_ATTRIBUTE_NORMAL,
 		NULL)))
 	{
-		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		VirtualFree(lpModulePath, 0, MEM_RELEASE);
 		return 0;
 	}
 
 	/* Go to the offset */
 	if (!(SetFilePointer(hFile, dwFileOffset, 0, FILE_BEGIN)))
 	{
-		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		VirtualFree(lpModulePath, 0, MEM_RELEASE);
 		HcClose(hFile);
 		return 0;
 	}
@@ -615,12 +615,12 @@ HcFileReadAddress(LPBYTE lpBaseAddress, PBYTE lpBufferOut, DWORD dwCountToRead)
 	/* Read it */
 	if (!ReadFile(hFile, lpBufferOut, dwCountToRead, &BytesRead, NULL))
 	{
-		VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+		VirtualFree(lpModulePath, 0, MEM_RELEASE);
 		HcClose(hFile);
 		return 0;
 	}
 
-	VirtualFree(lpModulePath, NULL, MEM_RELEASE);
+	VirtualFree(lpModulePath, 0, MEM_RELEASE);
 	HcClose(hFile);
 	return BytesRead;
 }

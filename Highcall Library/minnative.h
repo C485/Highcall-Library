@@ -1,4 +1,6 @@
-#pragma once
+#ifndef HC_MIN_NATIVE_H
+#define HC_MIN_NATIVE_H
+
 #include <windows.h>
 
 #define NT_SUCCESS(Status)				((NTSTATUS)(Status) >= 0)
@@ -15,6 +17,20 @@
 #define STATUS_HANDLE_NOT_CLOSABLE		((NTSTATUS)0xC0000235L)
 #define STATUS_INSUFFICIENT_RESOURCES	((NTSTATUS)0xC000009AL)
 #define STATUS_PARTIAL_COPY				((NTSTATUS)0x8000000DL)
+
+#define NtCurrentProcess ((HANDLE)(LONG_PTR)-1)
+#define NtCurrentThread ((HANDLE)(LONG_PTR)-2)
+
+#define ASSERT(x) ((void)sizeof(x))
+
+#define InitializeObjectAttributes( p, n, a, r, s ) { \
+    (p)->Length = sizeof( OBJECT_ATTRIBUTES );          \
+    (p)->RootDirectory = r;                             \
+    (p)->Attributes = a;                                \
+    (p)->ObjectName = n;                                \
+    (p)->SecurityDescriptor = s;                        \
+    (p)->SecurityQualityOfService = NULL;               \
+    }
 
 typedef struct _RTL_USER_PROCESS_PARAMETERS *PRTL_USER_PROCESS_PARAMETERS;
 typedef struct _RTL_CRITICAL_SECTION *PRTL_CRITICAL_SECTION;
@@ -479,3 +495,5 @@ typedef enum _MEMORY_INFORMATION_CLASS
 	MemoryRegionInformation, //MemoryBasicVlmInformation, MEMORY_REGION_INFORMATION
 	MemoryWorkingSetExInformation
 } MEMORY_INFORMATION_CLASS;
+
+#endif

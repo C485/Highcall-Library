@@ -48,7 +48,7 @@ HcProcessExitCode(IN SIZE_T dwProcessId,
 
 BOOLEAN 
 HCAPI
-HcProcessExitCode(IN HANDLE hProcess,
+HcProcessExitCodeEx(IN HANDLE hProcess,
 	IN LPDWORD lpExitCode)
 {
 	PROCESS_BASIC_INFORMATION ProcessBasic;
@@ -99,11 +99,11 @@ HcProcessOpen(SIZE_T dwProcessId, ACCESS_MASK DesiredAccess)
 
 BOOLEAN
 HCAPI
-HcProcessReady(HANDLE hProcess)
+HcProcessReadyEx(HANDLE hProcess)
 {
 	DWORD ExitCode;
 
-	HcProcessExitCode(hProcess, &ExitCode);
+	HcProcessExitCodeEx(hProcess, &ExitCode);
 
 	/* Check if its still running */
 	if (ExitCode != STILL_ACTIVE)
@@ -132,7 +132,7 @@ HcProcessReady(SIZE_T dwProcessId)
 	}
 
 	/* Ensure we didn't find it before ntdll was loaded */
-	Success = HcProcessReady(hProcess);
+	Success = HcProcessReadyEx(hProcess);
 
 	HcClose(hProcess);
 
@@ -144,7 +144,7 @@ static
 SIZE_T
 HCAPI MmInternalResolve(PVOID lParam)
 {
-	PMANUAL_INJECT ManualInject;
+	PHC_MANUAL_MAP ManualInject;
 	HMODULE hModule;
 	SIZE_T Index;
 	SIZE_T Function;
@@ -160,7 +160,7 @@ HCAPI MmInternalResolve(PVOID lParam)
 
 	PDLL_MAIN EntryPoint;
 
-	ManualInject = (PMANUAL_INJECT)lParam;
+	ManualInject = (PHC_MANUAL_MAP)lParam;
 
 	pIBR = ManualInject->BaseRelocation;
 	Delta = (SIZE_T)((LPBYTE)ManualInject->ImageBase - ManualInject->NtHeaders->OptionalHeader.ImageBase);
@@ -292,7 +292,7 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 	LPCWSTR lpPath)
 {
 	HC_FILE_INFORMATION fileInformation;
-	MANUAL_INJECT ManualInject;
+	MANUAL_MAP ManualInject;
 
 
 	PIMAGE_DOS_HEADER pHeaderDos;
@@ -304,13 +304,13 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 	DWORD ExitCode, SectionIndex;
 	SIZE_T BytesWritten;
 
-	if (!HcProcessReady(hProcess))
+	if (!HcProcessReadyEx(hProcess))
 	{
 		SetLastError(STATUS_PENDING);
 		return FALSE;
 	}
 
-	if (!HcFileQueryInformation(lpPath, &fileInformation))
+	if (!HcFileQueryInformationW(lpPath, &fileInformation))
 	{
 		return FALSE;
 	}
@@ -374,7 +374,7 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 		return FALSE;
 	}
 
-	memset(&ManualInject, 0, sizeof(MANUAL_INJECT));
+	memset(&ManualInject, 0, sizeof(MANUAL_MAP));
 
 	ManualInject.ImageBase = ImageBuffer;
 	ManualInject.NtHeaders = (PIMAGE_NT_HEADERS)((LPBYTE)ImageBuffer + pHeaderDos->e_lfanew);
@@ -389,7 +389,7 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 	if (!HcProcessWriteMemory(hProcess,
 		LoaderBuffer,
 		&ManualInject,
-		sizeof(MANUAL_INJECT),
+		sizeof(MANUAL_MAP),
 		&BytesWritten))
 	{
 		return FALSE;
@@ -397,7 +397,7 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 
 	/* Write loader code */
 	if (!HcProcessWriteMemory(hProcess,
-		(PVOID)((PMANUAL_INJECT)LoaderBuffer + 1),
+		(PVOID)((PHC_MANUAL_MAP)LoaderBuffer + 1),
 		MmInternalResolve,
 		(ULONG)((SIZE_T)MmInternalResolved - (SIZE_T)MmInternalResolve),
 		&BytesWritten))
@@ -409,7 +409,7 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 	hThread = HcCreateRemoteThread(hProcess,
 		NULL,
 		0,
-		(LPTHREAD_START_ROUTINE)((PMANUAL_INJECT)LoaderBuffer + 1),
+		(LPTHREAD_START_ROUTINE)((PHC_MANUAL_MAP)LoaderBuffer + 1),
 		LoaderBuffer,
 		0,
 		NULL);
@@ -446,13 +446,6 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 
 BOOLEAN
 HCAPI
-HcProcessSuspend(HANDLE hProcess)
-{
-	return NT_SUCCESS(HcSuspendProcess(hProcess));
-}
-
-BOOLEAN
-HCAPI
 HcProcessSuspend(SIZE_T dwProcessId)
 {
 	NTSTATUS Status;
@@ -468,9 +461,9 @@ HcProcessSuspend(SIZE_T dwProcessId)
 
 BOOLEAN
 HCAPI
-HcProcessResume(HANDLE hProcess)
+HcProcessSuspendEx(HANDLE hProcess)
 {
-	return NT_SUCCESS(HcResumeProcess(hProcess));
+	return NT_SUCCESS(HcSuspendProcess(hProcess));
 }
 
 BOOLEAN
@@ -488,6 +481,12 @@ HcProcessResume(SIZE_T dwProcessId)
 	return NT_SUCCESS(Status);
 }
 
+BOOLEAN
+HCAPI
+HcProcessResumeEx(HANDLE hProcess)
+{
+	return NT_SUCCESS(HcResumeProcess(hProcess));
+}
 
 BOOL
 HCAPI
@@ -552,7 +551,7 @@ HcProcessAllocate(IN HANDLE hProcess,
 BOOL
 HCAPI
 HcProcessWriteMemory(HANDLE hProcess,
-	PVOID lpBaseAddress,
+	LPVOID lpBaseAddress,
 	CONST VOID* lpBuffer,
 	SIZE_T nSize,
 	PSIZE_T lpNumberOfBytesWritten)
@@ -732,7 +731,7 @@ HcProcessQueryInformationWindow(_In_ HANDLE ProcessHandle,
 	Status = HcQueryInformationProcess(ProcessHandle,
 		ProcessWindowInformation,
 		NULL,
-		NULL,
+		0,
 		&ReturnLength);
 
 	if (NT_SUCCESS(Status))
@@ -1029,7 +1028,7 @@ HcProcessEnumModules(HANDLE hProcess,
 			return FALSE;
 		}
 
-		Module = new HC_MODULE_INFORMATION;
+		InitializeModuleInformation(Module, MAX_PATH, MAX_PATH);
 
 		/* Attempt to convert to a HC module */
 		if (HcProcessLdrModuleToHighCallModule(hProcess,
@@ -1039,14 +1038,14 @@ HcProcessEnumModules(HANDLE hProcess,
 			/* Give it to the caller */
 			if (hcmCallback(*Module, lParam))
 			{
-				delete Module;
+				DestroyModuleInformation(Module);
 				return TRUE;
 			}
 
 			Count += 1;
 		}
 
-		delete Module;
+		DestroyModuleInformation(Module);
 
 		if (Count > MAX_MODULES)
 		{
@@ -1256,7 +1255,7 @@ HcProcessQueryByName(LPCWSTR lpProcessName,
 	/* Loop through the process list */
 	while (TRUE)
 	{
-		hcpInformation = new HC_PROCESS_INFORMATION;
+		InitializeProcessInformation(hcpInformation, MAX_PATH);
 
 		/* Check for a match */
 		if (!lpProcessName ||
@@ -1265,7 +1264,7 @@ HcProcessQueryByName(LPCWSTR lpProcessName,
 				TRUE))
 		{
 
-			hcpInformation->Id = (SIZE_T)processInfo->UniqueProcessId;
+			hcpInformation->Id = HandleToUlong(processInfo->UniqueProcessId);
 
 			/* Copy the name */
 			wcsncpy(hcpInformation->Name,
@@ -1281,10 +1280,10 @@ HcProcessQueryByName(LPCWSTR lpProcessName,
 				/* Query main module */
 				HcProcessQueryInformationModule(CurrentHandle,
 					NULL,
-					&hcpInformation->MainModule);
+					hcpInformation->MainModule);
 
 				HcProcessQueryInformationWindow(CurrentHandle,
-					&hcpInformation->MainWindow);
+					hcpInformation->MainWindow);
 
 				/* Close this handle. */
 				HcClose(CurrentHandle);
@@ -1294,12 +1293,12 @@ HcProcessQueryByName(LPCWSTR lpProcessName,
 			if (hcpCallback(*hcpInformation, lParam))
 			{
 				VirtualFree(Buffer, 0, MEM_RELEASE);
-				delete hcpInformation;
+				DestroyProcessInformation(hcpInformation);
 				return TRUE;
 			}
 		}
 
-		delete hcpInformation;
+		DestroyProcessInformation(hcpInformation);
 
 		if (!processInfo->NextEntryOffset)
 		{

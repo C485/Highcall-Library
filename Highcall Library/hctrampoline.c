@@ -37,7 +37,7 @@ DWORD HCAPI HcTrampolineCalculateLength(BYTE* Src, DWORD NeededLength)
 		InstructionSize += decodedInstructions[i].size;
 
 		if (InstructionSize >= NeededLength)
-			BigEnough = true;
+			BigEnough = TRUE;
 	}
 
 	if (!BigEnough)

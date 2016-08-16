@@ -18,13 +18,26 @@ tCreateRemoteThread HcCreateRemoteThread;
 
 static VOID HCAPI HcInitializeTrampoline(VOID)
 {
-	HcGetWindowThreadProcessId = (tGetWindowThreadProcessId)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(USER32, "GetWindowThreadProcessId"));
-	HcGetCursorPos = (tGetCursorPos)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(USER32, "GetCursorPos"));
-	HcPostMessageA = (tPostMessageA)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(USER32, "PostMessageA"));
-	HcPostMessageW = (tPostMessageW)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(USER32, "PostMessageW"));
-	HcSendMessageA = (tSendMessageA)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(USER32, "SendMessageA"));
-	HcSendMessageW = (tSendMessageW)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(USER32, "SendMessageW"));
-	HcCreateRemoteThread = (tCreateRemoteThread)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddress(KERNEL32, "CreateRemoteThread"));
+	HcGetWindowThreadProcessId = (tGetWindowThreadProcessId)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddressA(USER32,
+		"GetWindowThreadProcessId"), 5);
+
+	HcGetCursorPos = (tGetCursorPos)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddressA(USER32, 
+		"GetCursorPos"), 5);
+
+	HcPostMessageA = (tPostMessageA)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddressA(USER32,
+		"PostMessageA"), 5);
+
+	HcPostMessageW = (tPostMessageW)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddressA(USER32, 
+		"PostMessageW"), 5);
+
+	HcSendMessageA = (tSendMessageA)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddressA(USER32,
+		"SendMessageA"), 5);
+
+	HcSendMessageW = (tSendMessageW)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddressA(USER32, 
+		"SendMessageW"), 5);
+
+	HcCreateRemoteThread = (tCreateRemoteThread)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddressA(KERNEL32, 
+		"CreateRemoteThread"), 5);
 }
 
 #pragma endregion
@@ -43,20 +56,35 @@ t_RtlActivateActivationContextEx RtlActivateActivationContextEx;
 
 static HIGHCALL_STATUS HCAPI HcInitializeImports(VOID)
 {
-	RtlGetVersion = (t_RtlGetVersion)HcModuleProcedureAddress(NTDLL, "RtlGetVersion");
+	RtlGetVersion = (t_RtlGetVersion)HcModuleProcedureAddressA(NTDLL, "RtlGetVersion");
 	if (!RtlGetVersion)
 	{
 		return HIGHCALL_RTLGETVERSION_UNDEFINED;
 	}
 
-	RtlEqualUnicodeString = (t_RtlEqualUnicodeString)HcModuleProcedureAddress(NTDLL, "RtlEqualUnicodeString");
-	RtlInitUnicodeString = (t_RtlInitUnicodeString)HcModuleProcedureAddress(NTDLL, "RtlInitUnicodeString");
-	LdrLoadDll = (t_LdrLoadDll)HcModuleProcedureAddress(NTDLL, "LdrLoadDll");
-	RtlAllocateActivationContextStack = (t_RtlAllocateActivationContextStack)HcModuleProcedureAddress(NTDLL, "RtlAllocateActivationContextStack");
-	RtlQueryInformationActivationContext = (t_RtlQueryInformationActivationContext)HcModuleProcedureAddress(NTDLL, "RtlQueryInformationActivationContext");
-	RtlFreeActivationContextStack = (t_RtlFreeActivationContextStack)HcModuleProcedureAddress(NTDLL, "RtlFreeActivationContextStack");
-	RtlFreeThreadActivationContextStack = (t_RtlFreeThreadActivationContextStack)HcModuleProcedureAddress(NTDLL, "RtlFreeThreadActivationContextStack");
-	RtlActivateActivationContextEx = (t_RtlActivateActivationContextEx)HcModuleProcedureAddress(NTDLL, "RtlActivateActivationContextEx");
+	RtlEqualUnicodeString = (t_RtlEqualUnicodeString)HcModuleProcedureAddressA(NTDLL,
+		"RtlEqualUnicodeString");
+
+	RtlInitUnicodeString = (t_RtlInitUnicodeString)HcModuleProcedureAddressA(NTDLL,
+		"RtlInitUnicodeString");
+
+	LdrLoadDll = (t_LdrLoadDll)HcModuleProcedureAddressA(NTDLL,
+		"LdrLoadDll");
+
+	RtlAllocateActivationContextStack = (t_RtlAllocateActivationContextStack)HcModuleProcedureAddressA(NTDLL, 
+		"RtlAllocateActivationContextStack");
+
+	RtlQueryInformationActivationContext = (t_RtlQueryInformationActivationContext)HcModuleProcedureAddressA(NTDLL, 
+		"RtlQueryInformationActivationContext");
+
+	RtlFreeActivationContextStack = (t_RtlFreeActivationContextStack)HcModuleProcedureAddressA(NTDLL,
+		"RtlFreeActivationContextStack");
+
+	RtlFreeThreadActivationContextStack = (t_RtlFreeThreadActivationContextStack)HcModuleProcedureAddressA(NTDLL,
+		"RtlFreeThreadActivationContextStack");
+
+	RtlActivateActivationContextEx = (t_RtlActivateActivationContextEx)HcModuleProcedureAddressA(NTDLL,
+		"RtlActivateActivationContextEx");
 
 	return HIGHCALL_SUCCESS;
 }
@@ -86,29 +114,29 @@ SyscallIndex sciQueryVirtualMemory;
 
 static HIGHCALL_STATUS HcInitializeSyscalls(VOID)
 {
-	sciQueryInformationToken = HcSyscallIndex("NtQueryInformationToken");
+	sciQueryInformationToken = HcSyscallIndexA("NtQueryInformationToken");
 
-	if (!(sciOpenProcessToken = HcSyscallIndex("NtOpenProcessToken")))
+	if (!(sciOpenProcessToken = HcSyscallIndexA("NtOpenProcessToken")))
 	{
 		return HIGHCALL_OPENPROCESSTOKEN_UNDEFINED;
 	}
 
-	sciResumeProcess = HcSyscallIndex("NtResumeProcess");
-	sciSuspendProcess = HcSyscallIndex("NtSuspendProcess");
-	sciAllocateVirtualMemory = HcSyscallIndex("NtAllocateVirtualMemory");
-	sciFreeVirtualMemory = HcSyscallIndex("NtFreeVirtualMemory");
-	sciResumeThread = HcSyscallIndex("NtResumeThread");
-	sciQueryInformationThread = HcSyscallIndex("NtQueryInformationThread");
-	sciCreateThread = HcSyscallIndex("NtCreateThread");
-	sciFlushInstructionCache = HcSyscallIndex("NtFlushInstructionCache");
-	sciOpenProcess = HcSyscallIndex("NtOpenProcess");
-	sciProtectVirtualMemory = HcSyscallIndex("NtProtectVirtualMemory");
-	sciReadVirtualMemory = HcSyscallIndex("NtReadVirtualMemory");
-	sciWriteVirtualMemory = HcSyscallIndex("NtWriteVirtualMemory");
-	sciQueryInformationProcess = HcSyscallIndex("NtQueryInformationProcess");
-	sciQuerySystemInformation = HcSyscallIndex("NtQuerySystemInformation");
-	sciClose = HcSyscallIndex("NtClose");
-	sciQueryVirtualMemory = HcSyscallIndex("NtQueryVirtualMemory");
+	sciResumeProcess = HcSyscallIndexA("NtResumeProcess");
+	sciSuspendProcess = HcSyscallIndexA("NtSuspendProcess");
+	sciAllocateVirtualMemory = HcSyscallIndexA("NtAllocateVirtualMemory");
+	sciFreeVirtualMemory = HcSyscallIndexA("NtFreeVirtualMemory");
+	sciResumeThread = HcSyscallIndexA("NtResumeThread");
+	sciQueryInformationThread = HcSyscallIndexA("NtQueryInformationThread");
+	sciCreateThread = HcSyscallIndexA("NtCreateThread");
+	sciFlushInstructionCache = HcSyscallIndexA("NtFlushInstructionCache");
+	sciOpenProcess = HcSyscallIndexA("NtOpenProcess");
+	sciProtectVirtualMemory = HcSyscallIndexA("NtProtectVirtualMemory");
+	sciReadVirtualMemory = HcSyscallIndexA("NtReadVirtualMemory");
+	sciWriteVirtualMemory = HcSyscallIndexA("NtWriteVirtualMemory");
+	sciQueryInformationProcess = HcSyscallIndexA("NtQueryInformationProcess");
+	sciQuerySystemInformation = HcSyscallIndexA("NtQuerySystemInformation");
+	sciClose = HcSyscallIndexA("NtClose");
+	sciQueryVirtualMemory = HcSyscallIndexA("NtQueryVirtualMemory");
 
 	return HIGHCALL_SUCCESS;
 }
@@ -202,15 +230,15 @@ static HIGHCALL_STATUS HcInitializeModules(VOID)
 		pLdrDataTableEntry = (PLDR_DATA_TABLE_ENTRY)pListEntry;
 
 		/* Important note is that this is strict to the entire name */
-		if (HcStringEqual(L"user32.dll", pLdrDataTableEntry->FullModuleName.Buffer, TRUE))
+		if (HcStringEqualW(L"user32.dll", pLdrDataTableEntry->FullModuleName.Buffer, TRUE))
 		{
 			USER32 = (HMODULE)pLdrDataTableEntry->InInitializationOrderLinks.Flink;
 		}
-		else if (HcStringEqual(L"ntdll.dll", pLdrDataTableEntry->FullModuleName.Buffer, TRUE))
+		else if (HcStringEqualW(L"ntdll.dll", pLdrDataTableEntry->FullModuleName.Buffer, TRUE))
 		{
 			NTDLL = (HMODULE)pLdrDataTableEntry->InInitializationOrderLinks.Flink;
 		}
-		else if (HcStringEqual(L"kernel32.dll", pLdrDataTableEntry->FullModuleName.Buffer, TRUE))
+		else if (HcStringEqualW(L"kernel32.dll", pLdrDataTableEntry->FullModuleName.Buffer, TRUE))
 		{
 			KERNEL32 = (HMODULE)pLdrDataTableEntry->InInitializationOrderLinks.Flink;
 		}

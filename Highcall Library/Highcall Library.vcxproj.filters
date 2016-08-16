@@ -28,12 +28,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="hcapi.cpp">
-      <Filter>Highcall</Filter>
-    </ClCompile>
-    <ClCompile Include="hctrampoline.cpp">
-      <Filter>Highcall\Trampoline</Filter>
-    </ClCompile>
     <ClCompile Include="..\distorm\src\decoder.c">
       <Filter>Disasm</Filter>
     </ClCompile>
@@ -61,22 +55,28 @@
     <ClCompile Include="..\distorm\src\wstring.c">
       <Filter>Disasm</Filter>
     </ClCompile>
-    <ClCompile Include="highcall.cpp">
+    <ClCompile Include="hcprocess.c">
       <Filter>Highcall</Filter>
     </ClCompile>
-    <ClCompile Include="hcstring.cpp">
+    <ClCompile Include="hctrampoline.c">
+      <Filter>Highcall\Trampoline</Filter>
+    </ClCompile>
+    <ClCompile Include="hcapi.c">
       <Filter>Highcall</Filter>
     </ClCompile>
-    <ClCompile Include="hcprocess.cpp">
+    <ClCompile Include="hcfile.c">
       <Filter>Highcall</Filter>
     </ClCompile>
-    <ClCompile Include="hcinternal.cpp">
+    <ClCompile Include="hcinternal.c">
       <Filter>Highcall</Filter>
     </ClCompile>
-    <ClCompile Include="hcfile.cpp">
+    <ClCompile Include="hcmodule.c">
       <Filter>Highcall</Filter>
     </ClCompile>
-    <ClCompile Include="hcmodule.cpp">
+    <ClCompile Include="hcstring.c">
+      <Filter>Highcall</Filter>
+    </ClCompile>
+    <ClCompile Include="highcall.c">
       <Filter>Highcall</Filter>
     </ClCompile>
   </ItemGroup>

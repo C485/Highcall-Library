@@ -1,52 +1,55 @@
-#pragma once
+#ifndef HC_SYSCALL_H
+#define HC_SYSCALL_H
+
 #include "native.h"
 #include "hcapi.h"
+#include "hcdef.h"
 
-extern "C" SyscallIndex sciQueryInformationToken;
-extern "C" NTSTATUS HcQueryInformationToken(_In_ HANDLE TokenHandle,
+HC_GLOBAL SyscallIndex sciQueryInformationToken;
+HC_GLOBAL NTSTATUS HcQueryInformationToken(_In_ HANDLE TokenHandle,
 	_In_ TOKEN_INFORMATION_CLASS TokenInformationClass,
 	_Out_writes_bytes_(TokenInformationLength) LPVOID TokenInformation,
 	_In_ ULONG TokenInformationLength,
 	_Out_ PULONG ReturnLength);
 
-extern "C" SyscallIndex sciOpenProcessToken;
-extern "C" NTSTATUS HcOpenProcessToken(_In_ HANDLE hProcess,
+HC_GLOBAL SyscallIndex sciOpenProcessToken;
+HC_GLOBAL NTSTATUS HcOpenProcessToken(_In_ HANDLE hProcess,
 	_In_ ACCESS_MASK DesiredAccess,
 	_Out_ PHANDLE TokenHandle);
 
-extern "C" SyscallIndex sciResumeProcess;
-extern "C" NTSTATUS HcResumeProcess(IN HANDLE ProcessHandle);
+HC_GLOBAL SyscallIndex sciResumeProcess;
+HC_GLOBAL NTSTATUS HcResumeProcess(IN HANDLE ProcessHandle);
 
-extern "C" SyscallIndex sciSuspendProcess;
-extern "C" NTSTATUS HcSuspendProcess(IN HANDLE ProcessHandle);
+HC_GLOBAL SyscallIndex sciSuspendProcess;
+HC_GLOBAL NTSTATUS HcSuspendProcess(IN HANDLE ProcessHandle);
 
-extern "C" SyscallIndex sciAllocateVirtualMemory;
-extern "C" NTSTATUS HcAllocateVirtualMemory(IN HANDLE hProcess,
+HC_GLOBAL SyscallIndex sciAllocateVirtualMemory;
+HC_GLOBAL NTSTATUS HcAllocateVirtualMemory(IN HANDLE hProcess,
 	IN LPVOID* UBaseAddress,
 	IN ULONG_PTR ZeroBits,
 	IN OUT PSIZE_T URegionSize,
 	IN ULONG AllocationType,
 	IN ULONG Protect);
 
-extern "C" SyscallIndex sciFreeVirtualMemory;
-extern "C" NTSTATUS HcFreeVirtualMemory(IN HANDLE hProcess,
+HC_GLOBAL SyscallIndex sciFreeVirtualMemory;
+HC_GLOBAL NTSTATUS HcFreeVirtualMemory(IN HANDLE hProcess,
 	IN LPVOID* UBaseAddress,
 	IN PSIZE_T URegionSize,
 	IN ULONG FreeType);
 
-extern "C" SyscallIndex sciResumeThread;
-extern "C" NTSTATUS HcResumeThread(IN HANDLE ThreadHandle,
+HC_GLOBAL SyscallIndex sciResumeThread;
+HC_GLOBAL NTSTATUS HcResumeThread(IN HANDLE ThreadHandle,
 	OUT PULONG SuspendCount OPTIONAL);
 
-extern "C" SyscallIndex sciQueryInformationThread;
-extern "C" NTSTATUS HcQueryInformationThread(IN HANDLE ThreadHandle,
+HC_GLOBAL SyscallIndex sciQueryInformationThread;
+HC_GLOBAL NTSTATUS HcQueryInformationThread(IN HANDLE ThreadHandle,
 	IN THREADINFOCLASS ThreadInformationClass,
 	OUT LPVOID ThreadInformation,
 	IN ULONG ThreadInformationLength,
 	OUT PULONG ReturnLength OPTIONAL);
 
-extern "C" SyscallIndex sciCreateThread;
-extern "C" NTSTATUS HcCreateThread(OUT PHANDLE ThreadHandle,
+HC_GLOBAL SyscallIndex sciCreateThread;
+HC_GLOBAL NTSTATUS HcCreateThread(OUT PHANDLE ThreadHandle,
 	IN ACCESS_MASK          DesiredAccess,
 	IN POBJECT_ATTRIBUTES   ObjectAttributes OPTIONAL,
 	IN HANDLE               ProcessHandle,
@@ -55,60 +58,62 @@ extern "C" NTSTATUS HcCreateThread(OUT PHANDLE ThreadHandle,
 	IN PINITIAL_TEB         InitialTeb,
 	IN BOOLEAN              CreateSuspended);
 
-extern "C" SyscallIndex sciFlushInstructionCache;
-extern "C" NTSTATUS HcFlushInstructionCache(IN HANDLE ProcessHandle,
+HC_GLOBAL SyscallIndex sciFlushInstructionCache;
+HC_GLOBAL NTSTATUS HcFlushInstructionCache(IN HANDLE ProcessHandle,
 	IN LPVOID BaseAddress,
 	IN SIZE_T NumberOfBytesToFlush);
 
-extern "C" SyscallIndex sciOpenProcess;
-extern "C" NTSTATUS HcOpenProcess(_Out_ PHANDLE ProcessHandle,
+HC_GLOBAL SyscallIndex sciOpenProcess;
+HC_GLOBAL NTSTATUS HcOpenProcess(_Out_ PHANDLE ProcessHandle,
 	_In_     ACCESS_MASK        DesiredAccess,
 	_In_     POBJECT_ATTRIBUTES ObjectAttributes,
 	_In_opt_ PCLIENT_ID         ClientId
 );
 
-extern "C" SyscallIndex sciProtectVirtualMemory;
-extern "C" NTSTATUS HcProtectVirtualMemory(IN HANDLE ProcessHandle,
+HC_GLOBAL SyscallIndex sciProtectVirtualMemory;
+HC_GLOBAL NTSTATUS HcProtectVirtualMemory(IN HANDLE ProcessHandle,
 	IN OUT LPVOID *BaseAddress,
 	IN OUT PSIZE_T NumberOfBytesToProtect,
 	IN ULONG NewAccessProtection,
 	OUT PULONG OldAccessProtection);
 
-extern "C" SyscallIndex sciReadVirtualMemory;
-extern "C" NTSTATUS HcReadVirtualMemory(HANDLE ProcessHandle,
+HC_GLOBAL SyscallIndex sciReadVirtualMemory;
+HC_GLOBAL NTSTATUS HcReadVirtualMemory(HANDLE ProcessHandle,
 	LPVOID BaseAddress,
 	LPVOID Buffer,
 	SIZE_T BufferSize,
 	PSIZE_T NumberOfBytesRead);
 
-extern "C" SyscallIndex sciWriteVirtualMemory;
-extern "C" NTSTATUS HcWriteVirtualMemory(HANDLE ProcessHandle,
+HC_GLOBAL SyscallIndex sciWriteVirtualMemory;
+HC_GLOBAL NTSTATUS HcWriteVirtualMemory(HANDLE ProcessHandle,
 	LPVOID BaseAddress, 
 	CONST VOID *Buffer,
 	SIZE_T BufferSize, 
 	PSIZE_T NumberOfBytesWritten);
 
-extern "C" SyscallIndex sciQueryInformationProcess;
-extern "C" NTSTATUS HcQueryInformationProcess(
+HC_GLOBAL SyscallIndex sciQueryInformationProcess;
+HC_GLOBAL NTSTATUS HcQueryInformationProcess(
 	__in HANDLE ProcessHandle, __in PROCESSINFOCLASS ProcessInformationClass,
 	__out_bcount(ProcessInformationLength) LPVOID ProcessInformation,
 	__in ULONG ProcessInformationLength,
 	__out_opt PULONG ReturnLength);
 
-extern "C" SyscallIndex sciQuerySystemInformation;
-extern "C" NTSTATUS HcQuerySystemInformation(
+HC_GLOBAL SyscallIndex sciQuerySystemInformation;
+HC_GLOBAL NTSTATUS HcQuerySystemInformation(
 	__in SYSTEM_INFORMATION_CLASS SystemInformationClass,
 	__out_bcount_opt(SystemInformationLength) LPVOID SystemInformation,
 	__in ULONG SystemInformationLength,
 	__out_opt PULONG ReturnLength);
 
-extern "C" SyscallIndex sciClose;
-extern "C" NTSTATUS HcClose(HANDLE hObject);
+HC_GLOBAL SyscallIndex sciClose;
+HC_GLOBAL NTSTATUS HcClose(HANDLE hObject);
 
-extern "C" SyscallIndex sciQueryVirtualMemory;
-extern "C" NTSTATUS HcQueryVirtualMemory(IN HANDLE ProcessHandle,
+HC_GLOBAL SyscallIndex sciQueryVirtualMemory;
+HC_GLOBAL NTSTATUS HcQueryVirtualMemory(IN HANDLE ProcessHandle,
 	IN LPVOID BaseAddress,
 	IN MEMORY_INFORMATION_CLASS MemoryInformationClass,
 	OUT LPVOID MemoryInformation,
 	IN SIZE_T MemoryInformationLength,
 	OUT PSIZE_T ReturnLength);
+
+#endif

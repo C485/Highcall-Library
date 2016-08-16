@@ -1,7 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #include "hcstring.h"
-#include <ctime>
 #include <stdio.h>
 
 /*
@@ -9,7 +8,7 @@
 */
 BOOL
 HCAPI
-HcStringIsBad(LPCSTR lpcStr)
+HcStringIsBadA(LPCSTR lpcStr)
 {
 	if (!lpcStr)
 	{
@@ -39,7 +38,7 @@ HcStringIsBad(LPCSTR lpcStr)
 */
 BOOL
 HCAPI
-HcStringIsBad(LPCWSTR lpcStr)
+HcStringIsBadW(LPCWSTR lpcStr)
 {
 	if (!lpcStr)
 	{
@@ -79,7 +78,7 @@ HcStringSplit(LPSTR lpStr, const char cDelimiter, PSIZE_T pdwCount)
 	SIZE_T Index;
 	char lpTerminatedDelim[2];
 
-	if (HcStringIsBad(lpStr))
+	if (HcStringIsBadA(lpStr))
 	{
 		return 0;
 	}
@@ -154,7 +153,7 @@ HcStringSplitToIntArray(LPSTR lpStr, const char delim, int* pArray, PSIZE_T dwCo
 {
 	LPSTR* plpSplit;
 	SIZE_T Count;
-	if (HcStringIsBad(lpStr))
+	if (HcStringIsBadA(lpStr))
 	{
 		return;
 	}
@@ -230,7 +229,7 @@ VOID
 HCAPI
 HcStringSubtract(LPCSTR lpStr, LPSTR lpOutStr, SIZE_T dwIndex, SIZE_T dwEndIndex, size_t lpSize)
 {
-	if (HcStringIsBad(lpStr))
+	if (HcStringIsBadA(lpStr))
 	{
 		return;
 	}
@@ -246,7 +245,7 @@ SIZE_T
 HCAPI
 HcStringCharIndex(LPCSTR lpStr, char delim)
 {
-	if (HcStringIsBad(lpStr))
+	if (HcStringIsBadA(lpStr))
 	{
 		return -1;
 	}
@@ -263,13 +262,7 @@ LPCSTR
 HCAPI
 HcStringTime()
 {
-	time_t rawtime;
-	time(&rawtime);
-	struct tm timeinfo;
-	localtime_s(&timeinfo, &rawtime);
-	char* buffer = (char*)malloc(80);
-	strftime(buffer, 80, "%d-%m-%Y %I:%M:%S", &timeinfo);
-	return buffer;
+	return NULL;
 }
 
 /*
@@ -277,9 +270,9 @@ HcStringTime()
 */
 VOID
 HCAPI
-HcStringToLower(LPSTR lpStr)
+HcStringToLowerA(LPSTR lpStr)
 {
-	if (HcStringIsBad(lpStr))
+	if (HcStringIsBadA(lpStr))
 		return;
 
 	for (; *lpStr; *lpStr++)
@@ -293,9 +286,9 @@ HcStringToLower(LPSTR lpStr)
 */
 VOID
 HCAPI
-HcStringToLower(LPWSTR lpStr)
+HcStringToLowerW(LPWSTR lpStr)
 {
-	if (HcStringIsBad(lpStr))
+	if (HcStringIsBadW(lpStr))
 		return;
 
 	for (; *lpStr; *lpStr++)
@@ -309,9 +302,9 @@ HcStringToLower(LPWSTR lpStr)
 */
 VOID
 HCAPI
-HcStringToUpper(LPSTR lpStr)
+HcStringToUpperA(LPSTR lpStr)
 {
-	if (HcStringIsBad(lpStr))
+	if (HcStringIsBadA(lpStr))
 		return;
 
 	for (; *lpStr; *lpStr++)
@@ -325,9 +318,9 @@ HcStringToUpper(LPSTR lpStr)
 */
 VOID
 HCAPI
-HcStringToUpper(LPWSTR lpStr)
+HcStringToUpperW(LPWSTR lpStr)
 {
-	if (HcStringIsBad(lpStr))
+	if (HcStringIsBadW(lpStr))
 		return;
 
 	for (; *lpStr; *lpStr++)
@@ -340,14 +333,14 @@ HcStringToUpper(LPWSTR lpStr)
 */
 BOOL
 HCAPI
-HcStringEqual(LPCSTR lpString1, LPCSTR lpString2, BOOLEAN CaseInSensitive)
+HcStringEqualA(LPCSTR lpString1, LPCSTR lpString2, BOOLEAN CaseInSensitive)
 {
 	BOOLEAN Return;
 	SIZE_T Size1, Size2;
 	BOOLEAN bString1, bString2;
 
-	bString1 = HcStringIsBad(lpString1);
-	bString2 = HcStringIsBad(lpString2);
+	bString1 = HcStringIsBadA(lpString1);
+	bString2 = HcStringIsBadA(lpString2);
 
 	if (bString1 && bString2)
 		return TRUE;
@@ -374,7 +367,7 @@ HcStringEqual(LPCSTR lpString1, LPCSTR lpString2, BOOLEAN CaseInSensitive)
 			PAGE_READWRITE);
 
 		strncpy(lpCopy1, lpString1, Size1);
-		HcStringToLower(lpCopy1);
+		HcStringToLowerA(lpCopy1);
 
 		lpCopy2 = (LPSTR)VirtualAlloc(0,
 			Size2,
@@ -382,7 +375,7 @@ HcStringEqual(LPCSTR lpString1, LPCSTR lpString2, BOOLEAN CaseInSensitive)
 			PAGE_READWRITE);
 
 		strncpy(lpCopy2, lpString2, Size2);
-		HcStringToLower(lpCopy2);
+		HcStringToLowerA(lpCopy2);
 
 		Return = strcmp(lpCopy1, lpCopy2);
 
@@ -400,14 +393,14 @@ HcStringEqual(LPCSTR lpString1, LPCSTR lpString2, BOOLEAN CaseInSensitive)
 */
 BOOL
 HCAPI
-HcStringEqual(LPCWSTR lpString1, LPCWSTR lpString2, BOOLEAN CaseInSensitive)
+HcStringEqualW(LPCWSTR lpString1, LPCWSTR lpString2, BOOLEAN CaseInSensitive)
 {
 	BOOLEAN Return;
 	SIZE_T Size1, Size2;
 	BOOLEAN bString1, bString2;
 
-	bString1 = HcStringIsBad(lpString1);
-	bString2 = HcStringIsBad(lpString2);
+	bString1 = HcStringIsBadW(lpString1);
+	bString2 = HcStringIsBadW(lpString2);
 
 	if (bString1 && bString2)
 		return TRUE;
@@ -434,7 +427,7 @@ HcStringEqual(LPCWSTR lpString1, LPCWSTR lpString2, BOOLEAN CaseInSensitive)
 			PAGE_READWRITE);
 
 		wcsncpy(lpCopy1, lpString1, Size1);
-		HcStringToLower(lpCopy1);
+		HcStringToLowerW(lpCopy1);
 
 		lpCopy2 = (LPWSTR)VirtualAlloc(0,
 			Size2,
@@ -442,7 +435,7 @@ HcStringEqual(LPCWSTR lpString1, LPCWSTR lpString2, BOOLEAN CaseInSensitive)
 			PAGE_READWRITE);
 
 		wcsncpy(lpCopy2, lpString2, Size2);
-		HcStringToLower(lpCopy2);
+		HcStringToLowerW(lpCopy2);
 
 		Return = wcscmp(lpCopy1, lpCopy2);
 
