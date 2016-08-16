@@ -61,13 +61,13 @@ typedef struct _HC_MODULE_INFORMATION
 		PAGE_READWRITE); \
 	(obj)->Size = 0; \
 	(obj)->Base = 0; \
-}\
+}
 
 #define DestroyModuleInformation(o) {\
 	VirtualFree((o)->Name, 0, MEM_RELEASE); \
 	VirtualFree((o)->Path, 0, MEM_RELEASE); \
 	VirtualFree(o, 0, MEM_RELEASE);\
-}\
+}
 
 typedef struct _HC_WINDOW_INFORMATION
 {
@@ -85,12 +85,12 @@ typedef struct _HC_WINDOW_INFORMATION
 		PAGE_READWRITE);	\
 	(wInfo)->WindowFlags = 0; \
 	(wInfo)->WindowHandle = 0; \
-}\
+}
 
 #define DestroyWindowInformation(o){\
 	VirtualFree((o)->WindowTitle, 0, MEM_RELEASE); \
 	VirtualFree(o, 0, MEM_RELEASE);\
-}\
+}
 
 typedef struct _HC_PROCESS_INFORMATION
 {
@@ -112,17 +112,18 @@ typedef struct _HC_PROCESS_INFORMATION
 		PAGE_READWRITE);	\
 	(o)->Id = 0; \
 	(o)->CanAccess = 0; \
-}\
+}
 
 #define DestroyProcessInformation(o) {\
 	VirtualFree((o)->Name, 0, MEM_RELEASE); \
 	DestroyModuleInformation(o->MainModule);\
 	DestroyWindowInformation(o->MainWindow); \
 	VirtualFree(o, 0, MEM_RELEASE);\
-}\
+}
 
-typedef BOOL(*HC_PROCESS_CALLBACK_EVENT)(HC_PROCESS_INFORMATION hcpInformation, LPARAM lParam);
-typedef BOOL(*HC_MODULE_CALLBACK_EVENT)(HC_MODULE_INFORMATION hcmInformation, LPARAM lParam);
+typedef BOOL(*HC_PROCESS_CALLBACK_EVENT)(HC_PROCESS_INFORMATION, LPARAM);
+typedef BOOL(*HC_MODULE_CALLBACK_EVENT)(HC_MODULE_INFORMATION, LPARAM);
+typedef BOOL(*HC_EXPORT_LIST_CALLBACK)(LPCSTR, LPARAM);
 
 typedef struct _mem_result
 {

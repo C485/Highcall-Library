@@ -20,6 +20,10 @@ extern "C" {
 		HCAPI
 		HcModuleHandleA(LPCSTR lpModuleName);
 
+	BOOLEAN
+		HCAPI
+		HcModuleListExports(HMODULE hModule, HC_EXPORT_LIST_CALLBACK callback, LPARAM lpParam);
+
 	SIZE_T
 		HCAPI
 		HcModuleProcedureAddressA(HANDLE hModule, LPCSTR lpProcedureName);

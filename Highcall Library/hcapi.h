@@ -27,8 +27,8 @@ VOID
 HCAPI
 HcCloseHandle(HANDLE hObject);
 
-#endif
-
 #if defined (__cplusplus)
 }
+#endif
+
 #endif

@@ -69,6 +69,63 @@ HcModuleProcedureAddressA(HANDLE hModule, LPCSTR lpProcedureName)
 	return 0;
 }
 
+BOOLEAN 
+HCAPI
+HcModuleListExports(HMODULE hModule, HC_EXPORT_LIST_CALLBACK callback, LPARAM lpParam)
+{
+	IMAGE_NT_HEADERS* pHeaderNT;
+	IMAGE_DOS_HEADER* pHeaderDOS;
+	IMAGE_EXPORT_DIRECTORY* pExports;
+	PDWORD pExportNames;
+	LPCSTR lpCurrentFunction;
+
+	if (!hModule)
+	{
+		hModule = ((HMODULE)NtCurrentPeb()->ImageBaseAddress);
+	}
+
+	pHeaderDOS = (PIMAGE_DOS_HEADER)hModule;
+	if (pHeaderDOS->e_magic != IMAGE_DOS_SIGNATURE)
+	{
+		return 0;
+	}
+
+	SIZE_T dwModule = (SIZE_T)hModule;
+
+	pHeaderNT = (PIMAGE_NT_HEADERS)(pHeaderDOS->e_lfanew + dwModule);
+	if (pHeaderNT->Signature != IMAGE_NT_SIGNATURE)
+	{
+		return 0;
+	}
+
+	pExports = (IMAGE_EXPORT_DIRECTORY*)
+		(pHeaderNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + dwModule);
+
+	/* Get the address containg null terminated export names, in ASCII */
+	pExportNames = (PDWORD)(pExports->AddressOfNames + dwModule);
+	if (!pExportNames)
+	{
+		return 0;
+	}
+
+	/* List through functions */
+	for (unsigned int i = 0; i < pExports->NumberOfNames; i++)
+	{
+		lpCurrentFunction = (LPCSTR)(pExportNames[i] + dwModule);
+		if (!lpCurrentFunction)
+		{
+			continue;
+		}
+
+		if (callback(lpCurrentFunction, lpParam))
+		{
+			return TRUE;
+		}
+	}
+
+	return TRUE;
+}
+
 /*
 @implemented
 */

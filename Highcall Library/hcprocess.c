@@ -101,21 +101,42 @@ BOOLEAN
 HCAPI
 HcProcessReadyEx(HANDLE hProcess)
 {
+	NTSTATUS Status;
+	PPEB_LDR_DATA LoaderData;
+	PROCESS_BASIC_INFORMATION ProcInfo;
 	DWORD ExitCode;
+	DWORD Len;
 
-	HcProcessExitCodeEx(hProcess, &ExitCode);
-
-	/* Check if its still running */
-	if (ExitCode != STILL_ACTIVE)
+	/* Will fail if there is a mismatch in compiler architecture. */
+	if (!HcProcessExitCodeEx(hProcess, &ExitCode) || ExitCode != STILL_ACTIVE)
 	{
 		return FALSE;
 	}
 
-	/* Ensure we didn't find it before ntdll was loaded */
-	HC_MODULE_INFORMATION hcmInfo;
-	HcProcessQueryInformationModule(hProcess, NULL, &hcmInfo);
+	/* Query the process information to get its PEB address */
+	Status = HcQueryInformationProcess(hProcess,
+		ProcessBasicInformation,
+		&ProcInfo,
+		sizeof(ProcInfo),
+		&Len);
 
-	return hcmInfo.Base > 0;
+	SetLastError(Status);
+	if (!NT_SUCCESS(Status))
+	{
+		return FALSE;
+	}
+	
+	/* Read loader data address from PEB */
+	if (!HcProcessReadMemory(hProcess,
+		&(ProcInfo.PebBaseAddress->LoaderData),
+		&LoaderData, 
+		sizeof(LoaderData),
+		NULL) || !LoaderData)
+	{
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 BOOLEAN
@@ -1060,7 +1081,7 @@ HcProcessEnumModules(HANDLE hProcess,
 	return FALSE;
 }
 
-VOID 
+BOOLEAN
 HCAPI 
 HcProcessEnumModulesEx(
 	_In_ HANDLE ProcessHandle,
@@ -1070,7 +1091,7 @@ HcProcessEnumModulesEx(
 	BOOLEAN querySucceeded;
 	PVOID baseAddress;
 	MEMORY_BASIC_INFORMATION basicInfo;
-	HC_MODULE_INFORMATION hcmInformation;
+	PHC_MODULE_INFORMATION hcmInformation;
 	SIZE_T allocationSize;
 
 	baseAddress = (PVOID)0;
@@ -1084,7 +1105,7 @@ HcProcessEnumModulesEx(
 		NULL
 	)))
 	{
-		return;
+		return FALSE;
 	}
 
 	querySucceeded = TRUE;
@@ -1093,7 +1114,9 @@ HcProcessEnumModulesEx(
 	{
 		if (basicInfo.Type == MEM_MAPPED || basicInfo.Type == MEM_IMAGE)
 		{
-			hcmInformation.Base = (SIZE_T) basicInfo.AllocationBase;
+			InitializeModuleInformation(hcmInformation, MAX_PATH, MAX_PATH);
+
+			hcmInformation->Base = (SIZE_T) basicInfo.AllocationBase;
 			allocationSize = 0;
 
 			/* Find next module */
@@ -1108,36 +1131,32 @@ HcProcessEnumModulesEx(
 					MemoryBasicInformation,
 					&basicInfo,
 					sizeof(MEMORY_BASIC_INFORMATION),
-					NULL
-				)))
+					NULL)))
 				{
 					querySucceeded = FALSE;
 					break;
 				}
 
-			} while (basicInfo.AllocationBase == (PVOID) hcmInformation.Base);
+			} while (basicInfo.AllocationBase == (PVOID) hcmInformation->Base);
 
-			hcmInformation.Size = allocationSize;
-
-			hcmInformation.Name = (LPWSTR)VirtualAlloc(NULL,
-				MAX_PATH,
-				MEM_COMMIT | MEM_RESERVE,
-				PAGE_READWRITE);
+			hcmInformation->Size = allocationSize;
 
 			if (HcProcessModuleFileName(ProcessHandle,
-				(PVOID)hcmInformation.Base,
-				hcmInformation.Name,
-				MAX_PATH
-			))
+				(PVOID)hcmInformation->Base,
+				hcmInformation->Path,
+				MAX_PATH))
 			{
-				if (hcmCallback(hcmInformation, lParam))
-				{
-					VirtualFree(hcmInformation.Name, 0, MEM_RELEASE);
-					return;
-				}
+				/* temporary */
+				wcsncpy(hcmInformation->Name, hcmInformation->Path, MAX_PATH);
 			}
 
-			VirtualFree(hcmInformation.Name, 0, MEM_RELEASE);
+			if (hcmCallback(*hcmInformation, lParam))
+			{
+				DestroyModuleInformation(hcmInformation);
+				return TRUE;
+			}
+
+			DestroyModuleInformation(hcmInformation);
 		}
 		else
 		{
@@ -1156,6 +1175,8 @@ HcProcessEnumModulesEx(
 			}
 		}
 	}
+
+	return TRUE;
 }
 
 static 

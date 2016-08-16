@@ -2,7 +2,6 @@
 #define HC_SYSCALL_H
 
 #include "native.h"
-#include "hcapi.h"
 #include "hcdef.h"
 
 HC_GLOBAL SyscallIndex sciQueryInformationToken;

@@ -40,10 +40,11 @@
     <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -86,6 +87,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>E:\Projects\Visual Studio\C++\Highcall Library\Capstone\msvc\x64\Debug;$(LibraryPath)</LibraryPath>
+    <TargetName>highcall</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -137,7 +139,9 @@
     <ClCompile Include="..\distorm\src\prefix.c" />
     <ClCompile Include="..\distorm\src\textdefs.c" />
     <ClCompile Include="..\distorm\src\wstring.c" />
-    <ClCompile Include="hcapi.c" />
+    <ClCompile Include="hcapi.c">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
+    </ClCompile>
     <ClCompile Include="hcfile.c" />
     <ClCompile Include="hcinternal.c" />
     <ClCompile Include="hcmodule.c" />

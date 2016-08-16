@@ -1,10 +1,13 @@
-Release/*
-Debug/*
-.vs/*
-Highcall Library/Debug
-Highcall Library/Release
 *.db
-Highcall Library.VC.VC.opendb
-x64
-Highcall Library/x64
+*.opendb
 *.suo
+*.lib
+*.exe
+*.ik
+*.pdb
+*.log
+*Debug
+*Release
+*vcxproj
+*vcxproj.filters
+*.sln

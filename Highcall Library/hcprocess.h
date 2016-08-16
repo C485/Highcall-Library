@@ -90,7 +90,7 @@ extern "C" {
 			HC_MODULE_CALLBACK_EVENT hcmCallback,
 			LPARAM lParam);
 
-	VOID
+	BOOLEAN
 		HCAPI
 		HcProcessEnumModulesEx(
 			_In_ HANDLE ProcessHandle,

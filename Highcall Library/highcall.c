@@ -5,6 +5,7 @@
 #include "hcmodule.h"
 #include "hcstring.h"
 #include "hcprocess.h"
+#include "hcapi.h"
 
 #pragma region Init Trampoline
 
