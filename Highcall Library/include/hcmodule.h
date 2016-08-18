@@ -2,7 +2,7 @@
 #define HC_MODULE_H
 
 #include "hcdef.h"
-#include "native.h"
+#include "../native/native.h"
 
 HC_GLOBAL HMODULE NTDLL;
 HC_GLOBAL HMODULE USER32;

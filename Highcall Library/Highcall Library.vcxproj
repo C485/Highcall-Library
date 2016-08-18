@@ -76,6 +76,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>highcall</TargetName>
     <LibraryPath>E:\Projects\Visual Studio\C++\Highcall Library\Capstone\msvc\x86\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>highcall</TargetName>
@@ -84,6 +85,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>highcall</TargetName>
     <LibraryPath>E:\Projects\Visual Studio\C++\Highcall Library\Capstone\msvc\x64\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>E:\Projects\Visual Studio\C++\Highcall Library\Capstone\msvc\x64\Debug;$(LibraryPath)</LibraryPath>
@@ -139,16 +141,15 @@
     <ClCompile Include="..\distorm\src\prefix.c" />
     <ClCompile Include="..\distorm\src\textdefs.c" />
     <ClCompile Include="..\distorm\src\wstring.c" />
-    <ClCompile Include="hcapi.c">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
-    </ClCompile>
-    <ClCompile Include="hcfile.c" />
-    <ClCompile Include="hcinternal.c" />
-    <ClCompile Include="hcmodule.c" />
-    <ClCompile Include="hcprocess.c" />
-    <ClCompile Include="hcstring.c" />
-    <ClCompile Include="hctrampoline.c" />
-    <ClCompile Include="highcall.c" />
+    <ClCompile Include="src\hcapi.c" />
+    <ClCompile Include="src\hcfile.c" />
+    <ClCompile Include="src\hcinternal.c" />
+    <ClCompile Include="src\hcmodule.c" />
+    <ClCompile Include="src\hcprocess.c" />
+    <ClCompile Include="src\hcstring.c" />
+    <ClCompile Include="src\hctoken.cpp" />
+    <ClCompile Include="src\hctrampoline.c" />
+    <ClCompile Include="src\highcall.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\distorm\include\distorm.h" />
@@ -162,103 +163,80 @@
     <ClInclude Include="..\distorm\src\textdefs.h" />
     <ClInclude Include="..\distorm\src\wstring.h" />
     <ClInclude Include="..\distorm\src\x86defs.h" />
-    <ClInclude Include="hcapi.h" />
-    <ClInclude Include="hcdef.h" />
-    <ClInclude Include="hcinternal.h" />
-    <ClInclude Include="hcfile.h" />
-    <ClInclude Include="hcmodule.h" />
-    <ClInclude Include="hcprocess.h" />
-    <ClInclude Include="hcstring.h" />
-    <ClInclude Include="hctrampoline.h" />
-    <ClInclude Include="highcall.h" />
-    <ClInclude Include="hcimport.h" />
-    <ClInclude Include="minnative.h" />
+    <ClInclude Include="include\hcapi.h" />
+    <ClInclude Include="include\hcdef.h" />
+    <ClInclude Include="include\hcfile.h" />
+    <ClInclude Include="include\hcimport.h" />
+    <ClInclude Include="include\hcinternal.h" />
+    <ClInclude Include="include\hcmodule.h" />
+    <ClInclude Include="include\hcprocess.h" />
+    <ClInclude Include="include\hcstring.h" />
+    <ClInclude Include="include\hcsyscall.h" />
+    <ClInclude Include="include\hctoken.h" />
+    <ClInclude Include="include\hctrampoline.h" />
+    <ClInclude Include="include\highcall.h" />
     <ClInclude Include="hcsyscall.h" />
-    <ClInclude Include="native.h" />
+    <ClInclude Include="native\minnative.h" />
+    <ClInclude Include="native\native.h" />
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="QuerySystemInformation.S">
+    <MASM Include="asm\AdjustPrivilegesToken.S">
       <FileType>Document</FileType>
     </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="OpenProcess.S">
+    <MASM Include="asm\AllocateVirtualMemory.S">
       <FileType>Document</FileType>
     </MASM>
-    <MASM Include="OpenProcessToken.S">
+    <MASM Include="asm\CreateThread.S">
       <FileType>Document</FileType>
     </MASM>
-    <MASM Include="QueryInformationToken.S">
+    <MASM Include="asm\FlushInstructionCache.S">
       <FileType>Document</FileType>
     </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="ResumeProcess.S">
+    <MASM Include="asm\FreeVirtualMemory.S">
       <FileType>Document</FileType>
     </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="SuspendProcess.S">
+    <MASM Include="asm\OpenProcess.S">
       <FileType>Document</FileType>
     </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="AllocateVirtualMemory.S">
+    <MASM Include="asm\OpenProcessToken.S">
       <FileType>Document</FileType>
     </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="FreeVirtualMemory.S">
+    <MASM Include="asm\ProtectVirtualMemory.S">
       <FileType>Document</FileType>
     </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="Close.S">
+    <MASM Include="asm\QueryInformationProcess.S">
       <FileType>Document</FileType>
     </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="QueryInformationProcess.S">
+    <MASM Include="asm\QueryInformationThread.S">
       <FileType>Document</FileType>
     </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="WriteVirtualMemory.S">
+    <MASM Include="asm\QueryInformationToken.S">
       <FileType>Document</FileType>
     </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="ReadVirtualMemory.S">
+    <MASM Include="asm\QuerySystemInformation.S">
       <FileType>Document</FileType>
     </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="ResumeThread.S">
+    <MASM Include="asm\QueryVirtualMemory.S">
+      <FileType>Document</FileType>
+    </MASM>
+    <MASM Include="asm\ReadVirtualMemory.S">
+      <FileType>Document</FileType>
+    </MASM>
+    <MASM Include="asm\ResumeProcess.S">
+      <FileType>Document</FileType>
+    </MASM>
+    <MASM Include="asm\ResumeThread.S">
+      <FileType>Document</FileType>
+    </MASM>
+    <MASM Include="asm\SuspendProcess.S">
+      <FileType>Document</FileType>
+    </MASM>
+    <MASM Include="asm\WriteVirtualMemory.S">
       <FileType>Document</FileType>
     </MASM>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="QueryInformationThread.S">
-      <FileType>Document</FileType>
-    </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="CreateThread.S">
-      <FileType>Document</FileType>
-    </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="FlushInstructionCache.S">
-      <FileType>Document</FileType>
-    </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="ProtectVirtualMemory.S">
-      <FileType>Document</FileType>
-    </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="QueryVirtualMemory.S">
+    <MASM Include="asm\Close.S">
       <FileType>Document</FileType>
     </MASM>
   </ItemGroup>

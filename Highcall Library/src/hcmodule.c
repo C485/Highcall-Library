@@ -1,7 +1,7 @@
-#include "hcmodule.h"
-#include "hcstring.h"
-#include "hcimport.h"
-#include "hctrampoline.h"
+#include "../include/hcmodule.h"
+#include "../include/hcstring.h"
+#include "../include/hcimport.h"
+#include "../include/hctrampoline.h"
 
 /*
 @implemented
@@ -69,6 +69,48 @@ HcModuleProcedureAddressA(HANDLE hModule, LPCSTR lpProcedureName)
 	return 0;
 }
 
+/*
+@implemented
+*/
+SIZE_T
+HCAPI
+HcModuleProcedureAddressW(HANDLE hModule, LPCWSTR lpProcedureName)
+{
+	DWORD Size;
+	SIZE_T ReturnValue;
+	LPSTR lpConvertedName;
+
+	Size = HcStringSecureLengthW(lpProcedureName);
+	if (!Size)
+	{
+		SetLastError(RtlNtStatusToDosError(STATUS_INVALID_PARAMETER));
+		return 0;
+	}
+
+	lpConvertedName = (LPSTR)VirtualAlloc(0,
+		Size + 1,
+		MEM_COMMIT | MEM_RESERVE,
+		PAGE_READWRITE);
+
+	if (!lpConvertedName)
+	{
+		SetLastError(RtlNtStatusToDosError(STATUS_INSUFFICIENT_RESOURCES));
+		return 0;
+	}
+
+	if (!HcStringConvertW(lpProcedureName, lpConvertedName, Size))
+	{
+		SetLastError(RtlNtStatusToDosError(STATUS_FAILED));
+		VirtualFree(lpConvertedName, 0, MEM_RELEASE);
+		return 0;
+	}
+
+	ReturnValue = HcModuleProcedureAddressA(hModule, lpConvertedName);
+
+	VirtualFree(lpConvertedName, 0, MEM_RELEASE);
+	return ReturnValue;
+}
+
 BOOLEAN 
 HCAPI
 HcModuleListExports(HMODULE hModule, HC_EXPORT_LIST_CALLBACK callback, LPARAM lpParam)
@@ -129,45 +171,6 @@ HcModuleListExports(HMODULE hModule, HC_EXPORT_LIST_CALLBACK callback, LPARAM lp
 /*
 @implemented
 */
-SIZE_T
-HCAPI
-HcModuleProcedureAddressW(HANDLE hModule, LPCWSTR lpProcedureName)
-{
-	DWORD Size;
-	SIZE_T ReturnValue;
-	LPSTR lpConvertedName;
-
-	if (!(Size = WideCharToMultiByte(CP_UTF8, 0, lpProcedureName, -1, NULL, 0, NULL, NULL)))
-	{
-		SetLastError(STATUS_INVALID_PARAMETER);
-		return 0;
-	}
-
-	if (!(lpConvertedName = (LPSTR)VirtualAlloc(0,
-		Size,
-		MEM_COMMIT | MEM_RESERVE,
-		PAGE_READWRITE)))
-	{
-		SetLastError(STATUS_INSUFFICIENT_RESOURCES);
-		return 0;
-	}
-
-	if (!(WideCharToMultiByte(CP_UTF8, 0, lpProcedureName, -1, lpConvertedName, Size, NULL, NULL)))
-	{
-		SetLastError(STATUS_FAILED);
-		VirtualFree(lpConvertedName, 0, MEM_RELEASE);
-		return 0;
-	}
-
-	ReturnValue = HcModuleProcedureAddressA(hModule, lpConvertedName);
-
-	VirtualFree(lpConvertedName, 0, MEM_RELEASE);
-	return ReturnValue;
-}
-
-/*
-@implemented
-*/
 HMODULE
 HCAPI
 HcModuleHandleW(LPCWSTR lpModuleName)
@@ -211,22 +214,25 @@ HcModuleHandleA(LPCSTR lpModuleName)
 	HMODULE ReturnValue;
 	LPWSTR lpConvertedName;
 
-	if (!(Size = MultiByteToWideChar(CP_UTF8, 0, lpModuleName, -1, NULL, 0)))
+	Size = HcStringSecureLengthA(lpModuleName);
+	if (!Size)
 	{
-		SetLastError(STATUS_INVALID_PARAMETER);
+		SetLastError(RtlNtStatusToDosError(STATUS_INVALID_PARAMETER));
 		return 0;
 	}
 
-	if (!(lpConvertedName = (LPWSTR)VirtualAlloc(0,
-		Size,
+	lpConvertedName = (LPWSTR)VirtualAlloc(0,
+		Size + 1,
 		MEM_COMMIT | MEM_RESERVE,
-		PAGE_READWRITE)))
+		PAGE_READWRITE);
+
+	if (!lpConvertedName)
 	{
-		SetLastError(STATUS_INSUFFICIENT_RESOURCES);
+		SetLastError(RtlNtStatusToDosError(STATUS_INSUFFICIENT_RESOURCES));
 		return 0;
 	}
 
-	if (!(MultiByteToWideChar(CP_UTF8, 0, lpModuleName, -1, lpConvertedName, Size)))
+	if (!HcStringConvertA(lpModuleName, lpConvertedName, Size))
 	{
 		SetLastError(STATUS_FAILED);
 		VirtualFree(lpConvertedName, 0, MEM_RELEASE);
@@ -255,7 +261,8 @@ HcModuleLoadA(LPCSTR lpPath)
 		return 0;
 	}
 
-	if (!(Length = lstrlenA(lpPath)))
+	Length = HcStringSecureLengthA(lpPath);
+	if (!Length)
 	{
 		return 0;
 	}
@@ -271,7 +278,7 @@ HcModuleLoadA(LPCSTR lpPath)
 		return 0;
 	}
 
-	if (!MultiByteToWideChar(CP_ACP, 0, lpPath, Length, lpConverted, Length))
+	if (!HcStringConvertA(lpPath, lpConverted, Length))
 	{
 		VirtualFree(lpConverted, 0, MEM_RELEASE);
 		return 0;

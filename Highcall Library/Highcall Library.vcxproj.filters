@@ -8,12 +8,6 @@
     <Filter Include="Highcall">
       <UniqueIdentifier>{a52f2cbd-6011-4529-9da5-7360bf3ae64d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Highcall\Trampoline">
-      <UniqueIdentifier>{fc46a276-7c3a-41ca-8ab5-5f4418b0bfd7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Highcall\Import">
-      <UniqueIdentifier>{4704915b-23bc-4523-b7b1-4f85b43366b2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Highcall\Syscall">
       <UniqueIdentifier>{402cf375-7ea8-42da-a29d-6efad335a469}</UniqueIdentifier>
     </Filter>
@@ -23,8 +17,14 @@
     <Filter Include="Disasm">
       <UniqueIdentifier>{0f2b5851-bfaf-4ff1-abf7-403c34980227}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Highcall\Syscall\Syscalls">
+    <Filter Include="Highcall\Syscall\asm">
       <UniqueIdentifier>{57eee873-6fb5-42d1-ba39-9d41f5c3cadc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Highcall\src">
+      <UniqueIdentifier>{374efc83-4797-4e15-b2ac-90c4d52c9e7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Highcall\include">
+      <UniqueIdentifier>{45d9016d-4330-4db6-b548-f5347e5f0c20}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -55,38 +55,35 @@
     <ClCompile Include="..\distorm\src\wstring.c">
       <Filter>Disasm</Filter>
     </ClCompile>
-    <ClCompile Include="hcprocess.c">
-      <Filter>Highcall</Filter>
+    <ClCompile Include="src\hcapi.c">
+      <Filter>Highcall\src</Filter>
     </ClCompile>
-    <ClCompile Include="hctrampoline.c">
-      <Filter>Highcall\Trampoline</Filter>
+    <ClCompile Include="src\hcfile.c">
+      <Filter>Highcall\src</Filter>
     </ClCompile>
-    <ClCompile Include="hcapi.c">
-      <Filter>Highcall</Filter>
+    <ClCompile Include="src\hcinternal.c">
+      <Filter>Highcall\src</Filter>
     </ClCompile>
-    <ClCompile Include="hcfile.c">
-      <Filter>Highcall</Filter>
+    <ClCompile Include="src\hcmodule.c">
+      <Filter>Highcall\src</Filter>
     </ClCompile>
-    <ClCompile Include="hcinternal.c">
-      <Filter>Highcall</Filter>
+    <ClCompile Include="src\hcprocess.c">
+      <Filter>Highcall\src</Filter>
     </ClCompile>
-    <ClCompile Include="hcmodule.c">
-      <Filter>Highcall</Filter>
+    <ClCompile Include="src\hcstring.c">
+      <Filter>Highcall\src</Filter>
     </ClCompile>
-    <ClCompile Include="hcstring.c">
-      <Filter>Highcall</Filter>
+    <ClCompile Include="src\hctrampoline.c">
+      <Filter>Highcall\src</Filter>
     </ClCompile>
-    <ClCompile Include="highcall.c">
-      <Filter>Highcall</Filter>
+    <ClCompile Include="src\highcall.c">
+      <Filter>Highcall\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hctoken.cpp">
+      <Filter>Highcall\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="hcapi.h">
-      <Filter>Highcall</Filter>
-    </ClInclude>
-    <ClInclude Include="hctrampoline.h">
-      <Filter>Highcall\Trampoline</Filter>
-    </ClInclude>
     <ClInclude Include="..\distorm\include\distorm.h">
       <Filter>Disasm</Filter>
     </ClInclude>
@@ -120,94 +117,109 @@
     <ClInclude Include="..\distorm\src\x86defs.h">
       <Filter>Disasm</Filter>
     </ClInclude>
-    <ClInclude Include="highcall.h">
-      <Filter>Highcall</Filter>
-    </ClInclude>
-    <ClInclude Include="native.h">
-      <Filter>Native</Filter>
-    </ClInclude>
-    <ClInclude Include="minnative.h">
-      <Filter>Native</Filter>
-    </ClInclude>
     <ClInclude Include="hcsyscall.h">
       <Filter>Highcall\Syscall</Filter>
     </ClInclude>
-    <ClInclude Include="hcimport.h">
-      <Filter>Highcall\Import</Filter>
+    <ClInclude Include="include\hcapi.h">
+      <Filter>Highcall\include</Filter>
     </ClInclude>
-    <ClInclude Include="hcdef.h">
-      <Filter>Highcall</Filter>
+    <ClInclude Include="include\hcdef.h">
+      <Filter>Highcall\include</Filter>
     </ClInclude>
-    <ClInclude Include="hcstring.h">
-      <Filter>Highcall</Filter>
+    <ClInclude Include="include\hcfile.h">
+      <Filter>Highcall\include</Filter>
     </ClInclude>
-    <ClInclude Include="hcprocess.h">
-      <Filter>Highcall</Filter>
+    <ClInclude Include="include\hcimport.h">
+      <Filter>Highcall\include</Filter>
     </ClInclude>
-    <ClInclude Include="hcinternal.h">
-      <Filter>Highcall</Filter>
+    <ClInclude Include="include\hcinternal.h">
+      <Filter>Highcall\include</Filter>
     </ClInclude>
-    <ClInclude Include="hcfile.h">
-      <Filter>Highcall</Filter>
+    <ClInclude Include="include\hcmodule.h">
+      <Filter>Highcall\include</Filter>
     </ClInclude>
-    <ClInclude Include="hcmodule.h">
-      <Filter>Highcall</Filter>
+    <ClInclude Include="include\hcprocess.h">
+      <Filter>Highcall\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hcstring.h">
+      <Filter>Highcall\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hcsyscall.h">
+      <Filter>Highcall\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hctoken.h">
+      <Filter>Highcall\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hctrampoline.h">
+      <Filter>Highcall\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\highcall.h">
+      <Filter>Highcall\include</Filter>
+    </ClInclude>
+    <ClInclude Include="native\minnative.h">
+      <Filter>Native</Filter>
+    </ClInclude>
+    <ClInclude Include="native\native.h">
+      <Filter>Native</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="AllocateVirtualMemory.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="Close.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="CreateThread.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="FlushInstructionCache.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="FreeVirtualMemory.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="OpenProcess.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="OpenProcessToken.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="ProtectVirtualMemory.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="QueryInformationProcess.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="QueryInformationThread.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="QueryInformationToken.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="QuerySystemInformation.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="ReadVirtualMemory.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="ResumeProcess.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="ResumeThread.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="SuspendProcess.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="WriteVirtualMemory.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
-    <MASM Include="QueryVirtualMemory.S">
-      <Filter>Highcall\Syscall\Syscalls</Filter>
-    </MASM>
+    <None Include="asm\AdjustPrivilegesToken.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\AllocateVirtualMemory.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\CreateThread.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\FlushInstructionCache.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\FreeVirtualMemory.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\OpenProcess.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\OpenProcessToken.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\ProtectVirtualMemory.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\QueryInformationProcess.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\QueryInformationThread.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\QueryInformationToken.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\QuerySystemInformation.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\QueryVirtualMemory.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\ReadVirtualMemory.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\ResumeProcess.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\ResumeThread.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\SuspendProcess.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\WriteVirtualMemory.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
+    <None Include="asm\Close.S">
+      <Filter>Highcall\Syscall\asm</Filter>
+    </None>
   </ItemGroup>
 </Project>

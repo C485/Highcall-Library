@@ -2,7 +2,7 @@
 #define HC_INTERNAL_H
 
 #include "hcdef.h"
-#include "native.h"
+#include "../native/native.h"
 
 #if defined (__cplusplus)
 extern "C" {

@@ -1,5 +1,5 @@
 #pragma once
-#include "native.h"
+#include "../native/native.h"
 #include "hcdef.h"
 
 #if defined (__cplusplus)
@@ -38,6 +38,22 @@ extern "C" {
 		HCAPI
 		HcStringTime();
 
+	SIZE_T
+		HCAPI
+		HcStringSecureLengthA(LPCSTR lpString);
+
+	SIZE_T
+		HCAPI
+		HcStringSecureLengthW(LPCWSTR lpString);
+
+	SIZE_T
+		HCAPI
+		HcStringLengthA(LPCSTR lpString);
+
+	SIZE_T
+		HCAPI
+		HcStringLengthW(LPCWSTR lpString);
+
 	VOID
 		HCAPI
 		HcStringToLowerA(LPSTR lpStr);
@@ -61,6 +77,18 @@ extern "C" {
 	BOOL
 		HCAPI
 		HcStringEqualW(LPCWSTR lpString1, LPCWSTR lpString2, BOOLEAN CaseInSensitive);
+
+	BOOLEAN
+		HCAPI
+		HcStringConvertA(LPCSTR lpStringToConvert,
+			LPWSTR lpStringOut,
+			DWORD Size);
+
+	BOOLEAN
+		HCAPI
+		HcStringConvertW(LPCWSTR lpStringToConvert,
+			LPSTR lpStringOut,
+			DWORD Size);
 
 #if defined (__cplusplus)
 }

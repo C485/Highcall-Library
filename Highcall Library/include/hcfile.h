@@ -1,8 +1,8 @@
 #ifndef HC_FILE_H
 #define HC_FILE_H
 
-#include "hcdef.h"
-#include "native.h"
+#include "../include/hcdef.h"
+#include "../native/native.h"
 
 #if defined (__cplusplus)
 extern "C" {

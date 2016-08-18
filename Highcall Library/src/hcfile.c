@@ -1,8 +1,8 @@
-#include "hcfile.h"
-#include "hcstring.h"
-#include "hcsyscall.h"
-#include "hcprocess.h"
-#include "hcmodule.h"
+#include "../include/hcfile.h"
+#include "../include/hcstring.h"
+#include "../include/hcsyscall.h"
+#include "../include/hcprocess.h"
+#include "../include/hcmodule.h"
 
 LPSTR
 HCAPI

@@ -3,10 +3,10 @@
 
 #include <stdio.h>
 
-#include "hcapi.h"
-#include "hcsyscall.h"
-#include "hcfile.h"
-#include "hcmodule.h"
+#include "../include/hcapi.h"
+#include "../include/hcsyscall.h"
+#include "../include/hcfile.h"
+#include "../include/hcmodule.h"
 
 NTSTATUS
 HCAPI

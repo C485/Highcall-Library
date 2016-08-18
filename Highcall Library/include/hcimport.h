@@ -1,7 +1,7 @@
 #ifndef HC_IMPORT_H
 #define HC_IMPORT_H
 
-#include "native.h"
+#include "../native/native.h"
 #include "hcdef.h"
 
 typedef NTSTATUS(NTAPI *t_RtlGetVersion) (_Out_ PRTL_OSVERSIONINFOW lpInformation);
@@ -42,5 +42,8 @@ HC_GLOBAL t_RtlFreeThreadActivationContextStack RtlFreeThreadActivationContextSt
 
 typedef NTSTATUS(NTAPI *t_RtlActivateActivationContextEx) (ULONG flags, PTEB tebAddress, HANDLE handle, PULONG_PTR cookie);
 HC_GLOBAL t_RtlActivateActivationContextEx RtlActivateActivationContextEx;
+
+typedef ULONG (NTAPI *t_RtlNtStatusToDosError) (_In_ NTSTATUS Status);
+HC_GLOBAL t_RtlNtStatusToDosError RtlNtStatusToDosError;
 
 #endif

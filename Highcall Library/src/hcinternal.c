@@ -1,5 +1,5 @@
-#include "hcinternal.h"
-#include "hcprocess.h"
+#include "../include/hcinternal.h"
+#include "../include/hcprocess.h"
 
 mem_result
 HCAPI

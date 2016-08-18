@@ -1,7 +1,7 @@
 #ifndef HIGHCALL_H
 #define HIGHCALL_H
 
-#include "native.h"
+#include "../native/native.h"
 #include "hcdef.h"
 
 typedef ULONG HIGHCALL_STATUS;

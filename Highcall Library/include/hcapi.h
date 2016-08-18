@@ -2,8 +2,8 @@
 #define HC_API_H
 
 #include <windows.h>
-#include "native.h"
-#include "hcdef.h"
+#include "../native/native.h"
+#include "../include/hcdef.h"
 
 #if defined (__cplusplus)
 extern "C" {

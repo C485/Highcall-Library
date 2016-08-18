@@ -1,7 +1,7 @@
 #ifndef HC_PROCESS_H
 #define HC_PROCESS_H
 
-#include "native.h"
+#include "../native/native.h"
 #include "hcdef.h"
 
 #if defined (__cplusplus)
@@ -133,14 +133,30 @@ extern "C" {
 			LPWSTR lpFilename,
 			DWORD nSize);
 
-	BOOL
+	BOOLEAN
 		HCAPI
 		HcProcessQueryByName(LPCWSTR lpProcessName,
 			HC_PROCESS_CALLBACK_EVENT hcpCallback,
 			LPARAM lParam);
 
-#endif
+
+	BOOLEAN
+		HCAPI
+		HcProcessSetPrivilegeA(HANDLE hProcess,
+			LPCSTR Privilege, 
+			BOOL bEnablePrivilege 
+		);
+
+
+	BOOLEAN
+		HCAPI
+		HcProcessSetPrivilegeW(HANDLE hProcess,
+			LPCWSTR Privilege,
+			BOOL bEnablePrivilege
+		);
 
 #if defined (__cplusplus)
 }
+#endif
+
 #endif

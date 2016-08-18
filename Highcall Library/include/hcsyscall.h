@@ -1,7 +1,7 @@
 #ifndef HC_SYSCALL_H
 #define HC_SYSCALL_H
 
-#include "native.h"
+#include "../native/native.h"
 #include "hcdef.h"
 
 HC_GLOBAL SyscallIndex sciQueryInformationToken;
@@ -114,5 +114,13 @@ HC_GLOBAL NTSTATUS HcQueryVirtualMemory(IN HANDLE ProcessHandle,
 	OUT LPVOID MemoryInformation,
 	IN SIZE_T MemoryInformationLength,
 	OUT PSIZE_T ReturnLength);
+
+HC_GLOBAL SyscallIndex sciAdjustPrivilegesToken;
+HC_GLOBAL NTSTATUS HcAdjustPrivilegesToken(HANDLE TokenHandle,
+	BOOL 	DisableAllPrivileges,
+	PTOKEN_PRIVILEGES 	NewState,
+	DWORD 	BufferLength,
+	PTOKEN_PRIVILEGES 	PreviousState,
+	PDWORD 	ReturnLength);
 
 #endif

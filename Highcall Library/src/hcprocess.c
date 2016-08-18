@@ -1,13 +1,13 @@
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "hcprocess.h"
-#include "hcapi.h"
-#include "hcstring.h"
-#include "hcsyscall.h"
-#include "hctrampoline.h"
-#include "hcimport.h"
-#include "hcfile.h"
-#include <psapi.h>
+#include "../include/hcprocess.h"
+#include "../include/hcapi.h"
+#include "../include/hcstring.h"
+#include "../include/hcsyscall.h"
+#include "../include/hctrampoline.h"
+#include "../include/hcimport.h"
+#include "../include/hcfile.h"
+#include "../include/hctoken.h"
 
 BOOLEAN
 HCAPI
@@ -35,7 +35,7 @@ HcProcessExitCode(IN SIZE_T dwProcessId,
 
 	if (!NT_SUCCESS(Status))
 	{
-		SetLastError(Status);
+		SetLastError(RtlNtStatusToDosError(Status));
 		HcClose(hProcess);
 		return FALSE;
 	}
@@ -63,7 +63,7 @@ HcProcessExitCodeEx(IN HANDLE hProcess,
 
 	if (!NT_SUCCESS(Status))
 	{
-		SetLastError(Status);
+		SetLastError(RtlNtStatusToDosError(Status));
 		return FALSE;
 	}
 
@@ -88,7 +88,7 @@ HcProcessOpen(SIZE_T dwProcessId, ACCESS_MASK DesiredAccess)
 
 	Status = HcOpenProcess(&hProcess, DesiredAccess, &oa, &cid);
 
-	SetLastError(Status);
+	SetLastError(RtlNtStatusToDosError(Status));
 	if (NT_SUCCESS(Status))
 	{
 		return hProcess;
@@ -120,7 +120,7 @@ HcProcessReadyEx(HANDLE hProcess)
 		sizeof(ProcInfo),
 		&Len);
 
-	SetLastError(Status);
+	SetLastError(RtlNtStatusToDosError(Status));
 	if (!NT_SUCCESS(Status))
 	{
 		return FALSE;
@@ -327,7 +327,7 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 
 	if (!HcProcessReadyEx(hProcess))
 	{
-		SetLastError(STATUS_PENDING);
+		SetLastError(RtlNtStatusToDosError(STATUS_PENDING));
 		return FALSE;
 	}
 
@@ -339,7 +339,7 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 	if (!HcParameterVerifyInjectModuleManual(fileInformation.Data))
 	{
 		VirtualFree(fileInformation.Data, 0, MEM_RELEASE);
-		SetLastError(STATUS_INVALID_PARAMETER);
+		SetLastError(RtlNtStatusToDosError(STATUS_INVALID_PARAMETER));
 		return FALSE;
 	}
 
@@ -529,14 +529,14 @@ HcProcessFree(IN HANDLE hProcess,
 
 		if (!NT_SUCCESS(Status))
 		{
-			SetLastError(Status);
+			SetLastError(RtlNtStatusToDosError(Status));
 			return FALSE;
 		}
 
 		return TRUE;
 	}
 
-	SetLastError(STATUS_INVALID_PARAMETER);
+	SetLastError(RtlNtStatusToDosError(STATUS_INVALID_PARAMETER));
 	return FALSE;
 }
 
@@ -562,7 +562,7 @@ HcProcessAllocate(IN HANDLE hProcess,
 
 	if (!NT_SUCCESS(Status))
 	{
-		SetLastError(Status);
+		SetLastError(RtlNtStatusToDosError(Status));
 		return NULL;
 	}
 
@@ -594,7 +594,7 @@ HcProcessWriteMemory(HANDLE hProcess,
 		PAGE_EXECUTE_READWRITE,
 		&OldValue);
 
-	SetLastError(Status);
+	SetLastError(RtlNtStatusToDosError(Status));
 	if (NT_SUCCESS(Status))
 	{
 		/* Check if we are unprotecting */
@@ -624,7 +624,7 @@ HcProcessWriteMemory(HANDLE hProcess,
 
 			if (!NT_SUCCESS(Status))
 			{
-				SetLastError(Status);
+				SetLastError(RtlNtStatusToDosError(Status));
 				return FALSE;
 			}
 
@@ -730,7 +730,7 @@ HcProcessVirtualQuery(IN HANDLE hProcess,
 	if (!NT_SUCCESS(Status))
 	{
 		/* We failed */
-		SetLastError(Status);
+		SetLastError(RtlNtStatusToDosError(Status));
 		return 0;
 	}
 
@@ -757,7 +757,7 @@ HcProcessQueryInformationWindow(_In_ HANDLE ProcessHandle,
 
 	if (NT_SUCCESS(Status))
 	{
-		SetLastError(Status);
+		SetLastError(RtlNtStatusToDosError(Status));
 		return FALSE;
 	}
 
@@ -1002,13 +1002,13 @@ HcProcessEnumModules(HANDLE hProcess,
 
 	if (!NT_SUCCESS(Status))
 	{
-		SetLastError(Status);
+		SetLastError(RtlNtStatusToDosError(Status));
 		return FALSE;
 	}
 
 	if (ProcInfo.PebBaseAddress == NULL)
 	{
-		SetLastError(STATUS_PARTIAL_COPY);
+		SetLastError(RtlNtStatusToDosError(STATUS_PARTIAL_COPY));
 		return FALSE;
 	}
 
@@ -1223,7 +1223,7 @@ HcGetProcessListSize()
 	return Size;
 }
 
-BOOL
+BOOLEAN
 HCAPI
 HcProcessQueryByName(LPCWSTR lpProcessName,
 	HC_PROCESS_CALLBACK_EVENT hcpCallback,
@@ -1254,7 +1254,7 @@ HcProcessQueryByName(LPCWSTR lpProcessName,
 		MEM_COMMIT | MEM_RESERVE,
 		PAGE_READWRITE)))
 	{
-		SetLastError(STATUS_INSUFFICIENT_RESOURCES);
+		SetLastError(RtlNtStatusToDosError(STATUS_INSUFFICIENT_RESOURCES));
 		return FALSE;
 	}
 
@@ -1267,7 +1267,7 @@ HcProcessQueryByName(LPCWSTR lpProcessName,
 		&Length)))
 	{
 		VirtualFree(Buffer, 0, MEM_RELEASE);
-		SetLastError(Status);
+		SetLastError(RtlNtStatusToDosError(Status));
 		return FALSE;
 	}
 
@@ -1364,7 +1364,7 @@ HcProcessModuleFileName(HANDLE hProcess,
 
 	if (!NT_SUCCESS(Status))
 	{
-		SetLastError(Status);
+		SetLastError(RtlNtStatusToDosError(Status));
 		return 0;
 	}
 
@@ -1387,3 +1387,187 @@ HcProcessModuleFileName(HANDLE hProcess,
 
 	return OutSize;
 }
+
+BOOLEAN
+HCAPI
+HcProcessSetPrivilegeA(HANDLE hProcess,
+	LPCSTR Privilege,      // Privilege to enable/disable
+	BOOL bEnablePrivilege   // TRUE to enable.  FALSE to disable
+){
+	NTSTATUS Status;
+	HANDLE hToken;
+	TOKEN_PRIVILEGES tp;
+	PLUID pLuid;
+	TOKEN_PRIVILEGES tpPrevious;
+	DWORD cbPrevious = sizeof(TOKEN_PRIVILEGES);
+
+	/* Acquire handle to token */
+	Status = HcOpenProcessToken(hProcess, 
+		TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, 
+		&hToken);
+
+	if (!NT_SUCCESS(Status))
+	{
+		SetLastError(RtlNtStatusToDosError(Status));
+		return FALSE;
+	}
+
+	/* Find the privilege */
+	pLuid = HcLookupPrivilegeValueA(Privilege);
+	if (!pLuid)
+	{
+		SetLastError(RtlNtStatusToDosError(STATUS_INVALID_PARAMETER));
+		return FALSE;
+	}
+
+	/* Set one privilege */
+	tp.PrivilegeCount = 1;
+
+	/* The id of our privilege */
+	tp.Privileges[0].Luid = *pLuid;
+
+	/* No special attributes */
+	tp.Privileges[0].Attributes = 0;
+
+	Status = HcAdjustPrivilegesToken(
+		hToken,
+		FALSE,
+		&tp,
+		sizeof(TOKEN_PRIVILEGES),
+		&tpPrevious,
+		&cbPrevious
+	);
+
+	if (!NT_SUCCESS(Status))
+	{
+		SetLastError(RtlNtStatusToDosError(Status));
+		return FALSE;
+	}
+
+	// 
+	// second pass.  set privilege based on previous setting
+	// 
+	tpPrevious.PrivilegeCount = 1;
+	tpPrevious.Privileges[0].Luid = *pLuid;
+
+	if (bEnablePrivilege)
+	{
+		/* Enable this privilege */
+		tpPrevious.Privileges[0].Attributes |= (SE_PRIVILEGE_ENABLED);
+	}
+	else 
+	{
+		/* Disable this privilege */
+		tpPrevious.Privileges[0].Attributes ^= (SE_PRIVILEGE_ENABLED &
+			tpPrevious.Privileges[0].Attributes);
+	}
+
+	Status = HcAdjustPrivilegesToken(
+		hToken,
+		FALSE,
+		&tpPrevious,
+		cbPrevious,
+		NULL,
+		NULL
+	);
+
+	if (!NT_SUCCESS(Status))
+	{
+		SetLastError(RtlNtStatusToDosError(Status));
+		return FALSE;
+	}
+
+	return TRUE;
+};
+
+BOOLEAN
+HCAPI
+HcProcessSetPrivilegeW(HANDLE hProcess,
+	LPCWSTR Privilege,      // Privilege to enable/disable
+	BOOL bEnablePrivilege   // TRUE to enable.  FALSE to disable
+) {
+	NTSTATUS Status;
+	HANDLE hToken;
+	TOKEN_PRIVILEGES tp;
+	PLUID pLuid;
+	TOKEN_PRIVILEGES tpPrevious;
+	DWORD cbPrevious = sizeof(TOKEN_PRIVILEGES);
+
+	/* Acquire handle to token */
+	Status = HcOpenProcessToken(hProcess,
+		TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
+		&hToken);
+
+	if (!NT_SUCCESS(Status))
+	{
+		SetLastError(RtlNtStatusToDosError(Status));
+		return FALSE;
+	}
+
+	/* Find the privilege */
+	pLuid = HcLookupPrivilegeValueW(Privilege);
+	if (!pLuid)
+	{
+		SetLastError(RtlNtStatusToDosError(STATUS_INVALID_PARAMETER));
+		return FALSE;
+	}
+
+	/* Set one privilege */
+	tp.PrivilegeCount = 1;
+
+	/* The id of our privilege */
+	tp.Privileges[0].Luid = *pLuid;
+
+	/* No special attributes */
+	tp.Privileges[0].Attributes = 0;
+
+	Status = HcAdjustPrivilegesToken(
+		hToken,
+		FALSE,
+		&tp,
+		sizeof(TOKEN_PRIVILEGES),
+		&tpPrevious,
+		&cbPrevious
+	);
+
+	if (!NT_SUCCESS(Status))
+	{
+		SetLastError(RtlNtStatusToDosError(Status));
+		return FALSE;
+	}
+
+	// 
+	// second pass.  set privilege based on previous setting
+	// 
+	tpPrevious.PrivilegeCount = 1;
+	tpPrevious.Privileges[0].Luid = *pLuid;
+
+	if (bEnablePrivilege)
+	{
+		/* Enable this privilege */
+		tpPrevious.Privileges[0].Attributes |= (SE_PRIVILEGE_ENABLED);
+	}
+	else
+	{
+		/* Disable this privilege */
+		tpPrevious.Privileges[0].Attributes ^= (SE_PRIVILEGE_ENABLED &
+			tpPrevious.Privileges[0].Attributes);
+	}
+
+	Status = HcAdjustPrivilegesToken(
+		hToken,
+		FALSE,
+		&tpPrevious,
+		cbPrevious,
+		NULL,
+		NULL
+	);
+
+	if (!NT_SUCCESS(Status))
+	{
+		SetLastError(RtlNtStatusToDosError(Status));
+		return FALSE;
+	}
+
+	return TRUE;
+};

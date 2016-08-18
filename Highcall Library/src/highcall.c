@@ -1,11 +1,11 @@
-#include "highcall.h"
-#include "hcsyscall.h"
-#include "hcimport.h"
-#include "hctrampoline.h"
-#include "hcmodule.h"
-#include "hcstring.h"
-#include "hcprocess.h"
-#include "hcapi.h"
+#include "../include/highcall.h"
+#include "../include/hcsyscall.h"
+#include "../include/hcimport.h"
+#include "../include/hctrampoline.h"
+#include "../include/hcmodule.h"
+#include "../include/hcstring.h"
+#include "../include/hcprocess.h"
+#include "../include/hcapi.h"
 
 #pragma region Init Trampoline
 
@@ -54,6 +54,7 @@ t_RtlQueryInformationActivationContext RtlQueryInformationActivationContext;
 t_RtlFreeActivationContextStack RtlFreeActivationContextStack;
 t_RtlFreeThreadActivationContextStack RtlFreeThreadActivationContextStack;
 t_RtlActivateActivationContextEx RtlActivateActivationContextEx;
+t_RtlNtStatusToDosError RtlNtStatusToDosError;
 
 static HIGHCALL_STATUS HCAPI HcInitializeImports(VOID)
 {
@@ -87,6 +88,9 @@ static HIGHCALL_STATUS HCAPI HcInitializeImports(VOID)
 	RtlActivateActivationContextEx = (t_RtlActivateActivationContextEx)HcModuleProcedureAddressA(NTDLL,
 		"RtlActivateActivationContextEx");
 
+	RtlNtStatusToDosError = (t_RtlNtStatusToDosError)HcModuleProcedureAddressA(NTDLL,
+		"RtlNtStatusToDosError");
+
 	return HIGHCALL_SUCCESS;
 }
 
@@ -112,6 +116,7 @@ SyscallIndex sciQueryInformationProcess;
 SyscallIndex sciQuerySystemInformation;
 SyscallIndex sciClose;
 SyscallIndex sciQueryVirtualMemory;
+SyscallIndex sciAdjustPrivilegesToken;
 
 static HIGHCALL_STATUS HcInitializeSyscalls(VOID)
 {
@@ -138,6 +143,7 @@ static HIGHCALL_STATUS HcInitializeSyscalls(VOID)
 	sciQuerySystemInformation = HcSyscallIndexA("NtQuerySystemInformation");
 	sciClose = HcSyscallIndexA("NtClose");
 	sciQueryVirtualMemory = HcSyscallIndexA("NtQueryVirtualMemory");
+	sciAdjustPrivilegesToken = HcSyscallIndexA("NtAdjustPrivilegesToken");
 
 	return HIGHCALL_SUCCESS;
 }

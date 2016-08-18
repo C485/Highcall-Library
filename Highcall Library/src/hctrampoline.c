@@ -1,7 +1,7 @@
-#include "hctrampoline.h"
-#include "hcapi.h"
-#include "hcfile.h"
-#include "../distorm/include/distorm.h"
+#include "../include/hctrampoline.h"
+#include "../include/hcapi.h"
+#include "../include/hcfile.h"
+#include "../../distorm/include/distorm.h"
 
 DWORD HCAPI HcTrampolineCalculateLength(BYTE* Src, DWORD NeededLength)
 {
