@@ -12,3 +12,5 @@
 *vcxproj.filters
 *.sln
 .vs
+*.suo
+*.vs

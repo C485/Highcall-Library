@@ -99,7 +99,7 @@ HCAPI
 HcLookupPrivilegeValueA(
 	IN LPCSTR Name)
 {
-	ULONG Priv;
+	ULONG Priv; 
 	LPWSTR Converted;
 	DWORD NameSize;
 
