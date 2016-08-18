@@ -40,6 +40,10 @@ extern "C" {
 		);
 	extern tCreateRemoteThread HcCreateRemoteThread;
 
+	typedef BOOL (WINAPI* tEnumWindows) (_In_ WNDENUMPROC lpEnumFunc,
+			_In_ LPARAM lParam);
+	extern tEnumWindows HcEnumWindows;
+
 #endif
 #if defined (__cplusplus)
 }

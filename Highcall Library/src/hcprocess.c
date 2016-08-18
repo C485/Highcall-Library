@@ -1112,7 +1112,7 @@ HcProcessEnumModulesEx(
 
 	while (querySucceeded)
 	{
-		if (basicInfo.Type == MEM_MAPPED || basicInfo.Type == MEM_IMAGE)
+		if (basicInfo.Type == MEM_IMAGE)
 		{
 			InitializeModuleInformation(hcmInformation, MAX_PATH, MAX_PATH);
 

@@ -16,6 +16,7 @@ tPostMessageW HcPostMessageW;
 tSendMessageA HcSendMessageA;
 tSendMessageW HcSendMessageW;
 tCreateRemoteThread HcCreateRemoteThread;
+tEnumWindows HcEnumWindows;
 
 static VOID HCAPI HcInitializeTrampoline(VOID)
 {
@@ -39,6 +40,9 @@ static VOID HCAPI HcInitializeTrampoline(VOID)
 
 	HcCreateRemoteThread = (tCreateRemoteThread)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddressA(KERNEL32, 
 		"CreateRemoteThread"), 5);
+
+	HcEnumWindows = (tEnumWindows)HcTrampolineOriginal((PBYTE)HcModuleProcedureAddressA(USER32,
+		"EnumWindows"), 5);
 }
 
 #pragma endregion

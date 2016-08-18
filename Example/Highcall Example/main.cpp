@@ -4,6 +4,7 @@
 #include <hcstring.h>
 #include <hcsyscall.h>
 #include <hcmodule.h>
+#include <hctrampoline.h>
 
 #include <stdio.h>
 #include <conio.h>
@@ -125,6 +126,25 @@ BOOL HiddenModuleCallback(HC_PROCESS_INFORMATION hpcInfo, LPARAM lParam)
 	return FALSE;
 }
 
+BOOL CALLBACK WindowCallback(HWND hWnd, LPARAM lParam)
+{
+	wchar_t WindowName[MAX_PATH];
+	GetWindowTextW(hWnd, WindowName, MAX_PATH);
+
+	if (HcStringIsBadW(WindowName))
+	{
+		return TRUE;
+	}
+
+	DWORD processId = 0;
+	HcGetWindowThreadProcessId(hWnd, &processId);
+
+	wprintf(L"\tWindow %s, Id: %x\n", WindowName, processId);
+
+	return TRUE;
+}
+
+
 BOOL ExportCallback(LPCSTR name, LPARAM param)
 {
 	if (strlen(name) < 4)
@@ -188,6 +208,12 @@ int wmain(int argc, wchar_t *argv[])
 
 	/* Enumerate hidden modules */
 	HcProcessQueryByName(NULL, HiddenModuleCallback, NULL);
+
+	printf("Press any key to enumerate all windows and their parent process ids.");
+	_getch();
+
+	/* Callback prints window name using GetWindowTextW and parent process id using HcGetWindowThreadProcessId. */
+	HcEnumWindows(WindowCallback, NULL);
 
 	printf("Press any key to enumerate all syscall indexes.\n");
 	_getch();
