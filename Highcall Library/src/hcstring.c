@@ -265,11 +265,11 @@ HcStringTime()
 	return NULL;
 }
 
-SIZE_T
+DWORD
 HCAPI
 HcStringSecureLengthA(LPCSTR lpString)
 {
-	SIZE_T Length;
+	DWORD Length = 0;
 	__try
 	{
 		for (; *lpString; *lpString++)
@@ -282,11 +282,11 @@ HcStringSecureLengthA(LPCSTR lpString)
 	return Length;
 }
 
-SIZE_T
+DWORD
 HCAPI
 HcStringSecureLengthW(LPCWSTR lpString)
 {
-	SIZE_T Length;
+	DWORD Length = 0;
 	__try
 	{
 		for (; *lpString; *lpString++)
@@ -299,21 +299,21 @@ HcStringSecureLengthW(LPCWSTR lpString)
 	return Length;
 }
 
-SIZE_T
+DWORD
 HCAPI
 HcStringLengthA(LPCSTR lpString)
 {
-	SIZE_T Length = 0;
+	DWORD Length = 0;
 	for (; *lpString; *lpString++)
 		Length++;
 	return Length;
 }
 
-SIZE_T
+DWORD
 HCAPI
 HcStringLengthW(LPCWSTR lpString)
 {
-	SIZE_T Length = 0;
+	DWORD Length = 0;
 	for (; *lpString; *lpString++)
 		Length++;
 	return Length;
@@ -516,10 +516,14 @@ HcStringConvertA(LPCSTR lpStringToConvert,
 		SetLastError(RtlNtStatusToDosError(STATUS_INVALID_PARAMETER));
 		return FALSE;
 	}
+	
+	if (!Size)
+	{
+		return FALSE;
+	}
 
 	/* Convert */
-	Size = MultiByteToWideChar(CP_ACP, 0, lpStringToConvert, Size, lpStringOut, Size);
-
+	Size = MultiByteToWideChar(CP_UTF8, 0, lpStringToConvert, Size, lpStringOut, Size);
 	if (!Size)
 	{
 		return FALSE;

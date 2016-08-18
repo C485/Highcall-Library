@@ -38,19 +38,19 @@ extern "C" {
 		HCAPI
 		HcStringTime();
 
-	SIZE_T
+	DWORD
 		HCAPI
 		HcStringSecureLengthA(LPCSTR lpString);
 
-	SIZE_T
+	DWORD
 		HCAPI
 		HcStringSecureLengthW(LPCWSTR lpString);
 
-	SIZE_T
+	DWORD
 		HCAPI
 		HcStringLengthA(LPCSTR lpString);
 
-	SIZE_T
+	DWORD
 		HCAPI
 		HcStringLengthW(LPCWSTR lpString);
 

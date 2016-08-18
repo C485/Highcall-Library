@@ -156,6 +156,18 @@ int wmain(int argc, wchar_t *argv[])
 
 	printf("Highcall initialized.\n");
 
+	printf("Acquiring debug privilege: ");
+
+	/* Get debug privilege for protected processes. */
+	if (HcProcessSetPrivilegeW(NtCurrentProcess, SE_DEBUG_NAME, TRUE))
+	{
+		printf("success.\n");
+	}
+	else
+	{
+		printf("failed.\n");
+	}
+
 	printf("\n\nPress any key to enumerate modules of your processes.\n\n");
 	_getch();
 

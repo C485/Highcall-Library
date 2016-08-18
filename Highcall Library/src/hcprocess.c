@@ -1417,6 +1417,7 @@ HcProcessSetPrivilegeA(HANDLE hProcess,
 	if (!pLuid)
 	{
 		SetLastError(RtlNtStatusToDosError(STATUS_INVALID_PARAMETER));
+		HcCloseHandle(hToken);
 		return FALSE;
 	}
 
@@ -1441,6 +1442,7 @@ HcProcessSetPrivilegeA(HANDLE hProcess,
 	if (!NT_SUCCESS(Status))
 	{
 		SetLastError(RtlNtStatusToDosError(Status));
+		HcCloseHandle(hToken);
 		return FALSE;
 	}
 
@@ -1462,8 +1464,7 @@ HcProcessSetPrivilegeA(HANDLE hProcess,
 			tpPrevious.Privileges[0].Attributes);
 	}
 
-	Status = HcAdjustPrivilegesToken(
-		hToken,
+	Status = HcAdjustPrivilegesToken(hToken,
 		FALSE,
 		&tpPrevious,
 		cbPrevious,
@@ -1474,9 +1475,11 @@ HcProcessSetPrivilegeA(HANDLE hProcess,
 	if (!NT_SUCCESS(Status))
 	{
 		SetLastError(RtlNtStatusToDosError(Status));
+		HcCloseHandle(hToken);
 		return FALSE;
 	}
 
+	HcCloseHandle(hToken);
 	return TRUE;
 };
 
@@ -1509,6 +1512,7 @@ HcProcessSetPrivilegeW(HANDLE hProcess,
 	if (!pLuid)
 	{
 		SetLastError(RtlNtStatusToDosError(STATUS_INVALID_PARAMETER));
+		HcCloseHandle(hToken);
 		return FALSE;
 	}
 
@@ -1521,8 +1525,7 @@ HcProcessSetPrivilegeW(HANDLE hProcess,
 	/* No special attributes */
 	tp.Privileges[0].Attributes = 0;
 
-	Status = HcAdjustPrivilegesToken(
-		hToken,
+	Status = HcAdjustPrivilegesToken(hToken,
 		FALSE,
 		&tp,
 		sizeof(TOKEN_PRIVILEGES),
@@ -1533,12 +1536,10 @@ HcProcessSetPrivilegeW(HANDLE hProcess,
 	if (!NT_SUCCESS(Status))
 	{
 		SetLastError(RtlNtStatusToDosError(Status));
+		HcCloseHandle(hToken);
 		return FALSE;
 	}
 
-	// 
-	// second pass.  set privilege based on previous setting
-	// 
 	tpPrevious.PrivilegeCount = 1;
 	tpPrevious.Privileges[0].Luid = *pLuid;
 
@@ -1566,8 +1567,10 @@ HcProcessSetPrivilegeW(HANDLE hProcess,
 	if (!NT_SUCCESS(Status))
 	{
 		SetLastError(RtlNtStatusToDosError(Status));
+		HcCloseHandle(hToken);
 		return FALSE;
 	}
 
+	HcCloseHandle(hToken);
 	return TRUE;
 };
