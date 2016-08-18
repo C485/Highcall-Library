@@ -77,19 +77,23 @@
     <TargetName>highcall</TargetName>
     <LibraryPath>E:\Projects\Visual Studio\C++\Highcall Library\Capstone\msvc\x86\Release;$(LibraryPath)</LibraryPath>
     <IncludePath>$(VC_IncludePath);$(IncludePath);</IncludePath>
+    <OutDir>$(SolutionDir)\Build\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>highcall</TargetName>
     <LibraryPath>E:\Projects\Visual Studio\C++\Highcall Library\Capstone\msvc\x86\Debug;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)\Build\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>highcall</TargetName>
     <LibraryPath>E:\Projects\Visual Studio\C++\Highcall Library\Capstone\msvc\x64\Release;$(LibraryPath)</LibraryPath>
     <IncludePath>$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)\Build\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>E:\Projects\Visual Studio\C++\Highcall Library\Capstone\msvc\x64\Debug;$(LibraryPath)</LibraryPath>
     <TargetName>highcall</TargetName>
+    <OutDir>$(SolutionDir)\Build\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

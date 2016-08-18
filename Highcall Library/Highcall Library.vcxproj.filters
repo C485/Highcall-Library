@@ -8,23 +8,23 @@
     <Filter Include="Highcall">
       <UniqueIdentifier>{a52f2cbd-6011-4529-9da5-7360bf3ae64d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Highcall\Syscall">
-      <UniqueIdentifier>{402cf375-7ea8-42da-a29d-6efad335a469}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Native">
       <UniqueIdentifier>{0bbbf0ac-5036-4ed2-8f38-e6731a89f10d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Disasm">
       <UniqueIdentifier>{0f2b5851-bfaf-4ff1-abf7-403c34980227}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Highcall\Syscall\asm">
-      <UniqueIdentifier>{57eee873-6fb5-42d1-ba39-9d41f5c3cadc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Highcall\src">
       <UniqueIdentifier>{374efc83-4797-4e15-b2ac-90c4d52c9e7d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Highcall\include">
       <UniqueIdentifier>{45d9016d-4330-4db6-b548-f5347e5f0c20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Highcall\src\Syscall">
+      <UniqueIdentifier>{402cf375-7ea8-42da-a29d-6efad335a469}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Highcall\src\Syscall\asm">
+      <UniqueIdentifier>{57eee873-6fb5-42d1-ba39-9d41f5c3cadc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -118,7 +118,7 @@
       <Filter>Disasm</Filter>
     </ClInclude>
     <ClInclude Include="hcsyscall.h">
-      <Filter>Highcall\Syscall</Filter>
+      <Filter>Highcall\src\Syscall</Filter>
     </ClInclude>
     <ClInclude Include="include\hcapi.h">
       <Filter>Highcall\include</Filter>
@@ -165,61 +165,61 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="asm\AdjustPrivilegesToken.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\AllocateVirtualMemory.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\CreateThread.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\FlushInstructionCache.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\FreeVirtualMemory.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\OpenProcess.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\OpenProcessToken.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\ProtectVirtualMemory.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\QueryInformationProcess.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\QueryInformationThread.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\QueryInformationToken.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\QuerySystemInformation.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\QueryVirtualMemory.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\ReadVirtualMemory.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\ResumeProcess.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\ResumeThread.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\SuspendProcess.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\WriteVirtualMemory.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
     <None Include="asm\Close.S">
-      <Filter>Highcall\Syscall\asm</Filter>
+      <Filter>Highcall\src\Syscall\asm</Filter>
     </None>
   </ItemGroup>
 </Project>
