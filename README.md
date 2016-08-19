@@ -1,5 +1,7 @@
 ## Highcall-Library - a usermode library primarily used for stealthy purposes.
 
+This library is designed to avoid any and all generic methods used for process manipulation, avoiding common detection routines for usermode.
+
 * **Features on x86**
   * Process 
     * Enumerate modules
