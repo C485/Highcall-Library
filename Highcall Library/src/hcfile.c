@@ -3,6 +3,7 @@
 #include "../include/hcsyscall.h"
 #include "../include/hcprocess.h"
 #include "../include/hcmodule.h"
+#include "../include/hcpe.h"
 
 LPSTR
 HCAPI
@@ -24,30 +25,6 @@ HcFileLocalDirectory()
 	free(module);
 	return index != -1 ? retn : (char*)0;
 }
-
-#ifdef PROGRAM_ALIAS
-LPSTR
-HCAPI
-HcFileLogFile()
-{
-	char* buffer = (char*)malloc(MAX_PATH);
-	char* path = HcFileLocalDirectory();
-	sprintf(buffer, "%s%s.log", path, PROGRAM_ALIAS);
-	free(path);
-	return buffer;
-}
-
-LPSTR
-HCAPI
-HcFileConfigFile()
-{
-	char* buffer = (char*)malloc(MAX_PATH);
-	char* path = HcFileLocalDirectory();
-	sprintf(buffer, "%s%s.config", path, PROGRAM_ALIAS);
-	free(path);
-	return buffer;
-}
-#endif
 
 BOOLEAN
 HCAPI
@@ -178,95 +155,6 @@ HcFileQueryInformationA(LPCSTR lpPath, PHC_FILE_INFORMATION fileInformation)
 	return TRUE;
 }
 
-#ifdef PROGRAM_ALIAS
-
-VOID
-HCAPI
-HcFileLogNormal(const char* input, ...)
-{
-	char* path = HcFileLogFile();
-	FILE* iobuf = fopen(path, "ab+");
-	free(path);
-
-	if (iobuf)
-	{
-		/* format the string */
-		char out[256];
-		va_list args;
-		va_start(args, input);
-		vsnprintf(out, 256, input, args);
-		va_end(args);
-
-		/* get the current time in string format */
-		const char* time = HcStringTime();
-		fprintf(iobuf, "%s [%d] %s::Normal: %s\n", time, GetCurrentThreadId(), PROGRAM_ALIAS, out);
-		fclose(iobuf);
-	}
-	else
-	{
-		FILE* logbuf = fopen("LOGFAILURE", "ab+");
-		fprintf(logbuf, "Failed to open and create log file buffer! Last message: %s", input);
-		fclose(logbuf);
-	}
-}
-
-VOID
-HCAPI
-HcFileLogError(const char* input, ...)
-{
-	char* path = HcFileLogFile();
-	FILE* iobuf = fopen(path, "ab+");
-	free(path);
-
-	if (iobuf)
-	{
-		/* format the string */
-		char out[256];
-		va_list args;
-		va_start(args, input);
-		vsnprintf(out, 256, input, args);
-		va_end(args);
-
-		/* get the current time in string format */
-		const char* time = HcStringTime();
-
-		fprintf(iobuf, "!--ERROR--%s [%d] %s::Error: %s\n", time, GetCurrentThreadId(), PROGRAM_ALIAS, out);
-		fclose(iobuf);
-	}
-	else
-	{
-		FILE* logbuf = fopen("LOGFAILURE", "ab+");
-		fprintf(logbuf, "Failed to open and create log file buffer! Last message: %s", input);
-		fclose(logbuf);
-	}
-}
-#endif
-
-
-/*
-@implemented
-*/
-DWORD
-HCAPI
-HcFileRvaOffset(PIMAGE_NT_HEADERS pImageHeader, SIZE_T RVA)
-{
-	PIMAGE_SECTION_HEADER sectionHeader = IMAGE_FIRST_SECTION(pImageHeader);
-
-	for (unsigned i = 0, sections = pImageHeader->FileHeader.NumberOfSections; i < sections; i++, sectionHeader++)
-	{
-		if (sectionHeader->VirtualAddress <= RVA)
-		{
-			if ((sectionHeader->VirtualAddress + sectionHeader->Misc.VirtualSize) > RVA)
-			{
-				RVA -= sectionHeader->VirtualAddress;
-				RVA += sectionHeader->PointerToRawData;
-				return (DWORD)RVA;
-			}
-		}
-	}
-	return 0;
-}
-
 /*
 @implemented
 */
@@ -274,7 +162,6 @@ DWORD
 HCAPI
 HcFileOffsetByExportNameA(HMODULE hModule, LPCSTR lpExportName)
 {
-	PIMAGE_DOS_HEADER pHeaderDOS;
 	PIMAGE_NT_HEADERS pHeaderNT;
 	SIZE_T szExportRVA;
 	SIZE_T szExportVA;
@@ -284,17 +171,10 @@ HcFileOffsetByExportNameA(HMODULE hModule, LPCSTR lpExportName)
 	{
 		hModule = ((HMODULE)NtCurrentPeb()->ImageBaseAddress);
 	}
-
-	pHeaderDOS = (PIMAGE_DOS_HEADER)hModule;
-	if (pHeaderDOS->e_magic != IMAGE_DOS_SIGNATURE)
-	{
-		return 0;
-	}
-
 	szModule = (SIZE_T)hModule;
 
-	pHeaderNT = (PIMAGE_NT_HEADERS)(szModule + pHeaderDOS->e_lfanew);
-	if (pHeaderNT->Signature != IMAGE_NT_SIGNATURE)
+	pHeaderNT = HcPEGetNtHeader(hModule);
+	if (!pHeaderNT)
 	{
 		return 0;
 	}
@@ -305,7 +185,7 @@ HcFileOffsetByExportNameA(HMODULE hModule, LPCSTR lpExportName)
 		/* Calculate the relative offset */
 		szExportRVA = szExportVA - szModule;
 
-		return HcFileRvaOffset(pHeaderNT, szExportRVA);
+		return HcPEGetRawFromRva(pHeaderNT, szExportRVA);
 	}
 
 	return 0;
@@ -318,7 +198,6 @@ DWORD
 HCAPI
 HcFileOffsetByExportNameW(HMODULE hModule, LPCWSTR lpExportName)
 {
-	PIMAGE_DOS_HEADER pHeaderDOS;
 	PIMAGE_NT_HEADERS pHeaderNT;
 	SIZE_T dwExportRVA;
 	SIZE_T dwExportVA;
@@ -329,16 +208,10 @@ HcFileOffsetByExportNameW(HMODULE hModule, LPCWSTR lpExportName)
 		hModule = ((HMODULE)NtCurrentPeb()->ImageBaseAddress);
 	}
 
-	pHeaderDOS = (PIMAGE_DOS_HEADER)hModule;
-	if (pHeaderDOS->e_magic != IMAGE_DOS_SIGNATURE)
-	{
-		return 0;
-	}
-
 	dwModule = (SIZE_T)hModule;
 
-	pHeaderNT = (PIMAGE_NT_HEADERS)(dwModule + pHeaderDOS->e_lfanew);
-	if (pHeaderNT->Signature != IMAGE_NT_SIGNATURE)
+	pHeaderNT = HcPEGetNtHeader(hModule);
+	if (!pHeaderNT)
 	{
 		return 0;
 	}
@@ -349,7 +222,7 @@ HcFileOffsetByExportNameW(HMODULE hModule, LPCWSTR lpExportName)
 		/* Calculate the relative offset */
 		dwExportRVA = dwExportVA - dwModule;
 
-		return HcFileRvaOffset(pHeaderNT, dwExportRVA);
+		return HcPEGetRawFromRva(pHeaderNT, dwExportRVA);
 	}
 
 	return 0;
@@ -368,27 +241,26 @@ HcFileReadModuleA(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dw
 	HANDLE hFile;
 	DWORD BytesRead;
 
-	if (!(dwFileOffset = HcFileOffsetByExportNameA(hModule, lpExportName)))
+	dwFileOffset = HcFileOffsetByExportNameA(hModule, lpExportName);
+	if (!dwFileOffset)
 	{
 		return 0;
 	}
 
-	if (!(lpModulePath = (LPSTR)VirtualAlloc(NULL,
+	lpModulePath = (LPSTR)VirtualAlloc(NULL,
 		MAX_PATH,
 		MEM_RESERVE | MEM_COMMIT,
-		PAGE_READWRITE)))
+		PAGE_READWRITE);
+
+	if (!lpModulePath)
 	{
 		return 0;
 	}
 
 	/* Acquire path of targetted module. */
 	GetModuleFileNameA(hModule, lpModulePath, MAX_PATH);
-	if (!lpModulePath)
-	{
-		VirtualFree(lpModulePath, 0, MEM_RELEASE);
-		return 0;
-	}
 
+	/* Open it up */
 	if (!(hFile = CreateFileA(lpModulePath,
 		GENERIC_READ,
 		FILE_SHARE_READ,
@@ -401,6 +273,7 @@ HcFileReadModuleA(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dw
 		return 0;
 	}
 
+	/* Run to the offset */
 	if (!(SetFilePointer(hFile, dwFileOffset, 0, FILE_BEGIN)))
 	{
 		VirtualFree(lpModulePath, 0, MEM_RELEASE);
@@ -408,6 +281,7 @@ HcFileReadModuleA(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dw
 		return 0;
 	}
 
+	/* Snatch the data */
 	if (!ReadFile(hFile, lpBuffer, dwCount, &BytesRead, NULL))
 	{
 		VirtualFree(lpModulePath, 0, MEM_RELEASE);
@@ -415,6 +289,7 @@ HcFileReadModuleA(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dw
 		return 0;
 	}
 
+	/* Fuck off */
 	VirtualFree(lpModulePath, 0, MEM_RELEASE);
 	CloseHandle(hFile);
 	return BytesRead;
@@ -448,12 +323,8 @@ HcFileReadModuleW(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD d
 
 	/* Acquire path of targetted module. */
 	GetModuleFileNameW(hModule, lpModulePath, MAX_PATH);
-	if (!lpModulePath)
-	{
-		VirtualFree(lpModulePath, 0, MEM_RELEASE);
-		return 0;
-	}
 
+	/* Open it up */
 	if (!(hFile = CreateFileW(lpModulePath,
 		GENERIC_READ,
 		FILE_SHARE_READ,
@@ -466,6 +337,7 @@ HcFileReadModuleW(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD d
 		return 0;
 	}
 
+	/* Run to the offset */
 	if (!(SetFilePointer(hFile, dwFileOffset, 0, FILE_BEGIN)))
 	{
 		VirtualFree(lpModulePath, 0, MEM_RELEASE);
@@ -473,6 +345,7 @@ HcFileReadModuleW(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD d
 		return 0;
 	}
 
+	/* Snatch the data */
 	if (!ReadFile(hFile, lpBuffer, dwCount, &BytesRead, NULL))
 	{
 		VirtualFree(lpModulePath, 0, MEM_RELEASE);
@@ -480,6 +353,7 @@ HcFileReadModuleW(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD d
 		return 0;
 	}
 
+	/* Fuck off */
 	VirtualFree(lpModulePath, 0, MEM_RELEASE);
 	CloseHandle(hFile);
 	return BytesRead;
@@ -489,10 +363,9 @@ DWORD
 HCAPI
 HcFileOffsetByVirtualAddress(LPBYTE lpBaseAddress)
 {
-	PIMAGE_DOS_HEADER pHeaderDOS;
 	PIMAGE_NT_HEADERS pHeaderNT;
-	SIZE_T dwRVA;
-	SIZE_T dwModule;
+	SIZE_T szRva;
+	SIZE_T szModule;
 	MEMORY_BASIC_INFORMATION memInfo;
 	HMODULE hModule;
 
@@ -512,29 +385,18 @@ HcFileOffsetByVirtualAddress(LPBYTE lpBaseAddress)
 		return 0;
 	}
 
-	if (!lpBaseAddress)
-	{
-		return 0;
-	}
+	szModule = (SIZE_T)hModule;
 
-	pHeaderDOS = (PIMAGE_DOS_HEADER)hModule;
-	if (pHeaderDOS->e_magic != IMAGE_DOS_SIGNATURE)
-	{
-		return 0;
-	}
-
-	dwModule = (SIZE_T)hModule;
-
-	pHeaderNT = (PIMAGE_NT_HEADERS)(dwModule + pHeaderDOS->e_lfanew);
-	if (pHeaderNT->Signature != IMAGE_NT_SIGNATURE)
+	pHeaderNT = HcPEGetNtHeader(hModule);
+	if (!pHeaderNT)
 	{
 		return 0;
 	}
 
 	/* Calculate the relative offset */
-	dwRVA = ((SIZE_T)lpBaseAddress) - dwModule;
+	szRva = ((SIZE_T)lpBaseAddress) - szModule;
 
-	return HcFileRvaOffset(pHeaderNT, dwRVA);
+	return HcPEGetRawFromRva(pHeaderNT, szRva);
 }
 
 SIZE_T

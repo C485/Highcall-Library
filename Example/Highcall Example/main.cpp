@@ -15,7 +15,7 @@
 If true is returned, it stops the iteration
 If false is returned, it goes to the next untill there is no more modules to loop
 */
-BOOL ModuleCallback(HC_MODULE_INFORMATION hcInfo, LPARAM lPARAM)
+BOOLEAN CALLBACK ModuleCallback(HC_MODULE_INFORMATION hcInfo, LPARAM lPARAM)
 {
 	wprintf(L"\n\t\t%s\n", hcInfo.Name);
 #ifdef _WIN64
@@ -35,7 +35,7 @@ BOOL ModuleCallback(HC_MODULE_INFORMATION hcInfo, LPARAM lPARAM)
 	If true is returned, it stops the iteration
 	If false is returned, it goes to the next untill there is no more processes to loop
 */
-BOOL ProcessCallback(HC_PROCESS_INFORMATION hpcInfo, LPARAM lParam)
+BOOLEAN CALLBACK ProcessCallback(HC_PROCESS_INFORMATION hpcInfo, LPARAM lParam)
 {
 	wprintf(L"\nProcess %s\n", hpcInfo.Name);
 	wprintf(L"\tAccessible? %s\n", hpcInfo.CanAccess ? L"true" : L"false");
@@ -95,7 +95,7 @@ BOOL ProcessCallback(HC_PROCESS_INFORMATION hpcInfo, LPARAM lParam)
 If true is returned, it stops the iteration
 If false is returned, it goes to the next untill there is no more processes to loop
 */
-BOOL HiddenModuleCallback(HC_PROCESS_INFORMATION hpcInfo, LPARAM lParam)
+BOOLEAN CALLBACK HiddenModuleCallback(HC_PROCESS_INFORMATION hpcInfo, LPARAM lParam)
 {
 	wprintf(L"\nProcess %s\n", hpcInfo.Name);
 	wprintf(L"\tAccessible? %s\n", hpcInfo.CanAccess ? L"Yes" : L"No");
@@ -145,7 +145,7 @@ BOOL CALLBACK WindowCallback(HWND hWnd, LPARAM lParam)
 }
 
 
-BOOL ExportCallback(LPCSTR name, LPARAM param)
+BOOLEAN CALLBACK ExportCallback(LPCSTR name, LPARAM param)
 {
 	if (strlen(name) < 4)
 	{
@@ -158,6 +158,11 @@ BOOL ExportCallback(LPCSTR name, LPARAM param)
 		printf("%s, index: %x\n", name, Index);
 	}
 	return FALSE;
+}
+
+void NtCreateThreadEX_TEST()
+{
+	printf("Thread created, Id: %x\n", GetCurrentThreadId());
 }
 
 int wmain(int argc, wchar_t *argv[])
@@ -175,6 +180,14 @@ int wmain(int argc, wchar_t *argv[])
 	}
 
 	printf("Highcall initialized.\n");
+
+	/* Starting arbitrary thread. */
+	printf("Starting arbitrary thread.\n");
+
+	HANDLE hThread = HcProcessCreateThread(NtCurrentProcess, (LPTHREAD_START_ROUTINE)NtCreateThreadEX_TEST, NULL, 0);
+
+	/* Wait for it to finish */
+	WaitForSingleObject(hThread, INFINITE);
 
 	printf("Acquiring debug privilege: ");
 

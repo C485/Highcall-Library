@@ -127,8 +127,6 @@ typedef struct _SYSTEM_PROCESS_INFORMATION
 	SYSTEM_THREAD_INFORMATION Threads[1];
 } SYSTEM_PROCESS_INFORMATION, *PSYSTEM_PROCESS_INFORMATION;
 
-
-
 typedef struct _PEB_LDR_DATA {
 	ULONG Length;
 	BOOLEAN Initialized;
@@ -293,6 +291,21 @@ typedef struct _TEB_ACTIVE_FRAME
 	PTEB_ACTIVE_FRAME_CONTEXT Context;
 } TEB_ACTIVE_FRAME, *PTEB_ACTIVE_FRAME;
 
+typedef struct _RTL_ACTIVATION_CONTEXT_STACK_FRAME
+{
+	struct _RTL_ACTIVATION_CONTEXT_STACK_FRAME *Previous;
+	struct _ACTIVATION_CONTEXT                 *ActivationContext;
+	ULONG                                       Flags;
+} RTL_ACTIVATION_CONTEXT_STACK_FRAME, *PRTL_ACTIVATION_CONTEXT_STACK_FRAME;
+
+typedef struct _ACTIVATION_CONTEXT_STACK
+{
+	ULONG                               Flags;
+	ULONG                               NextCookieSequenceNumber;
+	RTL_ACTIVATION_CONTEXT_STACK_FRAME *ActiveFrame;
+	LIST_ENTRY                          FrameListCache;
+} ACTIVATION_CONTEXT_STACK, *PACTIVATION_CONTEXT_STACK;
+
 typedef struct _TEB
 {
 	NT_TIB NtTib;
@@ -314,7 +327,7 @@ typedef struct _TEB
 	ULONG FpSoftwareStatusRegister;
 	PBYTE SystemReserved1[54];
 	NTSTATUS ExceptionCode;
-	PBYTE ActivationContextStackPointer;
+	PACTIVATION_CONTEXT_STACK ActivationContextStackPointer;
 #ifdef _WIN64
 	UCHAR SpareBytes[24];
 #else
@@ -437,6 +450,30 @@ typedef struct _TEB
 	PBYTE ResourceRetValue;
 	PBYTE ReservedForWdf;
 } TEB, *PTEB;
+
+typedef struct _THREAD_BASIC_INFORMATION
+{
+	NTSTATUS ExitStatus;
+	PTEB TebBaseAddress;
+	CLIENT_ID ClientId;
+	ULONG_PTR AffinityMask;
+	KPRIORITY Priority;
+	LONG BasePriority;
+} THREAD_BASIC_INFORMATION, *PTHREAD_BASIC_INFORMATION;
+
+typedef struct _SYSTEM_BASIC_INFORMATION {
+	ULONG Reserved;
+	ULONG TimerResolution;
+	ULONG PageSize;
+	ULONG NumberOfPhysicalPages;
+	ULONG LowestPhysicalPageNumber;
+	ULONG HighestPhysicalPageNumber;
+	ULONG AllocationGranularity;
+	ULONG MinimumUserModeAddress;
+	ULONG MaximumUserModeAddress;
+	KAFFINITY ActiveProcessorsAffinityMask;
+	CCHAR NumberOfProcessors;
+} SYSTEM_BASIC_INFORMATION, *PSYSTEM_BASIC_INFORMATION;
 
 __inline PPEB NTAPI NtCurrentPeb()
 {

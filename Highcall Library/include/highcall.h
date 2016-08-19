@@ -4,7 +4,7 @@
 #include "../native/native.h"
 #include "hcdef.h"
 
-typedef ULONG HIGHCALL_STATUS;
+typedef int HIGHCALL_STATUS;
 
 #define HIGHCALL_ADVANCE(Status)				((HIGHCALL_STATUS)(Status) >= 0)
 #define HIGHCALL_SUCCESS						((HIGHCALL_STATUS)0x00000000L)

@@ -149,9 +149,10 @@
     <ClCompile Include="src\hcfile.c" />
     <ClCompile Include="src\hcinternal.c" />
     <ClCompile Include="src\hcmodule.c" />
+    <ClCompile Include="src\hcpe.c" />
     <ClCompile Include="src\hcprocess.c" />
     <ClCompile Include="src\hcstring.c" />
-    <ClCompile Include="src\hctoken.cpp" />
+    <ClCompile Include="src\hctoken.c" />
     <ClCompile Include="src\hctrampoline.c" />
     <ClCompile Include="src\highcall.c" />
   </ItemGroup>
@@ -173,13 +174,13 @@
     <ClInclude Include="include\hcimport.h" />
     <ClInclude Include="include\hcinternal.h" />
     <ClInclude Include="include\hcmodule.h" />
+    <ClInclude Include="include\hcpe.h" />
     <ClInclude Include="include\hcprocess.h" />
     <ClInclude Include="include\hcstring.h" />
     <ClInclude Include="include\hcsyscall.h" />
     <ClInclude Include="include\hctoken.h" />
     <ClInclude Include="include\hctrampoline.h" />
     <ClInclude Include="include\highcall.h" />
-    <ClInclude Include="hcsyscall.h" />
     <ClInclude Include="native\minnative.h" />
     <ClInclude Include="native\native.h" />
   </ItemGroup>
@@ -241,6 +242,19 @@
   </ItemGroup>
   <ItemGroup>
     <MASM Include="asm\Close.S">
+      <FileType>Document</FileType>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="OpenDirectoryObject.S">
+      <FileType>Document</FileType>
+    </MASM>
+    <MASM Include="SetInformationThread.S">
+      <FileType>Document</FileType>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="CreateThreadEx.S">
       <FileType>Document</FileType>
     </MASM>
   </ItemGroup>

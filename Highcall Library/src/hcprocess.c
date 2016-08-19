@@ -8,6 +8,8 @@
 #include "../include/hcimport.h"
 #include "../include/hcfile.h"
 #include "../include/hctoken.h"
+#include "../include/hcpe.h"
+#include "../include/hcmodule.h"
 
 BOOLEAN
 HCAPI
@@ -278,29 +280,10 @@ BOOLEAN
 HCAPI
 HcParameterVerifyInjectModuleManual(PVOID Buffer)
 {
-	PIMAGE_DOS_HEADER pHeaderDos;
 	PIMAGE_NT_HEADERS pHeaderNt;
+	pHeaderNt = HcPEGetNtHeader(Buffer);
 
-	pHeaderDos = (PIMAGE_DOS_HEADER)Buffer;
-
-	if (pHeaderDos->e_magic != IMAGE_DOS_SIGNATURE)
-	{
-		return FALSE;
-	}
-
-	pHeaderNt = (PIMAGE_NT_HEADERS)((LPBYTE)Buffer + pHeaderDos->e_lfanew);
-
-	if (pHeaderNt->Signature != IMAGE_NT_SIGNATURE)
-	{
-		return FALSE;
-	}
-
-	if (!(pHeaderNt->FileHeader.Characteristics & IMAGE_FILE_DLL))
-	{
-		return FALSE;
-	}
-
-	return TRUE;
+	return pHeaderNt && (pHeaderNt->FileHeader.Characteristics & IMAGE_FILE_DLL);
 }
 
 /*
@@ -420,20 +403,17 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 	if (!HcProcessWriteMemory(hProcess,
 		(PVOID)((PHC_MANUAL_MAP)LoaderBuffer + 1),
 		MmInternalResolve,
-		(ULONG)((SIZE_T)MmInternalResolved - (SIZE_T)MmInternalResolve),
+		(SIZE_T)((SIZE_T)MmInternalResolved - (SIZE_T)MmInternalResolve),
 		&BytesWritten))
 	{
 		return FALSE;
 	}
 
 	/* Create a thread specifically for this dll, this will execute the code remotely */
-	hThread = HcCreateRemoteThread(hProcess,
-		NULL,
-		0,
+	hThread = HcProcessCreateThread(hProcess,
 		(LPTHREAD_START_ROUTINE)((PHC_MANUAL_MAP)LoaderBuffer + 1),
 		LoaderBuffer,
-		0,
-		NULL);
+		0);
 
 	if (!hThread)
 	{
@@ -509,7 +489,7 @@ HcProcessResumeEx(HANDLE hProcess)
 	return NT_SUCCESS(HcResumeProcess(hProcess));
 }
 
-BOOL
+BOOLEAN
 HCAPI
 HcProcessFree(IN HANDLE hProcess,
 	IN LPVOID lpAddress,
@@ -569,7 +549,7 @@ HcProcessAllocate(IN HANDLE hProcess,
 	return lpAddress;
 }
 
-BOOL
+BOOLEAN
 HCAPI
 HcProcessWriteMemory(HANDLE hProcess,
 	LPVOID lpBaseAddress,
@@ -606,7 +586,7 @@ HcProcessWriteMemory(HANDLE hProcess,
 		if (!UnProtect)
 		{
 			/* Set the new protection */
-			Status = HcProtectVirtualMemory(hProcess,
+			HcProtectVirtualMemory(hProcess,
 				&Base,
 				&RegionSize,
 				OldValue,
@@ -644,7 +624,7 @@ HcProcessWriteMemory(HANDLE hProcess,
 				&OldValue);
 
 			/* Note: This is what Windows returns and code depends on it */
-			return STATUS_ACCESS_VIOLATION;
+			return FALSE;
 		}
 
 		/* Otherwise, do the write */
@@ -667,7 +647,7 @@ HcProcessWriteMemory(HANDLE hProcess,
 		if (!NT_SUCCESS(Status))
 		{
 			/* Note: This is what Windows returns and code depends on it */
-			return STATUS_ACCESS_VIOLATION;
+			return FALSE;
 		}
 
 		/* Flush the ITLB */
@@ -678,7 +658,7 @@ HcProcessWriteMemory(HANDLE hProcess,
 	return FALSE;
 }
 
-BOOL
+BOOLEAN
 HCAPI
 HcProcessReadMemory(IN HANDLE hProcess,
 	IN LPCVOID lpBaseAddress,
@@ -707,7 +687,6 @@ HcProcessReadMemory(IN HANDLE hProcess,
 	/* Return success */
 	return TRUE;
 }
-
 
 SIZE_T
 NTAPI
@@ -738,7 +717,38 @@ HcProcessVirtualQuery(IN HANDLE hProcess,
 	return ResultLength;
 }
 
-BOOL
+HANDLE
+HCAPI
+HcProcessCreateThread(IN HANDLE hProcess,
+	IN LPTHREAD_START_ROUTINE lpStartAddress,
+	IN LPVOID lpParamater,
+	IN DWORD dwCreationFlags)
+{
+	NTSTATUS Status;
+	HANDLE hThread = 0;
+
+	Status = HcCreateThreadEx(&hThread,
+		THREAD_ALL_ACCESS, 
+		NULL, 
+		hProcess,
+		lpStartAddress,
+		lpParamater, 
+		dwCreationFlags,
+		0,
+		0,
+		0,
+		NULL);
+
+	if (!NT_SUCCESS(Status))
+	{
+		SetLastError(RtlNtStatusToDosError(Status));
+		return 0;
+	}
+
+	return hThread;
+}
+
+BOOLEAN
 HCAPI
 HcProcessQueryInformationWindow(_In_ HANDLE ProcessHandle,
 	PHC_WINDOW_INFORMATION HCWindowInformation)
@@ -792,7 +802,7 @@ HcProcessQueryInformationWindow(_In_ HANDLE ProcessHandle,
 	return FALSE;
 }
 
-BOOL
+BOOLEAN
 HCAPI
 HcProcessReadNullifiedString(HANDLE hProcess,
 	PUNICODE_STRING usStringIn,
@@ -843,7 +853,7 @@ HcProcessReadNullifiedString(HANDLE hProcess,
 	return TRUE;
 }
 
-BOOL
+BOOLEAN
 HCAPI
 HcProcessLdrModuleToHighCallModule(IN HANDLE hProcess,
 	IN PLDR_DATA_TABLE_ENTRY Module,
@@ -873,7 +883,7 @@ HcProcessLdrModuleToHighCallModule(IN HANDLE hProcess,
 	return TRUE;
 }
 
-BOOL
+BOOLEAN
 HCAPI
 HcProcessQueryInformationModule(IN HANDLE hProcess,
 	IN HMODULE hModule OPTIONAL,
@@ -978,7 +988,7 @@ HcProcessQueryInformationModule(IN HANDLE hProcess,
 	return FALSE;
 }
 
-BOOL
+BOOLEAN
 HCAPI
 HcProcessEnumModules(HANDLE hProcess,
 	HC_MODULE_CALLBACK_EVENT hcmCallback,
@@ -1392,7 +1402,7 @@ BOOLEAN
 HCAPI
 HcProcessSetPrivilegeA(HANDLE hProcess,
 	LPCSTR Privilege,      // Privilege to enable/disable
-	BOOL bEnablePrivilege   // TRUE to enable.  FALSE to disable
+	BOOLEAN bEnablePrivilege   // TRUE to enable.  FALSE to disable
 ){
 	NTSTATUS Status;
 	HANDLE hToken;
@@ -1487,7 +1497,7 @@ BOOLEAN
 HCAPI
 HcProcessSetPrivilegeW(HANDLE hProcess,
 	LPCWSTR Privilege,      // Privilege to enable/disable
-	BOOL bEnablePrivilege   // TRUE to enable.  FALSE to disable
+	BOOLEAN bEnablePrivilege   // TRUE to enable.  FALSE to disable
 ) {
 	NTSTATUS Status;
 	HANDLE hToken;

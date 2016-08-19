@@ -71,7 +71,7 @@ HC_GLOBAL NTSTATUS HcOpenProcess(_Out_ PHANDLE ProcessHandle,
 
 HC_GLOBAL SyscallIndex sciProtectVirtualMemory;
 HC_GLOBAL NTSTATUS HcProtectVirtualMemory(IN HANDLE ProcessHandle,
-	IN OUT LPVOID *BaseAddress,
+	IN OUT PVOID *BaseAddress,
 	IN OUT PSIZE_T NumberOfBytesToProtect,
 	IN ULONG NewAccessProtection,
 	OUT PULONG OldAccessProtection);
@@ -117,10 +117,34 @@ HC_GLOBAL NTSTATUS HcQueryVirtualMemory(IN HANDLE ProcessHandle,
 
 HC_GLOBAL SyscallIndex sciAdjustPrivilegesToken;
 HC_GLOBAL NTSTATUS HcAdjustPrivilegesToken(HANDLE TokenHandle,
-	BOOL 	DisableAllPrivileges,
+	BOOLEAN 	DisableAllPrivileges,
 	PTOKEN_PRIVILEGES 	NewState,
 	DWORD 	BufferLength,
 	PTOKEN_PRIVILEGES 	PreviousState,
 	PDWORD 	ReturnLength);
+
+HC_GLOBAL SyscallIndex sciSetInformationThread;
+HC_GLOBAL NTSTATUS HcSetInformationThread(IN HANDLE ThreadHandle,
+	IN THREADINFOCLASS ThreadInformationClass,
+	IN PVOID ThreadInformation,
+	IN ULONG ThreadInformationLength);
+
+HC_GLOBAL SyscallIndex sciOpenDirectoryObject;
+HC_GLOBAL NTSTATUS HcOpenDirectoryObject(OUT PHANDLE DirectoryHandle,
+	IN ACCESS_MASK DesiredAccess,
+	IN POBJECT_ATTRIBUTES ObjectAttributes);
+
+HC_GLOBAL SyscallIndex sciCreateThreadEx;
+HC_GLOBAL NTSTATUS HcCreateThreadEx(_Out_ PHANDLE ThreadHandle,
+	_In_ ACCESS_MASK DesiredAccess,
+	_In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
+	_In_ HANDLE ProcessHandle,
+	_In_ PVOID StartRoutine,
+	_In_opt_ PVOID Argument,
+	_In_ ULONG CreateFlags,
+	_In_opt_ ULONG_PTR ZeroBits,
+	_In_opt_ SIZE_T StackSize,
+	_In_opt_ SIZE_T MaximumStackSize,
+	_In_opt_ PVOID AttributeList);
 
 #endif

@@ -6,11 +6,11 @@
 extern "C" {
 #endif
 
-	BOOL
+	BOOLEAN
 		HCAPI
 		HcStringIsBadA(LPCSTR lpcStr);
 
-	BOOL
+	BOOLEAN
 		HCAPI
 		HcStringIsBadW(LPCWSTR lpcStr);
 
@@ -70,11 +70,11 @@ extern "C" {
 		HCAPI
 		HcStringToUpperW(LPWSTR lpStr);
 
-	BOOL
+	BOOLEAN
 		HCAPI
 		HcStringEqualA(LPCSTR lpString1, LPCSTR lpString2, BOOLEAN CaseInSensitive);
 
-	BOOL
+	BOOLEAN
 		HCAPI
 		HcStringEqualW(LPCWSTR lpString1, LPCWSTR lpString2, BOOLEAN CaseInSensitive);
 

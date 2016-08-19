@@ -22,7 +22,7 @@ extern "C" {
 		HCAPI
 		HcProcessOpen(SIZE_T dwProcessId, ACCESS_MASK DesiredAccess);
 
-	BOOL
+	BOOLEAN
 		HCAPI
 		HcProcessFree(IN HANDLE hProcess,
 			IN LPVOID lpAddress,
@@ -37,7 +37,7 @@ extern "C" {
 			IN ULONG flAllocationType,
 			IN ULONG flProtect);
 
-	BOOL
+	BOOLEAN
 		HCAPI
 		HcProcessWriteMemory(HANDLE hProcess,
 			LPVOID lpBaseAddress,
@@ -45,13 +45,20 @@ extern "C" {
 			SIZE_T nSize,
 			PSIZE_T lpNumberOfBytesWritten);
 
-	BOOL
+	BOOLEAN
 		HCAPI
 		HcProcessReadMemory(IN HANDLE hProcess,
 			IN LPCVOID lpBaseAddress,
 			IN LPVOID lpBuffer,
 			IN SIZE_T nSize,
 			OUT SIZE_T* lpNumberOfBytesRead);
+
+	HANDLE
+		HCAPI
+		HcProcessCreateThread(IN HANDLE hProcess,
+			IN LPTHREAD_START_ROUTINE lpStartAddress,
+			IN LPVOID lpParamater,
+			IN DWORD dwCreationFlags);
 
 	SIZE_T
 		NTAPI
@@ -60,31 +67,31 @@ extern "C" {
 			OUT PMEMORY_BASIC_INFORMATION lpBuffer,
 			IN SIZE_T dwLength);
 
-	BOOL
+	BOOLEAN
 		HCAPI
 		HcProcessQueryInformationWindow(_In_ HANDLE ProcessHandle,
 			PHC_WINDOW_INFORMATION HCWindowInformation);
 
-	BOOL
+	BOOLEAN
 		HCAPI
 		HcProcessReadNullifiedString(HANDLE hProcess,
 			PUNICODE_STRING usStringIn,
 			LPWSTR lpStringOut,
 			SIZE_T lpSize);
 
-	BOOL
+	BOOLEAN
 		HCAPI
 		HcProcessLdrModuleToHighCallModule(IN HANDLE hProcess,
 			IN PLDR_DATA_TABLE_ENTRY Module,
 			OUT PHC_MODULE_INFORMATION phcModuleOut);
 
-	BOOL
+	BOOLEAN
 		HCAPI
 		HcProcessQueryInformationModule(IN HANDLE hProcess,
 			IN HMODULE hModule OPTIONAL,
 			OUT PHC_MODULE_INFORMATION phcModuleOut);
 
-	BOOL
+	BOOLEAN
 		HCAPI
 		HcProcessEnumModules(HANDLE hProcess,
 			HC_MODULE_CALLBACK_EVENT hcmCallback,
@@ -144,7 +151,7 @@ extern "C" {
 		HCAPI
 		HcProcessSetPrivilegeA(HANDLE hProcess,
 			LPCSTR Privilege, 
-			BOOL bEnablePrivilege 
+			BOOLEAN bEnablePrivilege 
 		);
 
 
@@ -152,7 +159,7 @@ extern "C" {
 		HCAPI
 		HcProcessSetPrivilegeW(HANDLE hProcess,
 			LPCWSTR Privilege,
-			BOOL bEnablePrivilege
+			BOOLEAN bEnablePrivilege
 		);
 
 #if defined (__cplusplus)

@@ -189,31 +189,6 @@ typedef struct _DBGUI_WAIT_STATE_CHANGE
 	//} StateInfo;
 } DBGUI_WAIT_STATE_CHANGE, *PDBGUI_WAIT_STATE_CHANGE;
 
-typedef struct _RTL_ACTIVATION_CONTEXT_STACK_FRAME
-{
-	struct _RTL_ACTIVATION_CONTEXT_STACK_FRAME *Previous;
-	struct _ACTIVATION_CONTEXT                 *ActivationContext;
-	ULONG                                       Flags;
-} RTL_ACTIVATION_CONTEXT_STACK_FRAME, *PRTL_ACTIVATION_CONTEXT_STACK_FRAME;
-
-typedef struct _ACTIVATION_CONTEXT_STACK
-{
-	ULONG                               Flags;
-	ULONG                               NextCookieSequenceNumber;
-	RTL_ACTIVATION_CONTEXT_STACK_FRAME *ActiveFrame;
-	LIST_ENTRY                          FrameListCache;
-} ACTIVATION_CONTEXT_STACK, *PACTIVATION_CONTEXT_STACK;
-
-typedef struct _THREAD_BASIC_INFORMATION
-{
-	NTSTATUS ExitStatus;
-	PTEB TebBaseAddress;
-	CLIENT_ID ClientId;
-	ULONG_PTR AffinityMask;
-	KPRIORITY Priority;
-	LONG BasePriority;
-} THREAD_BASIC_INFORMATION, *PTHREAD_BASIC_INFORMATION;
-
 typedef struct _SECTION_IMAGE_INFORMATION
 {
 	PBYTE TransferAddress; //Entrypoint
@@ -374,15 +349,12 @@ typedef struct _RTL_RELATIVE_NAME_U
 
 typedef struct _INITIAL_TEB
 {
-	struct {
-		PBYTE OldStackBase;
-		PBYTE OldStackLimit;
-	} OldInitialTeb;
-	PBYTE StackBase;
-	PBYTE StackLimit;
-	PBYTE StackAllocationBase;
+	PVOID PreviousStackBase;
+	PVOID PreviousStackLimit;
+	PVOID StackBase;
+	PVOID StackLimit;
+	PVOID AllocatedStackBase;
 } INITIAL_TEB, *PINITIAL_TEB;
-
 
 //0x22C FlsHighIndex, x64 0x0350
 typedef struct _RTL_UNKNOWN_FLS_DATA {
@@ -937,7 +909,7 @@ typedef enum _WINDOWINFOCLASS
 	WindowProcess = 0, //HANDLE
 	WindowRealWindowOwner = 1,
 	WindowThread = 2, //HANDLE
-	WindowIsHung = 5 //BOOL
+	WindowIsHung = 5 //BOOLEAN
 
 } WINDOWINFOCLASS;
 
@@ -946,5 +918,17 @@ typedef struct
 	UNICODE_STRING SectionFileName;
 	WCHAR NameBuffer[ANYSIZE_ARRAY];
 } MEMORY_SECTION_NAME, *PMEMORY_SECTION_NAME;
+
+typedef struct _NtCreateThreadExBuffer {
+	ULONG Size;
+	ULONG Unknown1;
+	ULONG Unknown2;
+	PULONG Unknown3;
+	ULONG Unknown4;
+	ULONG Unknown5;
+	ULONG Unknown6;
+	PULONG Unknown7;
+	ULONG Unknown8;
+} NtCreateThreadExBuffer, *PNtCreateThreadExBuffer;
 
 #endif

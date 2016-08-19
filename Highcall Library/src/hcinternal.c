@@ -1,5 +1,6 @@
 #include "../include/hcinternal.h"
 #include "../include/hcprocess.h"
+#include "../include/hcstring.h"
 
 mem_result
 HCAPI
@@ -219,7 +220,7 @@ HcInternalMemoryNop(PVOID pAddress, SIZE_T dwLen)
 
 SIZE_T
 HCAPI
-HcInternalPatternFind(const char* pattern, const char* mask, HC_MODULE_INFORMATION module)
+HcInternalPatternFind(LPCSTR pattern, LPCSTR mask, HC_MODULE_INFORMATION module)
 {
 	/* specifies where the function will start searching from */
 	SIZE_T base = module.Base;
@@ -227,8 +228,11 @@ HcInternalPatternFind(const char* pattern, const char* mask, HC_MODULE_INFORMATI
 	/* specifies where the function will end searching */
 	SIZE_T size = module.Size;
 
+	/* Size of our pattern's mask. */
+	DWORD MaskSize = HcStringSecureLengthA(mask);
+
 	/* loop through the specified module */
-	for (SIZE_T retAddress = base; retAddress < base + size - strlen(mask); retAddress++)
+	for (SIZE_T retAddress = base; retAddress < base + size - MaskSize; retAddress++)
 	{
 		if (*(BYTE*)retAddress == (pattern[0] & 0xff) || mask[0] == '?')
 		{

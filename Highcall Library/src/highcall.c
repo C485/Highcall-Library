@@ -59,6 +59,9 @@ t_RtlFreeActivationContextStack RtlFreeActivationContextStack;
 t_RtlFreeThreadActivationContextStack RtlFreeThreadActivationContextStack;
 t_RtlActivateActivationContextEx RtlActivateActivationContextEx;
 t_RtlNtStatusToDosError RtlNtStatusToDosError;
+t_RtlAcquirePebLock RtlAcquirePebLock;
+t_RtlReleasePebLock RtlReleasePebLock;
+t_BaseFormatObjectAttributes BaseFormatObjectAttributes;
 
 static HIGHCALL_STATUS HCAPI HcInitializeImports(VOID)
 {
@@ -95,6 +98,15 @@ static HIGHCALL_STATUS HCAPI HcInitializeImports(VOID)
 	RtlNtStatusToDosError = (t_RtlNtStatusToDosError)HcModuleProcedureAddressA(NTDLL,
 		"RtlNtStatusToDosError");
 
+	RtlAcquirePebLock = (t_RtlAcquirePebLock)HcModuleProcedureAddressA(NTDLL,
+		"RtlAcquirePebLock");
+
+	RtlReleasePebLock = (t_RtlReleasePebLock)HcModuleProcedureAddressA(NTDLL,
+		"RtlReleasePebLock");
+
+	BaseFormatObjectAttributes = (t_BaseFormatObjectAttributes)HcModuleProcedureAddressA(KERNEL32,
+		"BaseFormatObjectAttributes");
+
 	return HIGHCALL_SUCCESS;
 }
 
@@ -102,25 +114,29 @@ static HIGHCALL_STATUS HCAPI HcInitializeImports(VOID)
 
 #pragma region Init Syscall
 
-SyscallIndex sciQueryInformationToken;
-SyscallIndex sciOpenProcessToken;
-SyscallIndex sciResumeProcess;
-SyscallIndex sciSuspendProcess;
-SyscallIndex sciAllocateVirtualMemory;
-SyscallIndex sciFreeVirtualMemory;
-SyscallIndex sciResumeThread;
-SyscallIndex sciQueryInformationThread;
-SyscallIndex sciCreateThread;
-SyscallIndex sciFlushInstructionCache;
-SyscallIndex sciOpenProcess;
-SyscallIndex sciProtectVirtualMemory;
-SyscallIndex sciReadVirtualMemory;
-SyscallIndex sciWriteVirtualMemory;
-SyscallIndex sciQueryInformationProcess;
-SyscallIndex sciQuerySystemInformation;
-SyscallIndex sciClose;
-SyscallIndex sciQueryVirtualMemory;
-SyscallIndex sciAdjustPrivilegesToken;
+SyscallIndex sciQueryInformationToken,
+	sciOpenProcessToken,
+	sciResumeProcess,
+	sciSuspendProcess,
+	sciAllocateVirtualMemory,
+	sciFreeVirtualMemory,
+	sciResumeThread,
+	sciQueryInformationThread,
+	sciCreateThread,
+	sciFlushInstructionCache,
+	sciOpenProcess,
+	sciProtectVirtualMemory,
+	sciReadVirtualMemory,
+	sciWriteVirtualMemory,
+	sciQueryInformationProcess,
+	sciQuerySystemInformation,
+	sciClose,
+	sciQueryVirtualMemory,
+	sciAdjustPrivilegesToken,
+	sciSetInformationThread,
+	sciOpenDirectoryObject,
+	sciCreateThreadEx;
+
 
 static HIGHCALL_STATUS HcInitializeSyscalls(VOID)
 {
@@ -148,6 +164,9 @@ static HIGHCALL_STATUS HcInitializeSyscalls(VOID)
 	sciClose = HcSyscallIndexA("NtClose");
 	sciQueryVirtualMemory = HcSyscallIndexA("NtQueryVirtualMemory");
 	sciAdjustPrivilegesToken = HcSyscallIndexA("NtAdjustPrivilegesToken");
+	sciSetInformationThread = HcSyscallIndexA("NtSetInformationThread");
+	sciOpenDirectoryObject = HcSyscallIndexA("NtOpenDirectoryObject");
+	sciCreateThreadEx = HcSyscallIndexA("NtCreateThreadEx");
 
 	return HIGHCALL_SUCCESS;
 }
@@ -225,6 +244,7 @@ static VOID HcInitializeWindowsVersion(VOID)
 HMODULE NTDLL;
 HMODULE USER32;
 HMODULE KERNEL32;
+SIZE_T BaseThreadInit;
 
 static HIGHCALL_STATUS HcInitializeModules(VOID)
 {
@@ -255,10 +275,12 @@ static HIGHCALL_STATUS HcInitializeModules(VOID)
 		}
 	}
 
-	if (!USER32 || !KERNEL32 || !NTDLL)
+	if (!NTDLL)
 	{
 		return HIGHCALL_FAILED;
 	}
+
+	BaseThreadInit = HcModuleProcedureAddressA(KERNEL32, "BaseThreadInitThunk");
 
 	return HIGHCALL_SUCCESS;
 }
@@ -288,6 +310,11 @@ HIGHCALL_STATUS HCAPI HcInitialize()
 	if (!HIGHCALL_ADVANCE(Status))
 	{
 		return Status;
+	}
+
+	if (!USER32)
+	{
+		USER32 = HcModuleLoadA("user32.dll");
 	}
 
 	HcInitializeTrampoline();

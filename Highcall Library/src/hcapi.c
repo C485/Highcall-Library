@@ -36,16 +36,19 @@ HCAPI
 HcSyscallIndexA(LPCSTR lpName)
 {
 	BYTE buffer[10];
-	HcFileReadModuleA(NTDLL, lpName, buffer, 10);
+	if (!HcFileReadModuleA(NTDLL, lpName, buffer, 10))
+	{
+		return 0;
+	}
 
 #ifndef _WIN64
 	/* mov eax, syscallindex */
 	/* buffer + 1 is the syscall index, 0xB8 is the mov instruction */
-	return buffer ? *(ULONG*)(buffer + 1) : 0;
+	return *(ULONG*)(buffer + 1);
 #else
 	/* mov r10, rcx */
 	/* mov eax, syscall index */
-	return buffer ? *(ULONG*)(buffer + 4) : 0;
+	return *(ULONG*)(buffer + 4);
 #endif
 }
 
@@ -55,16 +58,19 @@ HCAPI
 HcSyscallIndexW(LPCWSTR lpName)
 {
 	BYTE buffer[10];
-	HcFileReadModuleW(NTDLL, lpName, buffer, 10);
+	if (!HcFileReadModuleW(NTDLL, lpName, buffer, 10))
+	{
+		return 0;
+	}
 
 #ifndef _WIN64
 	/* mov eax, syscallindex */
 	/* buffer + 1 is the syscall index, 0xB8 is the mov instruction */
-	return buffer ? *(ULONG*)(buffer + 1) : 0;
+	return *(ULONG*)(buffer + 1);
 #else
 	/* mov r10, rcx */
 	/* mov eax, syscall index */
-	return buffer ? *(ULONG*)(buffer + 4) : 0;
+	return *(ULONG*)(buffer + 4);
 #endif
 }
 VOID

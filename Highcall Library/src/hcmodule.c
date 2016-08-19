@@ -2,6 +2,7 @@
 #include "../include/hcstring.h"
 #include "../include/hcimport.h"
 #include "../include/hctrampoline.h"
+#include "../include/hcpe.h"
 
 /*
 @implemented
@@ -10,9 +11,8 @@ SIZE_T
 HCAPI
 HcModuleProcedureAddressA(HANDLE hModule, LPCSTR lpProcedureName)
 {
-	IMAGE_NT_HEADERS* pHeaderNT;
-	IMAGE_DOS_HEADER* pHeaderDOS;
-	IMAGE_EXPORT_DIRECTORY* pExports;
+	SIZE_T szModule;
+	PIMAGE_EXPORT_DIRECTORY pExports;
 	PDWORD pExportNames;
 	PDWORD pExportFunctions;
 	PWORD pExportOrdinals;
@@ -23,34 +23,21 @@ HcModuleProcedureAddressA(HANDLE hModule, LPCSTR lpProcedureName)
 		hModule = ((HMODULE)NtCurrentPeb()->ImageBaseAddress);
 	}
 
-	pHeaderDOS = (PIMAGE_DOS_HEADER)hModule;
-	if (pHeaderDOS->e_magic != IMAGE_DOS_SIGNATURE)
+	szModule = (SIZE_T)hModule;
+
+	pExports = HcPEGetExportDirectory(hModule);
+	if (!pExports)
 	{
 		return 0;
 	}
-
-	SIZE_T dwModule = (SIZE_T)hModule;
-
-	pHeaderNT = (PIMAGE_NT_HEADERS)(pHeaderDOS->e_lfanew + dwModule);
-	if (pHeaderNT->Signature != IMAGE_NT_SIGNATURE)
-	{
-		return 0;
-	}
-
-	pExports = (IMAGE_EXPORT_DIRECTORY*)
-		(pHeaderNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + dwModule);
 
 	/* Get the address containg null terminated export names, in ASCII */
-	pExportNames = (PDWORD)(pExports->AddressOfNames + dwModule);
-	if (!pExportNames)
-	{
-		return 0;
-	}
+	pExportNames = (PDWORD)(pExports->AddressOfNames + szModule);
 
 	/* List through functions */
 	for (unsigned int i = 0; i < pExports->NumberOfFunctions; i++)
 	{
-		lpCurrentFunction = (LPCSTR)(pExportNames[i] + dwModule);
+		lpCurrentFunction = (LPCSTR)(pExportNames[i] + szModule);
 		if (!lpCurrentFunction)
 		{
 			continue;
@@ -59,10 +46,10 @@ HcModuleProcedureAddressA(HANDLE hModule, LPCSTR lpProcedureName)
 		/* Check for a match*/
 		if (HcStringEqualA(lpCurrentFunction, lpProcedureName, TRUE))
 		{
-			pExportOrdinals = (PWORD)(pExports->AddressOfNameOrdinals + dwModule);
-			pExportFunctions = (PDWORD)(pExports->AddressOfFunctions + dwModule);
+			pExportOrdinals = (PWORD)(pExports->AddressOfNameOrdinals + szModule);
+			pExportFunctions = (PDWORD)(pExports->AddressOfFunctions + szModule);
 
-			return pExportFunctions[pExportOrdinals[i]] + dwModule;
+			return pExportFunctions[pExportOrdinals[i]] + szModule;
 		}
 	}
 
@@ -115,39 +102,29 @@ BOOLEAN
 HCAPI
 HcModuleListExports(HMODULE hModule, HC_EXPORT_LIST_CALLBACK callback, LPARAM lpParam)
 {
-	IMAGE_NT_HEADERS* pHeaderNT;
-	IMAGE_DOS_HEADER* pHeaderDOS;
-	IMAGE_EXPORT_DIRECTORY* pExports;
+	PIMAGE_EXPORT_DIRECTORY pExports;
 	PDWORD pExportNames;
 	LPCSTR lpCurrentFunction;
+	SIZE_T dwModule;
 
 	if (!hModule)
 	{
 		hModule = ((HMODULE)NtCurrentPeb()->ImageBaseAddress);
 	}
 
-	pHeaderDOS = (PIMAGE_DOS_HEADER)hModule;
-	if (pHeaderDOS->e_magic != IMAGE_DOS_SIGNATURE)
+	dwModule = (SIZE_T)hModule;
+
+	pExports = HcPEGetExportDirectory(hModule);
+	if (!pExports)
 	{
-		return 0;
+		return FALSE;
 	}
-
-	SIZE_T dwModule = (SIZE_T)hModule;
-
-	pHeaderNT = (PIMAGE_NT_HEADERS)(pHeaderDOS->e_lfanew + dwModule);
-	if (pHeaderNT->Signature != IMAGE_NT_SIGNATURE)
-	{
-		return 0;
-	}
-
-	pExports = (IMAGE_EXPORT_DIRECTORY*)
-		(pHeaderNT->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + dwModule);
 
 	/* Get the address containg null terminated export names, in ASCII */
 	pExportNames = (PDWORD)(pExports->AddressOfNames + dwModule);
 	if (!pExportNames)
 	{
-		return 0;
+		return FALSE;
 	}
 
 	/* List through functions */

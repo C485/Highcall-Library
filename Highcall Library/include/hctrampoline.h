@@ -11,22 +11,22 @@ extern "C" {
 
 	PVOID HCAPI HcTrampolineOriginal(PBYTE lpBaseAddress, DWORD dwMinimumSize);
 
-	typedef BOOL(WINAPI* tGetWindowThreadProcessId) (_In_ HWND hWnd, _Out_opt_ LPDWORD lpdwProcessId);
+	typedef BOOLEAN(WINAPI* tGetWindowThreadProcessId) (_In_ HWND hWnd, _Out_opt_ LPDWORD lpdwProcessId);
 	extern tGetWindowThreadProcessId HcGetWindowThreadProcessId;
 
-	typedef BOOL(WINAPI* tGetCursorPos) (_Out_ LPPOINT lpPoint);
+	typedef BOOLEAN(WINAPI* tGetCursorPos) (_Out_ LPPOINT lpPoint);
 	extern tGetCursorPos HcGetCursorPos;
 
-	typedef BOOL(WINAPI* tPostMessageA) (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	typedef BOOLEAN(WINAPI* tPostMessageA) (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	extern tPostMessageA HcPostMessageA;
 
-	typedef BOOL(WINAPI* tPostMessageW) (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	typedef BOOLEAN(WINAPI* tPostMessageW) (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	extern tPostMessageW HcPostMessageW;
 
-	typedef BOOL(WINAPI* tSendMessageA) (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	typedef BOOLEAN(WINAPI* tSendMessageA) (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	extern tSendMessageA HcSendMessageA;
 
-	typedef BOOL(WINAPI* tSendMessageW) (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	typedef BOOLEAN(WINAPI* tSendMessageW) (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	extern tSendMessageW HcSendMessageW;
 
 	typedef HANDLE(WINAPI* tCreateRemoteThread) (
@@ -40,7 +40,7 @@ extern "C" {
 		);
 	extern tCreateRemoteThread HcCreateRemoteThread;
 
-	typedef BOOL (WINAPI* tEnumWindows) (_In_ WNDENUMPROC lpEnumFunc,
+	typedef BOOLEAN (WINAPI* tEnumWindows) (_In_ WNDENUMPROC lpEnumFunc,
 			_In_ LPARAM lParam);
 	extern tEnumWindows HcEnumWindows;
 

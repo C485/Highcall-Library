@@ -7,7 +7,7 @@
 /*
 @implemented
 */
-BOOL
+BOOLEAN
 HCAPI
 HcStringIsBadA(LPCSTR lpcStr)
 {
@@ -37,7 +37,7 @@ HcStringIsBadA(LPCSTR lpcStr)
 /*
 @implemented
 */
-BOOL
+BOOLEAN
 HCAPI
 HcStringIsBadW(LPCWSTR lpcStr)
 {
@@ -385,7 +385,7 @@ HcStringToUpperW(LPWSTR lpStr)
 /*
 @implemented
 */
-BOOL
+BOOLEAN
 HCAPI
 HcStringEqualA(LPCSTR lpString1, LPCSTR lpString2, BOOLEAN CaseInSensitive)
 {
@@ -431,12 +431,12 @@ HcStringEqualA(LPCSTR lpString1, LPCSTR lpString2, BOOLEAN CaseInSensitive)
 		strncpy(lpCopy2, lpString2, Size2);
 		HcStringToLowerA(lpCopy2);
 
-		Return = strcmp(lpCopy1, lpCopy2);
+		Return = strcmp(lpCopy1, lpCopy2) == 0 ? TRUE : FALSE;
 
 		VirtualFree(lpCopy1, 0, MEM_RELEASE);
 		VirtualFree(lpCopy2, 0, MEM_RELEASE);
 
-		return !Return;
+		return Return;
 	}
 
 	return !strcmp(lpString1, lpString2);
@@ -445,7 +445,7 @@ HcStringEqualA(LPCSTR lpString1, LPCSTR lpString2, BOOLEAN CaseInSensitive)
 /*
 @implemented
 */
-BOOL
+BOOLEAN
 HCAPI
 HcStringEqualW(LPCWSTR lpString1, LPCWSTR lpString2, BOOLEAN CaseInSensitive)
 {
@@ -491,12 +491,12 @@ HcStringEqualW(LPCWSTR lpString1, LPCWSTR lpString2, BOOLEAN CaseInSensitive)
 		wcsncpy(lpCopy2, lpString2, Size2);
 		HcStringToLowerW(lpCopy2);
 
-		Return = wcscmp(lpCopy1, lpCopy2);
+		Return = wcscmp(lpCopy1, lpCopy2) == 0 ? TRUE : FALSE;
 
 		VirtualFree(lpCopy1, 0, MEM_RELEASE);
 		VirtualFree(lpCopy2, 0, MEM_RELEASE);
 
-		return !Return;
+		return Return;
 	}
 
 	return !wcscmp(lpString1, lpString2);
@@ -523,7 +523,7 @@ HcStringConvertA(LPCSTR lpStringToConvert,
 	}
 
 	/* Convert */
-	Size = MultiByteToWideChar(CP_UTF8, 0, lpStringToConvert, Size, lpStringOut, Size);
+		Size = MultiByteToWideChar(CP_UTF8, 0, lpStringToConvert, Size, lpStringOut, Size);
 	if (!Size)
 	{
 		return FALSE;

@@ -7,6 +7,7 @@
 HC_GLOBAL HMODULE NTDLL;
 HC_GLOBAL HMODULE USER32;
 HC_GLOBAL HMODULE KERNEL32;
+HC_GLOBAL SIZE_T BaseThreadInit;
 
 #if defined (__cplusplus)
 extern "C" {

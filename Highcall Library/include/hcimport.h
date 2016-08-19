@@ -30,7 +30,7 @@ typedef NTSTATUS(NTAPI *t_RtlAllocateActivationContextStack) (IN PACTIVATION_CON
 HC_GLOBAL t_RtlAllocateActivationContextStack RtlAllocateActivationContextStack;
 
 typedef NTSTATUS(NTAPI *t_RtlQueryInformationActivationContext) (ULONG flags, HANDLE handle, PBYTE subinst,
-	ULONG Class, PBYTE buffer,
+	ACTIVATION_CONTEXT_INFO_CLASS Class, PACTIVATION_CONTEXT_BASIC_INFORMATION buffer,
 	SIZE_T bufsize, SIZE_T *retlen);
 HC_GLOBAL t_RtlQueryInformationActivationContext RtlQueryInformationActivationContext;
 
@@ -45,5 +45,16 @@ HC_GLOBAL t_RtlActivateActivationContextEx RtlActivateActivationContextEx;
 
 typedef ULONG (NTAPI *t_RtlNtStatusToDosError) (_In_ NTSTATUS Status);
 HC_GLOBAL t_RtlNtStatusToDosError RtlNtStatusToDosError;
+
+typedef VOID(NTAPI *t_RtlAcquirePebLock)(VOID);
+HC_GLOBAL t_RtlAcquirePebLock RtlAcquirePebLock;
+
+typedef VOID(NTAPI *t_RtlReleasePebLock)(VOID);
+HC_GLOBAL t_RtlReleasePebLock RtlReleasePebLock;
+
+typedef POBJECT_ATTRIBUTES(WINAPI *t_BaseFormatObjectAttributes) (OUT POBJECT_ATTRIBUTES ObjectAttributes,
+	IN PSECURITY_ATTRIBUTES SecurityAttributes OPTIONAL,
+	IN PUNICODE_STRING ObjectName);
+HC_GLOBAL t_BaseFormatObjectAttributes BaseFormatObjectAttributes;
 
 #endif

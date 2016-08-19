@@ -16,26 +16,6 @@ extern "C" {
 		HCAPI
 		HcFileLocalDirectory();
 
-#ifdef PROGRAM_ALIAS
-
-	LPSTR
-		HCAPI
-		HcFileLogFile();
-
-	LPSTR
-		HCAPI
-		HcFileConfigFile();
-
-	VOID
-		HCAPI
-		HcFileLogNormal(const char* input, ...);
-
-	VOID
-		HCAPI
-		HcFileLogError(const char* input, ...);
-
-#endif
-
 	BOOLEAN
 		HCAPI
 		HcFileExistsA(LPCSTR name);
@@ -55,10 +35,6 @@ extern "C" {
 	BOOLEAN
 		HCAPI
 		HcFileQueryInformationA(LPCSTR lpPath, PHC_FILE_INFORMATION fileInformation);
-
-	DWORD
-		HCAPI
-		HcFileRvaOffset(PIMAGE_NT_HEADERS pImageHeader, SIZE_T RVA);
 
 	DWORD
 		HCAPI
