@@ -298,8 +298,6 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 	HC_FILE_INFORMATION fileInformation;
 	MANUAL_MAP ManualInject;
 
-
-	PIMAGE_DOS_HEADER pHeaderDos;
 	PIMAGE_NT_HEADERS pHeaderNt;
 	PIMAGE_SECTION_HEADER pHeaderSection;
 
@@ -326,8 +324,7 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 		return FALSE;
 	}
 
-	pHeaderDos = (PIMAGE_DOS_HEADER)fileInformation.Data;
-	pHeaderNt = (PIMAGE_NT_HEADERS)((LPBYTE)fileInformation.Data + pHeaderDos->e_lfanew);
+	pHeaderNt = HcPEGetNtHeader(fileInformation.Data);
 
 	ImageBuffer = HcProcessAllocate(hProcess,
 		NULL,
@@ -381,7 +378,7 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 	memset(&ManualInject, 0, sizeof(MANUAL_MAP));
 
 	ManualInject.ImageBase = ImageBuffer;
-	ManualInject.NtHeaders = (PIMAGE_NT_HEADERS)((LPBYTE)ImageBuffer + pHeaderDos->e_lfanew);
+	ManualInject.NtHeaders = pHeaderNt;
 	ManualInject.BaseRelocation = (PIMAGE_BASE_RELOCATION)((LPBYTE)ImageBuffer + pHeaderNt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress);
 	ManualInject.ImportDirectory = (PIMAGE_IMPORT_DESCRIPTOR)((LPBYTE)ImageBuffer + pHeaderNt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
 

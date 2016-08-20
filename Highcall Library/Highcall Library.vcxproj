@@ -246,15 +246,13 @@
     </MASM>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="OpenDirectoryObject.S">
+    <MASM Include="asm\CreateThreadEx.S">
       <FileType>Document</FileType>
     </MASM>
-    <MASM Include="SetInformationThread.S">
+    <MASM Include="asm\OpenDirectoryObject.S">
       <FileType>Document</FileType>
     </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="CreateThreadEx.S">
+    <MASM Include="asm\SetInformationThread.S">
       <FileType>Document</FileType>
     </MASM>
   </ItemGroup>

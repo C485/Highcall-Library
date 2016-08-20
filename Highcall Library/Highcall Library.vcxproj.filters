@@ -220,16 +220,14 @@
     <MASM Include="asm\SuspendProcess.S">
       <Filter>Highcall\src\Syscall\asm</Filter>
     </MASM>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="OpenDirectoryObject.S">
+    <MASM Include="asm\OpenDirectoryObject.S">
       <Filter>Highcall\src\Syscall\asm</Filter>
-    </None>
-    <None Include="SetInformationThread.S">
+    </MASM>
+    <MASM Include="asm\CreateThreadEx.S">
       <Filter>Highcall\src\Syscall\asm</Filter>
-    </None>
-    <None Include="CreateThreadEx.S">
+    </MASM>
+    <MASM Include="asm\SetInformationThread.S">
       <Filter>Highcall\src\Syscall\asm</Filter>
-    </None>
+    </MASM>
   </ItemGroup>
 </Project>

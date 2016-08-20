@@ -321,5 +321,7 @@ HIGHCALL_STATUS HCAPI HcInitialize()
 	HcInitializeSecurity();
 	HcInitializeWindowsVersion();
 
+	HcProcessSetPrivilegeW(NtCurrentProcess, SE_DEBUG_NAME, TRUE);
+
 	return HIGHCALL_SUCCESS;
 }
