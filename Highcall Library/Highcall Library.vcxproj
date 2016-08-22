@@ -145,13 +145,15 @@
     <ClCompile Include="..\distorm\src\prefix.c" />
     <ClCompile Include="..\distorm\src\textdefs.c" />
     <ClCompile Include="..\distorm\src\wstring.c" />
-    <ClCompile Include="src\hcapi.c" />
     <ClCompile Include="src\hcfile.c" />
     <ClCompile Include="src\hcinternal.c" />
+    <ClCompile Include="src\hcvirtual.c" />
     <ClCompile Include="src\hcmodule.c" />
+    <ClCompile Include="src\hcobject.c" />
     <ClCompile Include="src\hcpe.c" />
     <ClCompile Include="src\hcprocess.c" />
     <ClCompile Include="src\hcstring.c" />
+    <ClCompile Include="src\hcsyscall.c" />
     <ClCompile Include="src\hctoken.c" />
     <ClCompile Include="src\hctrampoline.c" />
     <ClCompile Include="src\highcall.c" />
@@ -168,12 +170,13 @@
     <ClInclude Include="..\distorm\src\textdefs.h" />
     <ClInclude Include="..\distorm\src\wstring.h" />
     <ClInclude Include="..\distorm\src\x86defs.h" />
-    <ClInclude Include="include\hcapi.h" />
     <ClInclude Include="include\hcdef.h" />
     <ClInclude Include="include\hcfile.h" />
     <ClInclude Include="include\hcimport.h" />
     <ClInclude Include="include\hcinternal.h" />
+    <ClInclude Include="include\hcvirtual.h" />
     <ClInclude Include="include\hcmodule.h" />
+    <ClInclude Include="include\hcobject.h" />
     <ClInclude Include="include\hcpe.h" />
     <ClInclude Include="include\hcprocess.h" />
     <ClInclude Include="include\hcstring.h" />
@@ -181,7 +184,6 @@
     <ClInclude Include="include\hctoken.h" />
     <ClInclude Include="include\hctrampoline.h" />
     <ClInclude Include="include\highcall.h" />
-    <ClInclude Include="native\minnative.h" />
     <ClInclude Include="native\native.h" />
   </ItemGroup>
   <ItemGroup>
@@ -253,6 +255,20 @@
       <FileType>Document</FileType>
     </MASM>
     <MASM Include="asm\SetInformationThread.S">
+      <FileType>Document</FileType>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="asm\LockVirtualMemory.S">
+      <FileType>Document</FileType>
+    </MASM>
+    <MASM Include="asm\UnlockVirtualMemory.S">
+      <FileType>Document</FileType>
+    </MASM>
+    <MASM Include="asm\WaitForMultipleObjects.S">
+      <FileType>Document</FileType>
+    </MASM>
+    <MASM Include="asm\WaitForSingleObject.S">
       <FileType>Document</FileType>
     </MASM>
   </ItemGroup>

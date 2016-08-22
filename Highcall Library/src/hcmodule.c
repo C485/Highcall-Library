@@ -3,6 +3,7 @@
 #include "../include/hcimport.h"
 #include "../include/hctrampoline.h"
 #include "../include/hcpe.h"
+#include "../include/hcvirtual.h"
 
 /*
 @implemented
@@ -74,10 +75,7 @@ HcModuleProcedureAddressW(HANDLE hModule, LPCWSTR lpProcedureName)
 		return 0;
 	}
 
-	lpConvertedName = (LPSTR)VirtualAlloc(0,
-		Size + 1,
-		MEM_COMMIT | MEM_RESERVE,
-		PAGE_READWRITE);
+	lpConvertedName = (LPSTR)HcAlloc(Size + 1);
 
 	if (!lpConvertedName)
 	{
@@ -88,13 +86,13 @@ HcModuleProcedureAddressW(HANDLE hModule, LPCWSTR lpProcedureName)
 	if (!HcStringConvertW(lpProcedureName, lpConvertedName, Size))
 	{
 		SetLastError(RtlNtStatusToDosError(STATUS_FAILED));
-		VirtualFree(lpConvertedName, 0, MEM_RELEASE);
+		HcFree(lpConvertedName);
 		return 0;
 	}
 
 	ReturnValue = HcModuleProcedureAddressA(hModule, lpConvertedName);
 
-	VirtualFree(lpConvertedName, 0, MEM_RELEASE);
+	HcFree(lpConvertedName);
 	return ReturnValue;
 }
 
@@ -198,11 +196,7 @@ HcModuleHandleA(LPCSTR lpModuleName)
 		return 0;
 	}
 
-	lpConvertedName = (LPWSTR)VirtualAlloc(0,
-		Size + 1,
-		MEM_COMMIT | MEM_RESERVE,
-		PAGE_READWRITE);
-
+	lpConvertedName = (LPWSTR)HcAlloc(Size + 1);
 	if (!lpConvertedName)
 	{
 		SetLastError(RtlNtStatusToDosError(STATUS_INSUFFICIENT_RESOURCES));
@@ -212,13 +206,13 @@ HcModuleHandleA(LPCSTR lpModuleName)
 	if (!HcStringConvertA(lpModuleName, lpConvertedName, Size))
 	{
 		SetLastError(STATUS_FAILED);
-		VirtualFree(lpConvertedName, 0, MEM_RELEASE);
+		HcFree(lpConvertedName);
 		return 0;
 	}
 
 	ReturnValue = HcModuleHandleW(lpConvertedName);
 
-	VirtualFree(lpConvertedName, 0, MEM_RELEASE);
+	HcFree(lpConvertedName);
 	return ReturnValue;
 }
 
@@ -244,11 +238,7 @@ HcModuleLoadA(LPCSTR lpPath)
 		return 0;
 	}
 
-	lpConverted = (LPWSTR)VirtualAlloc(NULL,
-		Length + 1,
-		MEM_COMMIT | MEM_RESERVE,
-		PAGE_READWRITE);
-
+	lpConverted = (LPWSTR)HcAlloc(Length + 1);
 	if (!lpConverted)
 	{
 		SetLastError(STATUS_INSUFFICIENT_RESOURCES);
@@ -257,7 +247,7 @@ HcModuleLoadA(LPCSTR lpPath)
 
 	if (!HcStringConvertA(lpPath, lpConverted, Length))
 	{
-		VirtualFree(lpConverted, 0, MEM_RELEASE);
+		HcFree(lpConverted);
 		return 0;
 	}
 
@@ -268,12 +258,12 @@ HcModuleLoadA(LPCSTR lpPath)
 	if (!NT_SUCCESS(Status))
 	{
 		SetLastError(Status);
-		VirtualFree(lpConverted, 0, MEM_RELEASE);
+		HcFree(lpConverted);
 
 		return 0;
 	}
 
-	VirtualFree(lpConverted, 0, MEM_RELEASE);
+	HcFree(lpConverted);
 	return (HMODULE)hModule;
 }
 

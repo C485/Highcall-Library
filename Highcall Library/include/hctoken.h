@@ -16,6 +16,11 @@ PLUID
 HCAPI
 HcLookupPrivilegeValueA(IN LPCSTR Name);
 
+NTSTATUS
+HCAPI
+HcTokenIsElevated(_In_ HANDLE TokenHandle,
+	_Out_ PBOOLEAN Elevated);
+
 #if defined (__cplusplus)
 }
 #endif

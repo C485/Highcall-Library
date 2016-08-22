@@ -4,12 +4,14 @@
 #include "../include/hcprocess.h"
 #include "../include/hcmodule.h"
 #include "../include/hcpe.h"
+#include "../include/hcvirtual.h"
+#include "../include/hcobject.h"
 
 LPSTR
 HCAPI
 HcFileMainModule()
 {
-	char* buffer = (char*)malloc(MAX_PATH);
+	char* buffer = (char*)HcAlloc(MAX_PATH);
 	GetModuleFileNameA(NULL, buffer, MAX_PATH);
 	return buffer;
 }
@@ -20,9 +22,9 @@ HcFileLocalDirectory()
 {
 	char* module = HcFileMainModule();
 	SIZE_T index = HcStringCharIndex(module, '\\');
-	char* retn = (char*)malloc(MAX_PATH);
+	char* retn = (char*)HcAlloc(MAX_PATH);
 	HcStringSubtract(module, retn, 0, index, MAX_PATH);
-	free(module);
+	HcFree(module);
 	return index != -1 ? retn : (char*)0;
 }
 
@@ -70,7 +72,6 @@ HCAPI
 HcFileQueryInformationW(LPCWSTR lpPath, PHC_FILE_INFORMATION fileInformation)
 {
 	HANDLE hFile;
-	DWORD BytesRead;
 
 	hFile = CreateFileW(lpPath,
 		GENERIC_READ,
@@ -87,24 +88,6 @@ HcFileQueryInformationW(LPCWSTR lpPath, PHC_FILE_INFORMATION fileInformation)
 
 	fileInformation->Size = GetFileSize(hFile, NULL);
 
-	fileInformation->Data = (PBYTE)VirtualAlloc(NULL,
-		fileInformation->Size,
-		MEM_COMMIT | MEM_RESERVE,
-		PAGE_READWRITE);
-
-	if (!ReadFile(hFile,
-		fileInformation->Data,
-		fileInformation->Size,
-		&BytesRead,
-		NULL) || BytesRead != fileInformation->Size)
-	{
-		SetLastError(STATUS_FAILED);
-		VirtualFree(fileInformation->Data, 0, MEM_RELEASE);
-		HcClose(hFile);
-
-		return FALSE;
-	}
-
 	HcClose(hFile);
 
 	return TRUE;
@@ -115,7 +98,6 @@ HCAPI
 HcFileQueryInformationA(LPCSTR lpPath, PHC_FILE_INFORMATION fileInformation)
 {
 	HANDLE hFile;
-	DWORD BytesRead;
 
 	hFile = CreateFileA(lpPath,
 		GENERIC_READ,
@@ -131,24 +113,6 @@ HcFileQueryInformationA(LPCSTR lpPath, PHC_FILE_INFORMATION fileInformation)
 	}
 
 	fileInformation->Size = GetFileSize(hFile, NULL);
-
-	fileInformation->Data = (PBYTE)VirtualAlloc(NULL,
-		fileInformation->Size,
-		MEM_COMMIT | MEM_RESERVE,
-		PAGE_READWRITE);
-
-	if (!ReadFile(hFile,
-		fileInformation->Data,
-		fileInformation->Size,
-		&BytesRead,
-		NULL) || BytesRead != fileInformation->Size)
-	{
-		SetLastError(STATUS_FAILED);
-		VirtualFree(fileInformation->Data, 0, MEM_RELEASE);
-		HcClose(hFile);
-
-		return FALSE;
-	}
 
 	HcClose(hFile);
 
@@ -247,10 +211,7 @@ HcFileReadModuleA(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dw
 		return 0;
 	}
 
-	lpModulePath = (LPSTR)VirtualAlloc(NULL,
-		MAX_PATH,
-		MEM_RESERVE | MEM_COMMIT,
-		PAGE_READWRITE);
+	lpModulePath = (LPSTR)HcAlloc(MAX_PATH);
 
 	if (!lpModulePath)
 	{
@@ -269,29 +230,29 @@ HcFileReadModuleA(HMODULE hModule, LPCSTR lpExportName, BYTE* lpBuffer, DWORD dw
 		FILE_ATTRIBUTE_NORMAL,
 		NULL)))
 	{
-		VirtualFree(lpModulePath, 0, MEM_RELEASE);
+		HcFree(lpModulePath);
 		return 0;
 	}
 
 	/* Run to the offset */
 	if (!(SetFilePointer(hFile, dwFileOffset, 0, FILE_BEGIN)))
 	{
-		VirtualFree(lpModulePath, 0, MEM_RELEASE);
-		CloseHandle(hFile);
+		HcFree(lpModulePath);
+		HcObjectClose(hFile);
 		return 0;
 	}
 
 	/* Snatch the data */
 	if (!ReadFile(hFile, lpBuffer, dwCount, &BytesRead, NULL))
 	{
-		VirtualFree(lpModulePath, 0, MEM_RELEASE);
-		CloseHandle(hFile);
+		HcFree(lpModulePath);
+		HcObjectClose(hFile);
 		return 0;
 	}
 
 	/* Fuck off */
-	VirtualFree(lpModulePath, 0, MEM_RELEASE);
-	CloseHandle(hFile);
+	HcFree(lpModulePath);
+	HcObjectClose(hFile);
 	return BytesRead;
 }
 
@@ -313,10 +274,7 @@ HcFileReadModuleW(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD d
 		return 0;
 	}
 
-	if (!(lpModulePath = (LPWSTR)VirtualAlloc(NULL,
-		MAX_PATH,
-		MEM_RESERVE | MEM_COMMIT,
-		PAGE_READWRITE)))
+	if (!(lpModulePath = (LPWSTR)HcAlloc(MAX_PATH)))
 	{
 		return 0;
 	}
@@ -333,29 +291,29 @@ HcFileReadModuleW(HMODULE hModule, LPCWSTR lpExportName, BYTE* lpBuffer, DWORD d
 		FILE_ATTRIBUTE_NORMAL,
 		NULL)))
 	{
-		VirtualFree(lpModulePath, 0, MEM_RELEASE);
+		HcFree(lpModulePath);
 		return 0;
 	}
 
 	/* Run to the offset */
 	if (!(SetFilePointer(hFile, dwFileOffset, 0, FILE_BEGIN)))
 	{
-		VirtualFree(lpModulePath, 0, MEM_RELEASE);
-		CloseHandle(hFile);
+		HcFree(lpModulePath);
+		HcObjectClose(hFile);
 		return 0;
 	}
 
 	/* Snatch the data */
 	if (!ReadFile(hFile, lpBuffer, dwCount, &BytesRead, NULL))
 	{
-		VirtualFree(lpModulePath, 0, MEM_RELEASE);
-		CloseHandle(hFile);
+		HcFree(lpModulePath);
+		HcObjectClose(hFile);
 		return 0;
 	}
 
 	/* Fuck off */
-	VirtualFree(lpModulePath, 0, MEM_RELEASE);
-	CloseHandle(hFile);
+	HcFree(lpModulePath);
+	HcObjectClose(hFile);
 	return BytesRead;
 }
 
@@ -370,8 +328,7 @@ HcFileOffsetByVirtualAddress(LPBYTE lpBaseAddress)
 	HMODULE hModule;
 
 	/* Find the module that allocated the address */
-	if (!HcProcessVirtualQuery(NtCurrentProcess,
-		lpBaseAddress,
+	if (!HcVirtualQuery(lpBaseAddress,
 		&memInfo,
 		sizeof(memInfo)))
 	{
@@ -411,8 +368,7 @@ HcFileReadAddress(LPBYTE lpBaseAddress, PBYTE lpBufferOut, DWORD dwCountToRead)
 	MEMORY_BASIC_INFORMATION memInfo;
 
 	/* Find the module that allocated the address */
-	if (!HcProcessVirtualQuery(NtCurrentProcess,
-		lpBaseAddress,
+	if (!HcVirtualQuery(lpBaseAddress,
 		&memInfo,
 		sizeof(memInfo)))
 	{
@@ -434,10 +390,7 @@ HcFileReadAddress(LPBYTE lpBaseAddress, PBYTE lpBufferOut, DWORD dwCountToRead)
 	}
 
 	/* Allocate for the path of the module */
-	lpModulePath = (LPWSTR)VirtualAlloc(NULL,
-		MAX_PATH,
-		MEM_RESERVE | MEM_COMMIT,
-		PAGE_READWRITE);
+	lpModulePath = (LPWSTR)HcAlloc(MAX_PATH);
 
 	if (!lpModulePath)
 	{
@@ -449,7 +402,7 @@ HcFileReadAddress(LPBYTE lpBaseAddress, PBYTE lpBufferOut, DWORD dwCountToRead)
 	GetModuleFileNameW(hModule, lpModulePath, MAX_PATH);
 	if (!lpModulePath)
 	{
-		VirtualFree(lpModulePath, 0, MEM_RELEASE);
+		HcFree(lpModulePath);
 		return 0;
 	}
 
@@ -462,14 +415,14 @@ HcFileReadAddress(LPBYTE lpBaseAddress, PBYTE lpBufferOut, DWORD dwCountToRead)
 		FILE_ATTRIBUTE_NORMAL,
 		NULL)))
 	{
-		VirtualFree(lpModulePath, 0, MEM_RELEASE);
+		HcFree(lpModulePath);
 		return 0;
 	}
 
 	/* Go to the offset */
 	if (!(SetFilePointer(hFile, dwFileOffset, 0, FILE_BEGIN)))
 	{
-		VirtualFree(lpModulePath, 0, MEM_RELEASE);
+		HcFree(lpModulePath);
 		HcClose(hFile);
 		return 0;
 	}
@@ -477,12 +430,12 @@ HcFileReadAddress(LPBYTE lpBaseAddress, PBYTE lpBufferOut, DWORD dwCountToRead)
 	/* Read it */
 	if (!ReadFile(hFile, lpBufferOut, dwCountToRead, &BytesRead, NULL))
 	{
-		VirtualFree(lpModulePath, 0, MEM_RELEASE);
+		HcFree(lpModulePath);
 		HcClose(hFile);
 		return 0;
 	}
 
-	VirtualFree(lpModulePath, 0, MEM_RELEASE);
+	HcFree(lpModulePath);
 	HcClose(hFile);
 	return BytesRead;
 }

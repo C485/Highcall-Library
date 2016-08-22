@@ -34,7 +34,7 @@ typedef struct _HC_MANUAL_MAP
 	PIMAGE_IMPORT_DESCRIPTOR ImportDirectory;
 	pLoadLibraryA fnLoadLibraryA;
 	pGetProcAddress fnGetProcAddress;
-}MANUAL_MAP, *PHC_MANUAL_MAP;
+}MANUAL_MAP, *PMANUAL_MAP;
 
 typedef SIZE_T TrampolineJump;
 typedef DWORD SyscallIndex;
@@ -128,16 +128,14 @@ typedef struct _mem_result
 {
 	SIZE_T address;
 	BOOLEAN accessible;
-
 	SIZE_T length;
-	unsigned char* buffer;
 
 } mem_result;
 
 typedef struct _HC_FILE_INFORMATION
 {
 	DWORD Size;
-	PBYTE Data;
+	/* yet to fill.. */
 
 } HC_FILE_INFORMATION, *PHC_FILE_INFORMATION;
 

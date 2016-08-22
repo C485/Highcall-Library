@@ -1,6 +1,7 @@
 #include "../include/hctrampoline.h"
-#include "../include/hcapi.h"
 #include "../include/hcfile.h"
+#include "../include/hcvirtual.h"
+
 #include "../../distorm/include/distorm.h"
 
 DWORD HCAPI HcTrampolineCalculateLength(BYTE* Src, DWORD NeededLength)
@@ -68,14 +69,10 @@ PVOID HCAPI HcTrampolineOriginal(PBYTE lpBaseAddress, DWORD dwMinimumSize)
 		return 0;
 	}
 
-	Original = (PBYTE) VirtualAlloc(NULL,
-		dwRequiredSize,
-		MEM_COMMIT | MEM_RESERVE,
-		PAGE_READWRITE);
-
+	Original = (PBYTE) HcAlloc(dwRequiredSize);
 	if (!HcFileReadAddress(lpBaseAddress, Original, dwRequiredSize))
 	{
-		VirtualFree(Original, 0, MEM_RELEASE);
+		HcFree(Original);
 		return 0;
 	}
 
@@ -109,30 +106,30 @@ PVOID HCAPI HcTrampolineOriginal(PBYTE lpBaseAddress, DWORD dwMinimumSize)
 	SizeOfFunction = dwRequiredSize + SizeOfJump;
 
 	/* Allocate for the new function */
-	Recreated = VirtualAlloc(0,
+	Recreated = HcVirtualAlloc(0,
 		SizeOfFunction,
 		MEM_RESERVE | MEM_COMMIT,
 		PAGE_EXECUTE_READWRITE);
 
 	if (!Recreated)
 	{
-		VirtualFree(Original, 0, MEM_RELEASE);
-		VirtualFree(opCode, 0, MEM_RELEASE);
+		HcFree(Original);
+		HcFree(opCode);
 		return 0;
 	}
 
 	/* Copy original to the new function */
 	memcpy(Recreated, Original, dwRequiredSize);
 
-	VirtualFree(Original, 0, MEM_RELEASE);
+	HcFree(Original);
 
-	Jump = (PBYTE)VirtualAlloc(0,
+	Jump = (PBYTE)HcVirtualAlloc(0,
 		SizeOfJump,
 		MEM_COMMIT | MEM_RESERVE,
 		PAGE_EXECUTE_READWRITE);
 
 	memcpy(Jump, opCode, SizeOfOpcode);
-	VirtualFree(opCode, 0, MEM_RELEASE);
+	HcFree(opCode);
 
 #ifndef _WIN64
 	/* Relative jump back */

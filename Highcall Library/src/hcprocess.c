@@ -1,15 +1,15 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #include "../include/hcprocess.h"
-#include "../include/hcapi.h"
 #include "../include/hcstring.h"
 #include "../include/hcsyscall.h"
-#include "../include/hctrampoline.h"
 #include "../include/hcimport.h"
 #include "../include/hcfile.h"
 #include "../include/hctoken.h"
 #include "../include/hcpe.h"
 #include "../include/hcmodule.h"
+#include "../include/hcobject.h"
+#include "../include/hcvirtual.h"
 
 BOOLEAN
 HCAPI
@@ -163,11 +163,12 @@ HcProcessReady(SIZE_T dwProcessId)
 }
 
 #pragma region Internal Manual Map Code
+
 static
 SIZE_T
 HCAPI MmInternalResolve(PVOID lParam)
 {
-	PHC_MANUAL_MAP ManualInject;
+	PMANUAL_MAP ManualInject;
 	HMODULE hModule;
 	SIZE_T Index;
 	SIZE_T Function;
@@ -183,7 +184,7 @@ HCAPI MmInternalResolve(PVOID lParam)
 
 	PDLL_MAIN EntryPoint;
 
-	ManualInject = (PHC_MANUAL_MAP)lParam;
+	ManualInject = (PMANUAL_MAP)lParam;
 
 	pIBR = ManualInject->BaseRelocation;
 	Delta = (SIZE_T)((LPBYTE)ManualInject->ImageBase - ManualInject->NtHeaders->OptionalHeader.ImageBase);
@@ -288,7 +289,18 @@ HcParameterVerifyInjectModuleManual(PVOID Buffer)
 
 /*
 @inprogress
-@32bit
+
+	Inserts a dynamic library's code inside of a process, without the use of any windows library linking code.
+	This ensure that any code trying to locate a dll will not succeed, as there is no record of library loading happening.
+
+	The code currently only supports 32bit to 32bit.
+
+	For 64bit to 32bit, the internal resolving code will need to be in either shellcode, or an assembly file.
+	For 32bit to 64bit, same story.
+
+	RETURN 
+		- A boolean indicating success
+		GetLastError() for a diagnosis.
 */
 BOOLEAN
 HCAPI
@@ -298,35 +310,67 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 	HC_FILE_INFORMATION fileInformation;
 	MANUAL_MAP ManualInject;
 
+	PIMAGE_DOS_HEADER pHeaderDos;
 	PIMAGE_NT_HEADERS pHeaderNt;
 	PIMAGE_SECTION_HEADER pHeaderSection;
 
-	HANDLE hThread;
-	PVOID ImageBuffer, LoaderBuffer;
+	HANDLE hThread, hFile;
+	PVOID ImageBuffer, LoaderBuffer, FileBuffer;
 	DWORD ExitCode, SectionIndex;
-	SIZE_T BytesWritten;
+	SIZE_T BytesWritten, BytesRead;
 
+	/* Check if we attempted to inject too early. */
 	if (!HcProcessReadyEx(hProcess))
 	{
 		SetLastError(RtlNtStatusToDosError(STATUS_PENDING));
 		return FALSE;
 	}
 
+	/* Get the basic information about the file */
 	if (!HcFileQueryInformationW(lpPath, &fileInformation))
 	{
 		return FALSE;
 	}
 
-	if (!HcParameterVerifyInjectModuleManual(fileInformation.Data))
+	/* Allocate for the file information */
+	FileBuffer = HcAlloc(fileInformation.Size);
+
+	/* Read the file */
+	hFile = CreateFileW(lpPath,
+		GENERIC_READ,
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL,
+		OPEN_EXISTING,
+		0,
+		NULL);
+
+	if (!ReadFile(hFile,
+		FileBuffer,
+		fileInformation.Size,
+		&BytesRead,
+		NULL) || BytesRead != fileInformation.Size)
 	{
-		VirtualFree(fileInformation.Data, 0, MEM_RELEASE);
+		HcFree(FileBuffer);
+		HcClose(hFile);
+
+		return FALSE;
+	}
+
+	HcObjectClose(hFile);
+
+	/* Verify this is a PE DLL */
+	if (!HcParameterVerifyInjectModuleManual(FileBuffer))
+	{
+		HcFree(FileBuffer);
 		SetLastError(RtlNtStatusToDosError(STATUS_INVALID_PARAMETER));
 		return FALSE;
 	}
 
-	pHeaderNt = HcPEGetNtHeader(fileInformation.Data);
+	pHeaderDos = HcPEGetDosHeader(FileBuffer);
+	pHeaderNt = HcPEGetNtHeader(FileBuffer);
 
-	ImageBuffer = HcProcessAllocate(hProcess,
+	/* Allocate for the code/data of the dll */
+	ImageBuffer = HcVirtualAllocEx(hProcess,
 		NULL,
 		pHeaderNt->OptionalHeader.SizeOfImage,
 		MEM_COMMIT | MEM_RESERVE,
@@ -334,34 +378,45 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 
 	if (!ImageBuffer)
 	{
-		VirtualFree(fileInformation.Data, 0, MEM_RELEASE);
+		HcFree(FileBuffer);
 		return FALSE;
 	}
 
+	/* Write the code/data to the target executable */
 	if (!HcProcessWriteMemory(hProcess,
 		ImageBuffer,
-		fileInformation.Data,
+		FileBuffer,
 		pHeaderNt->OptionalHeader.SizeOfHeaders,
 		&BytesWritten))
 	{
-		HcProcessFree(hProcess, ImageBuffer, 0, MEM_RELEASE);
-		VirtualFree(fileInformation.Data, 0, MEM_RELEASE);
+		HcVirtualFreeEx(hProcess, ImageBuffer, 0, MEM_RELEASE);
+		HcFree(FileBuffer);
 		return FALSE;
 	}
 
 	pHeaderSection = (PIMAGE_SECTION_HEADER)(pHeaderNt + 1);
 
-	/* Write code to process */
+	/* Write sections of the dll to the process, not guaranteed to succeed, so no check. */
 	for (SectionIndex = 0; SectionIndex < pHeaderNt->FileHeader.NumberOfSections; SectionIndex++)
 	{
+		/* This writes to relative locations of our loaded executable. 
+		
+			ImageBuffer points to the base of the library.
+			.VirtualAddress points to the relative offset from the base of the library to the section.
+			
+			FileBuffer points to the base of the file.
+			.PointerToRawData points to the relative offset from the file to the section.
+		*/
+
 		HcProcessWriteMemory(hProcess,
 			(PVOID)((LPBYTE)ImageBuffer + pHeaderSection[SectionIndex].VirtualAddress),
-			(PVOID)((LPBYTE)fileInformation.Data + pHeaderSection[SectionIndex].PointerToRawData),
+			(PVOID)((LPBYTE)FileBuffer + pHeaderSection[SectionIndex].PointerToRawData),
 			pHeaderSection[SectionIndex].SizeOfRawData,
 			&BytesWritten);
 	}
 
-	LoaderBuffer = HcProcessAllocate(hProcess,
+	/* Allocate code for our function */
+	LoaderBuffer = HcVirtualAllocEx(hProcess,
 		NULL,
 		4096,
 		MEM_COMMIT | MEM_RESERVE,
@@ -369,24 +424,37 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 
 	if (!LoaderBuffer)
 	{
-		HcProcessFree(hProcess, ImageBuffer, 0, MEM_RELEASE);
-		VirtualFree(fileInformation.Data, 0, MEM_RELEASE);
+		HcVirtualFreeEx(hProcess, ImageBuffer, 0, MEM_RELEASE);
+		HcFree(FileBuffer);
 
 		return FALSE;
 	}
 
 	memset(&ManualInject, 0, sizeof(MANUAL_MAP));
 
+	/*
+		MANUAL_MAP struct
+	
+		ImageBase = allocated image location.
+		NtHeaders = allocated image location, added with relative address pointing Nt header.
+		BaseRelocation = allocated image buffer + relative address of relocation.
+		ImportDirectory = allocated image buffer + relative import directory
+
+		LoadLibraryA - this needs to be reworked.
+			right now, this function is located by looking into our own address.
+			this will not work for when the executable does not match the target executable architecture. (cross dll injection)
+
+		GetProcAddress, same as above.
+	*/
+
 	ManualInject.ImageBase = ImageBuffer;
-	ManualInject.NtHeaders = pHeaderNt;
+	ManualInject.NtHeaders = (PIMAGE_NT_HEADERS)((LPBYTE)ImageBuffer + pHeaderDos->e_lfanew);
 	ManualInject.BaseRelocation = (PIMAGE_BASE_RELOCATION)((LPBYTE)ImageBuffer + pHeaderNt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress);
 	ManualInject.ImportDirectory = (PIMAGE_IMPORT_DESCRIPTOR)((LPBYTE)ImageBuffer + pHeaderNt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
-
-	/* This is used inside of the target executable */
 	ManualInject.fnLoadLibraryA = LoadLibraryA;
 	ManualInject.fnGetProcAddress = GetProcAddress;
 
-	/* Write loader information */
+	/* Set the manual map information */
 	if (!HcProcessWriteMemory(hProcess,
 		LoaderBuffer,
 		&ManualInject,
@@ -396,49 +464,55 @@ HcProcessInjectModuleManual(HANDLE hProcess,
 		return FALSE;
 	}
 
-	/* Write loader code */
+	/* Set the code which will resolve imports, relocations */
 	if (!HcProcessWriteMemory(hProcess,
-		(PVOID)((PHC_MANUAL_MAP)LoaderBuffer + 1),
+		(PVOID)((PMANUAL_MAP)LoaderBuffer + 1),
 		MmInternalResolve,
-		(SIZE_T)((SIZE_T)MmInternalResolved - (SIZE_T)MmInternalResolve),
+		(DWORD)MmInternalResolved - (DWORD)MmInternalResolve,
 		&BytesWritten))
 	{
 		return FALSE;
 	}
 
-	/* Create a thread specifically for this dll, this will execute the code remotely */
+	/* Execute the code in a new thread */
 	hThread = HcProcessCreateThread(hProcess,
-		(LPTHREAD_START_ROUTINE)((PHC_MANUAL_MAP)LoaderBuffer + 1),
+		(LPTHREAD_START_ROUTINE)((PMANUAL_MAP)LoaderBuffer + 1),
 		LoaderBuffer,
 		0);
 
 	if (!hThread)
 	{
-		HcProcessFree(hProcess, LoaderBuffer, 0, MEM_RELEASE);
-		HcProcessFree(hProcess, ImageBuffer, 0, MEM_RELEASE);
+		HcVirtualFreeEx(hProcess, LoaderBuffer, 0, MEM_RELEASE);
+		HcVirtualFreeEx(hProcess, ImageBuffer, 0, MEM_RELEASE);
 
-		VirtualFree(fileInformation.Data, 0, MEM_RELEASE);
+		HcFree(FileBuffer);
 		return FALSE;
 	}
 
-	WaitForSingleObject(hThread, INFINITE);
+	/* Wait for the thread to finish */
+	HcObjectWait(hThread, INFINITE);
+
+	/* Did the thread exit? */
 	GetExitCodeThread(hThread, &ExitCode);
 
 	if (!ExitCode)
 	{
-		HcProcessFree(hProcess, LoaderBuffer, 0, MEM_RELEASE);
-		HcProcessFree(hProcess, ImageBuffer, 0, MEM_RELEASE);
+		/* We're out, something went wrong. */
+
+		HcVirtualFreeEx(hProcess, LoaderBuffer, 0, MEM_RELEASE);
+		HcVirtualFreeEx(hProcess, ImageBuffer, 0, MEM_RELEASE);
 
 		HcClose(hThread);
 
-		VirtualFree(fileInformation.Data, 0, MEM_RELEASE);
+		HcFree(FileBuffer);
 		return FALSE;
 	}
 
+	/* Done.*/
 	HcClose(hThread);
-	HcProcessFree(hProcess, LoaderBuffer, 0, MEM_RELEASE);
+	HcVirtualFreeEx(hProcess, LoaderBuffer, 0, MEM_RELEASE);
 
-	VirtualFree(fileInformation.Data, 0, MEM_RELEASE);
+	HcFree(FileBuffer);
 	return TRUE;
 }
 
@@ -484,66 +558,6 @@ HCAPI
 HcProcessResumeEx(HANDLE hProcess)
 {
 	return NT_SUCCESS(HcResumeProcess(hProcess));
-}
-
-BOOLEAN
-HCAPI
-HcProcessFree(IN HANDLE hProcess,
-	IN LPVOID lpAddress,
-	IN SIZE_T dwSize,
-	IN ULONG dwFreeType)
-{
-	NTSTATUS Status;
-
-	/* Validate size and flags */
-	if (!dwSize || !(dwFreeType & MEM_RELEASE))
-	{
-		/* Free the memory */
-		Status = HcFreeVirtualMemory(hProcess,
-			&lpAddress,
-			&dwSize,
-			dwFreeType);
-
-		if (!NT_SUCCESS(Status))
-		{
-			SetLastError(RtlNtStatusToDosError(Status));
-			return FALSE;
-		}
-
-		return TRUE;
-	}
-
-	SetLastError(RtlNtStatusToDosError(STATUS_INVALID_PARAMETER));
-	return FALSE;
-}
-
-/*
-* @implemented
-*/
-LPVOID
-HCAPI
-HcProcessAllocate(IN HANDLE hProcess,
-	IN LPVOID lpAddress,
-	IN SIZE_T dwSize,
-	IN ULONG flAllocationType,
-	IN ULONG flProtect)
-{
-	NTSTATUS Status;
-
-	Status = HcAllocateVirtualMemory(hProcess,
-		&lpAddress,
-		0,
-		&dwSize,
-		flAllocationType,
-		flProtect);
-
-	if (!NT_SUCCESS(Status))
-	{
-		SetLastError(RtlNtStatusToDosError(Status));
-		return NULL;
-	}
-
-	return lpAddress;
 }
 
 BOOLEAN
@@ -685,35 +699,6 @@ HcProcessReadMemory(IN HANDLE hProcess,
 	return TRUE;
 }
 
-SIZE_T
-NTAPI
-HcProcessVirtualQuery(IN HANDLE hProcess,
-	IN LPCVOID lpAddress,
-	OUT PMEMORY_BASIC_INFORMATION lpBuffer,
-	IN SIZE_T dwLength)
-{
-	NTSTATUS Status;
-	SIZE_T ResultLength;
-
-	/* Query basic information */
-	Status = HcQueryVirtualMemory(hProcess,
-		(LPVOID)lpAddress,
-		MemoryBasicInformation,
-		lpBuffer,
-		dwLength,
-		&ResultLength);
-
-	if (!NT_SUCCESS(Status))
-	{
-		/* We failed */
-		SetLastError(RtlNtStatusToDosError(Status));
-		return 0;
-	}
-
-	/* Return the queried length */
-	return ResultLength;
-}
-
 HANDLE
 HCAPI
 HcProcessCreateThread(IN HANDLE hProcess,
@@ -768,10 +753,7 @@ HcProcessQueryInformationWindow(_In_ HANDLE ProcessHandle,
 		return FALSE;
 	}
 
-	Buffer = VirtualAlloc(NULL,
-		ReturnLength,
-		MEM_COMMIT | MEM_RESERVE,
-		PAGE_READWRITE);
+	Buffer = HcAlloc(ReturnLength);
 
 	WindowInformation = (PPROCESS_WINDOW_INFORMATION)Buffer;
 
@@ -791,11 +773,11 @@ HcProcessQueryInformationWindow(_In_ HANDLE ProcessHandle,
 			WindowInformation->WindowTitle,
 			WindowInformation->WindowTitleLength);
 
-		VirtualFree(Buffer, 0, MEM_RELEASE);
+		HcFree(Buffer);
 		return TRUE;
 	}
 
-	VirtualFree(Buffer, 0, MEM_RELEASE);
+	HcFree(Buffer);
 	return FALSE;
 }
 
@@ -1200,10 +1182,7 @@ HcGetProcessListSize()
 	{
 		/* Allocate for first test */
 		if (!(ProcInfoArray = (PSYSTEM_PROCESS_INFORMATION)
-			VirtualAlloc(NULL,
-				Size,
-				MEM_COMMIT | MEM_RESERVE,
-				PAGE_READWRITE)))
+			HcAlloc(Size)))
 		{
 			return FALSE;
 		}
@@ -1214,7 +1193,7 @@ HcGetProcessListSize()
 			NULL);
 
 		/* Release, we're only looking for the size. */
-		VirtualFree(ProcInfoArray, 0, MEM_RELEASE);
+		HcFree(ProcInfoArray);
 
 		/* Not enough, go for it again. */
 		if (Status == STATUS_INFO_LENGTH_MISMATCH)
@@ -1256,10 +1235,7 @@ HcProcessQueryByName(LPCWSTR lpProcessName,
 	}
 
 	/* Allocate the buffer with specified size. */
-	if (!(Buffer = VirtualAlloc(NULL,
-		Length,
-		MEM_COMMIT | MEM_RESERVE,
-		PAGE_READWRITE)))
+	if (!(Buffer = HcAlloc(Length)))
 	{
 		SetLastError(RtlNtStatusToDosError(STATUS_INSUFFICIENT_RESOURCES));
 		return FALSE;
@@ -1273,7 +1249,7 @@ HcProcessQueryByName(LPCWSTR lpProcessName,
 		Length,
 		&Length)))
 	{
-		VirtualFree(Buffer, 0, MEM_RELEASE);
+		HcFree(Buffer);
 		SetLastError(RtlNtStatusToDosError(Status));
 		return FALSE;
 	}
@@ -1320,7 +1296,7 @@ HcProcessQueryByName(LPCWSTR lpProcessName,
 			/* Call the callback as long as the user doesn't return FALSE. */
 			if (hcpCallback(*hcpInformation, lParam))
 			{
-				VirtualFree(Buffer, 0, MEM_RELEASE);
+				HcFree(Buffer);
 				DestroyProcessInformation(hcpInformation);
 				return TRUE;
 			}
@@ -1337,7 +1313,7 @@ HcProcessQueryByName(LPCWSTR lpProcessName,
 		processInfo = (PSYSTEM_PROCESS_INFORMATION)((SIZE_T)processInfo + processInfo->NextEntryOffset);
 	}
 
-	VirtualFree(Buffer, 0, MEM_RELEASE);
+	HcFree(Buffer);
 	return FALSE;
 }
 
@@ -1398,8 +1374,8 @@ HcProcessModuleFileName(HANDLE hProcess,
 BOOLEAN
 HCAPI
 HcProcessSetPrivilegeA(HANDLE hProcess,
-	LPCSTR Privilege,      // Privilege to enable/disable
-	BOOLEAN bEnablePrivilege   // TRUE to enable.  FALSE to disable
+	LPCSTR Privilege, 
+	BOOLEAN bEnablePrivilege 
 ){
 	NTSTATUS Status;
 	HANDLE hToken;
@@ -1424,7 +1400,7 @@ HcProcessSetPrivilegeA(HANDLE hProcess,
 	if (!pLuid)
 	{
 		SetLastError(RtlNtStatusToDosError(STATUS_INVALID_PARAMETER));
-		HcCloseHandle(hToken);
+		HcObjectClose(hToken);
 		return FALSE;
 	}
 
@@ -1449,7 +1425,7 @@ HcProcessSetPrivilegeA(HANDLE hProcess,
 	if (!NT_SUCCESS(Status))
 	{
 		SetLastError(RtlNtStatusToDosError(Status));
-		HcCloseHandle(hToken);
+		HcObjectClose(hToken);
 		return FALSE;
 	}
 
@@ -1482,19 +1458,19 @@ HcProcessSetPrivilegeA(HANDLE hProcess,
 	if (!NT_SUCCESS(Status))
 	{
 		SetLastError(RtlNtStatusToDosError(Status));
-		HcCloseHandle(hToken);
+		HcObjectClose(hToken);
 		return FALSE;
 	}
 
-	HcCloseHandle(hToken);
+	HcObjectClose(hToken);
 	return TRUE;
 };
 
 BOOLEAN
 HCAPI
 HcProcessSetPrivilegeW(HANDLE hProcess,
-	LPCWSTR Privilege,      // Privilege to enable/disable
-	BOOLEAN bEnablePrivilege   // TRUE to enable.  FALSE to disable
+	LPCWSTR Privilege,
+	BOOLEAN bEnablePrivilege
 ) {
 	NTSTATUS Status;
 	HANDLE hToken;
@@ -1519,7 +1495,7 @@ HcProcessSetPrivilegeW(HANDLE hProcess,
 	if (!pLuid)
 	{
 		SetLastError(RtlNtStatusToDosError(STATUS_INVALID_PARAMETER));
-		HcCloseHandle(hToken);
+		HcObjectClose(hToken);
 		return FALSE;
 	}
 
@@ -1543,7 +1519,7 @@ HcProcessSetPrivilegeW(HANDLE hProcess,
 	if (!NT_SUCCESS(Status))
 	{
 		SetLastError(RtlNtStatusToDosError(Status));
-		HcCloseHandle(hToken);
+		HcObjectClose(hToken);
 		return FALSE;
 	}
 
@@ -1574,10 +1550,10 @@ HcProcessSetPrivilegeW(HANDLE hProcess,
 	if (!NT_SUCCESS(Status))
 	{
 		SetLastError(RtlNtStatusToDosError(Status));
-		HcCloseHandle(hToken);
+		HcObjectClose(hToken);
 		return FALSE;
 	}
 
-	HcCloseHandle(hToken);
+	HcObjectClose(hToken);
 	return TRUE;
 };

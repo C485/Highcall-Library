@@ -24,21 +24,6 @@ extern "C" {
 
 	BOOLEAN
 		HCAPI
-		HcProcessFree(IN HANDLE hProcess,
-			IN LPVOID lpAddress,
-			IN SIZE_T dwSize,
-			IN ULONG dwFreeType);
-
-	LPVOID
-		HCAPI
-		HcProcessAllocate(IN HANDLE hProcess,
-			IN LPVOID lpAddress,
-			IN SIZE_T dwSize,
-			IN ULONG flAllocationType,
-			IN ULONG flProtect);
-
-	BOOLEAN
-		HCAPI
 		HcProcessWriteMemory(HANDLE hProcess,
 			LPVOID lpBaseAddress,
 			CONST VOID* lpBuffer,
@@ -59,13 +44,6 @@ extern "C" {
 			IN LPTHREAD_START_ROUTINE lpStartAddress,
 			IN LPVOID lpParamater,
 			IN DWORD dwCreationFlags);
-
-	SIZE_T
-		NTAPI
-		HcProcessVirtualQuery(IN HANDLE hProcess,
-			IN LPCVOID lpAddress,
-			OUT PMEMORY_BASIC_INFORMATION lpBuffer,
-			IN SIZE_T dwLength);
 
 	BOOLEAN
 		HCAPI
@@ -151,16 +129,14 @@ extern "C" {
 		HCAPI
 		HcProcessSetPrivilegeA(HANDLE hProcess,
 			LPCSTR Privilege, 
-			BOOLEAN bEnablePrivilege 
-		);
+			BOOLEAN bEnablePrivilege);
 
 
 	BOOLEAN
 		HCAPI
 		HcProcessSetPrivilegeW(HANDLE hProcess,
 			LPCWSTR Privilege,
-			BOOLEAN bEnablePrivilege
-		);
+			BOOLEAN bEnablePrivilege);
 
 #if defined (__cplusplus)
 }

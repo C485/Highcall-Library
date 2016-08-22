@@ -4,6 +4,22 @@
 #include "../native/native.h"
 #include "hcdef.h"
 
+#if defined (__cplusplus)
+extern "C" {
+#endif
+
+SyscallIndex
+HCAPI
+HcSyscallIndexA(LPCSTR lpName);
+
+SyscallIndex
+HCAPI
+HcSyscallIndexW(LPCWSTR lpName); 
+
+#if defined (__cplusplus)
+}
+#endif
+
 HC_GLOBAL SyscallIndex sciQueryInformationToken;
 HC_GLOBAL NTSTATUS HcQueryInformationToken(_In_ HANDLE TokenHandle,
 	_In_ TOKEN_INFORMATION_CLASS TokenInformationClass,
@@ -146,5 +162,30 @@ HC_GLOBAL NTSTATUS HcCreateThreadEx(_Out_ PHANDLE ThreadHandle,
 	_In_opt_ SIZE_T StackSize,
 	_In_opt_ SIZE_T MaximumStackSize,
 	_In_opt_ PVOID AttributeList);
+
+HC_GLOBAL SyscallIndex sciWaitForSingleObject;
+HC_GLOBAL NTSTATUS HcWaitForSingleObject(IN HANDLE hObject,
+	IN BOOLEAN bAlertable,
+	IN PLARGE_INTEGER Timeout);
+
+HC_GLOBAL SyscallIndex sciWaitForMultipleObjects;
+HC_GLOBAL NTSTATUS HcWaitForMultipleObjects(IN ULONG ObjectCount,
+	IN PHANDLE HandleArray,
+	IN WAIT_TYPE WaitType,
+	IN BOOLEAN Alertable,
+	IN PLARGE_INTEGER TimeOut OPTIONAL);
+
+HC_GLOBAL SyscallIndex sciUnlockVirtualMemory;
+HC_GLOBAL NTSTATUS HcUnlockVirtualMemory(IN HANDLE ProcessHandle,
+	IN OUT PVOID * BaseAddress,
+	IN OUT PSIZE_T NumberOfBytesToUnlock,
+	IN ULONG MapType);
+
+
+HC_GLOBAL SyscallIndex sciLockVirtualMemory;
+HC_GLOBAL NTSTATUS HcLockVirtualMemory(IN HANDLE ProcessHandle,
+	IN OUT PVOID * BaseAddress,
+	IN OUT PSIZE_T NumberOfBytesToLock,
+	IN ULONG MapType);
 
 #endif

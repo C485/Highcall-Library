@@ -1,6 +1,7 @@
 #include "../include/hcinternal.h"
 #include "../include/hcprocess.h"
 #include "../include/hcstring.h"
+#include "../include/hcvirtual.h"
 
 mem_result
 HCAPI
@@ -9,8 +10,7 @@ HcInternalMemoryTest(SIZE_T dwBaseAddress,
 {
 	mem_result _result = { 0 };
 	_result.address = dwBaseAddress;
-	_result.length = dwBufferLength;
-	_result.buffer = (unsigned char*)malloc(dwBufferLength);
+	_result.length = 0;
 	_result.accessible = TRUE;
 
 	if (!dwBaseAddress)
@@ -21,9 +21,12 @@ HcInternalMemoryTest(SIZE_T dwBaseAddress,
 	__try
 	{
 		/* try reading each piece of memory specified */
-		for (SIZE_T i = 0; i < dwBufferLength; i++)
+		for (SIZE_T Count = 0; Count < dwBufferLength; Count++)
 		{
-			_result.buffer[i] = (unsigned char)(dwBaseAddress + i);
+			if (dwBufferLength + Count)
+			{
+				_result.length++;
+			}
 		}
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER)
@@ -47,8 +50,7 @@ HcInternalMemoryTestEx(SIZE_T dwBaseAddress,
 {
 	mem_result _result = { 0 };
 	_result.address = dwBaseAddress;
-	_result.length = dwBufferLength;
-	_result.buffer = (unsigned char*)malloc(dwBufferLength);
+	_result.length = 0;
 	_result.accessible = TRUE;
 
 	if (!dwBaseAddress)
@@ -77,10 +79,13 @@ HcInternalMemoryTestEx(SIZE_T dwBaseAddress,
 
 		_result.address = (SIZE_T)_result.address + pdwOffsets[dwOffsetCount - 1];
 
-		for (SIZE_T i = 0; i < dwBufferLength; i++)
+		/* try reading each piece of memory specified */
+		for (SIZE_T Count = 0; Count < dwBufferLength; Count++)
 		{
-			/* read the end pointer with the specified buffer length */
-			_result.buffer[i] = (unsigned char)(_result.address + i);
+			if (dwBufferLength + Count)
+			{
+				_result.length++;
+			}
 		}
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER)

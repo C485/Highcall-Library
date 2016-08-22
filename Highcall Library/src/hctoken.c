@@ -1,5 +1,7 @@
 #include "../include/hctoken.h"
 #include "../include/hcstring.h"
+#include "../include/hcsyscall.h"
+#include "../include/hcvirtual.h"
 
 typedef struct
 {
@@ -111,10 +113,7 @@ HcLookupPrivilegeValueA(
 	if (!NameSize)
 		return NULL;
 
-	Converted = (LPWSTR)VirtualAlloc(NULL,
-		NameSize + 1,
-		MEM_COMMIT | MEM_RESERVE,
-		PAGE_READWRITE);
+	Converted = (LPWSTR)HcAlloc(NameSize + 1);
 
 	HcStringConvertA(Name, Converted, NameSize);
 
@@ -122,11 +121,34 @@ HcLookupPrivilegeValueA(
 	{
 		if (HcStringEqualW(Converted, WellKnownPrivileges[Priv].Name, TRUE))
 		{
-			VirtualFree(Converted, 0, MEM_RELEASE);
+			HcFree(Converted);
 			return (PLUID)&(WellKnownPrivileges[Priv].Luid);
 		}
 	}
 
 	VirtualFree(Converted, 0, MEM_RELEASE);
 	return NULL;
+}
+
+NTSTATUS
+HCAPI
+HcTokenIsElevated(_In_ HANDLE TokenHandle,
+	_Out_ PBOOLEAN Elevated
+) {
+	NTSTATUS Status;
+	TOKEN_ELEVATION Elevation;
+	ULONG returnLength;
+
+	Status = HcQueryInformationToken(TokenHandle,
+		TokenElevation,
+		&Elevation,
+		sizeof(TOKEN_ELEVATION),
+		&returnLength);
+
+	if (NT_SUCCESS(Status))
+	{
+		*Elevated = !!Elevation.TokenIsElevated;
+	}
+
+	return Status;
 }

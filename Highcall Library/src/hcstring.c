@@ -2,6 +2,8 @@
 
 #include "../include/hcstring.h"
 #include "../include/hcimport.h"
+#include "../include/hcvirtual.h"
+
 #include <stdio.h>
 
 /*
@@ -111,10 +113,7 @@ HcStringSplit(LPSTR lpStr, const char cDelimiter, PSIZE_T pdwCount)
 	Count += LastDelimiter < (lpStr + HcStringLengthA(lpStr) - 1);
 	Count++;
 
-	if (!(plpResult = (LPSTR*)VirtualAlloc(NULL,
-		sizeof(LPSTR) * Count,
-		MEM_RESERVE | MEM_COMMIT,
-		PAGE_READWRITE)))
+	if (!(plpResult = (LPSTR*)HcAlloc(sizeof(LPSTR) * Count)))
 	{
 		return 0;
 	}
@@ -195,11 +194,7 @@ HcStringIntToStringArray(int pIntArray[], SIZE_T dwCountToRead, LPSTR* lpOutStri
 	for (SIZE_T i = 0; i < dwCountToRead; i++)
 	{
 		/* Allocate next. */
-		lpCurrent = (LPSTR)VirtualAlloc(0,
-			MAX_INT_STRING,
-			MEM_RESERVE | MEM_COMMIT,
-			PAGE_READWRITE);
-
+		lpCurrent = (LPSTR)HcAlloc(MAX_INT_STRING);
 		__try
 		{
 
@@ -212,12 +207,12 @@ HcStringIntToStringArray(int pIntArray[], SIZE_T dwCountToRead, LPSTR* lpOutStri
 			/* move the string into the array */
 			strncpy(lpOutStringArray[i], lpCurrent, MAX_INT_STRING);
 
-			VirtualFree(lpCurrent, 0, MEM_RELEASE);
+			HcFree(lpCurrent);
 		}
 		__except (EXCEPTION_EXECUTE_HANDLER)
 		{
-			VirtualFree(lpCurrent, 0, MEM_RELEASE);
-			SetLastError(STATUS_PARTIAL_COPY);
+			HcFree(lpCurrent);
+			SetLastError(RtlNtStatusToDosError(STATUS_PARTIAL_COPY));
 			return;
 		}
 	}
@@ -415,26 +410,20 @@ HcStringEqualA(LPCSTR lpString1, LPCSTR lpString2, BOOLEAN CaseInSensitive)
 	{
 		LPSTR lpCopy1, lpCopy2;
 
-		lpCopy1 = (LPSTR)VirtualAlloc(0,
-			Size1,
-			MEM_COMMIT | MEM_RESERVE,
-			PAGE_READWRITE);
+		lpCopy1 = (LPSTR)HcAlloc(Size1);
 
 		strncpy(lpCopy1, lpString1, Size1);
 		HcStringToLowerA(lpCopy1);
 
-		lpCopy2 = (LPSTR)VirtualAlloc(0,
-			Size2,
-			MEM_COMMIT | MEM_RESERVE,
-			PAGE_READWRITE);
+		lpCopy2 = (LPSTR)HcAlloc(Size2);
 
 		strncpy(lpCopy2, lpString2, Size2);
 		HcStringToLowerA(lpCopy2);
 
 		Return = strcmp(lpCopy1, lpCopy2) == 0 ? TRUE : FALSE;
 
-		VirtualFree(lpCopy1, 0, MEM_RELEASE);
-		VirtualFree(lpCopy2, 0, MEM_RELEASE);
+		HcFree(lpCopy1);
+		HcFree(lpCopy2);
 
 		return Return;
 	}
@@ -475,26 +464,20 @@ HcStringEqualW(LPCWSTR lpString1, LPCWSTR lpString2, BOOLEAN CaseInSensitive)
 	{
 		LPWSTR lpCopy1, lpCopy2;
 
-		lpCopy1 = (LPWSTR)VirtualAlloc(0,
-			Size1,
-			MEM_COMMIT | MEM_RESERVE,
-			PAGE_READWRITE);
+		lpCopy1 = (LPWSTR)HcAlloc(Size1);
 
 		wcsncpy(lpCopy1, lpString1, Size1);
 		HcStringToLowerW(lpCopy1);
 
-		lpCopy2 = (LPWSTR)VirtualAlloc(0,
-			Size2,
-			MEM_COMMIT | MEM_RESERVE,
-			PAGE_READWRITE);
+		lpCopy2 = (LPWSTR)HcAlloc(Size2);
 
 		wcsncpy(lpCopy2, lpString2, Size2);
 		HcStringToLowerW(lpCopy2);
 
 		Return = wcscmp(lpCopy1, lpCopy2) == 0 ? TRUE : FALSE;
 
-		VirtualFree(lpCopy1, 0, MEM_RELEASE);
-		VirtualFree(lpCopy2, 0, MEM_RELEASE);
+		HcFree(lpCopy1);
+		HcFree(lpCopy2);
 
 		return Return;
 	}
@@ -523,7 +506,7 @@ HcStringConvertA(LPCSTR lpStringToConvert,
 	}
 
 	/* Convert */
-		Size = MultiByteToWideChar(CP_UTF8, 0, lpStringToConvert, Size, lpStringOut, Size);
+	Size = MultiByteToWideChar(CP_UTF8, 0, lpStringToConvert, Size, lpStringOut, Size);
 	if (!Size)
 	{
 		return FALSE;
